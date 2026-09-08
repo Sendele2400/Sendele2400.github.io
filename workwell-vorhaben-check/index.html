@@ -293,6 +293,12 @@
     animation:badge-pulse 2.2s ease-in-out infinite;
   }
   @keyframes badge-pulse{0%,100%{box-shadow:0 0 16px rgba(166,255,77,.5)}50%{box-shadow:0 0 28px rgba(0,240,255,.7)}}
+  /* S11: Offline-Signal, wenn der n8n-Webhook nicht erreichbar ist (z. B. LAN-IP von oeffentlicher Seite) */
+  .badge.offline{
+    background:linear-gradient(90deg, var(--danger), var(--neon-pink));
+    animation:none;
+    box-shadow:0 0 16px rgba(255,77,109,.55);
+  }
 
   .row{
     display:flex;gap:16px;align-items:baseline;
@@ -511,6 +517,7 @@
   const elSenden   = document.getElementById('senden');
   const elErgebnis = document.getElementById('ergebnis');
   const elFelder   = document.getElementById('felder');
+  const elBadge    = elErgebnis.querySelector('.badge');
 
   // ---------- Hilfsfunktionen ----------
   function ersteGefuellteSpalte(row, spalten){
@@ -530,25 +537,39 @@
   }
 
   // ---------- Kern: Verarbeitung ----------
-  // S10 (heute): statische Platzhalter-Werte – die App verkabelt und das UI testen.
-  // >>> S11: DIESE FUNKTION wird ersetzt durch einen fetch()-POST an den n8n-Webhook,
-  //     z. B.:
-  //     async function verarbeite(eingabeText){
-  //       const res = await fetch('https://<dein-n8n>/webhook/<pfad>', {
-  //         method: 'POST',
-  //         headers: {'Content-Type': 'application/json'},
-  //         body: JSON.stringify({text: eingabeText})
-  //       });
-  //       return await res.json();   // {titel, kapazitaet, risiko, empfehlung, begruendung}
-  //     }
-  function verarbeite(eingabeText){
+  // S11 aktiv: fetch()-POST an den n8n-Webhook.
+  // Der Webhook liefert JSON: {titel, kapazitaet, risiko, empfehlung, begruendung}.
+  // Fallback: Ist der Webhook nicht erreichbar (LAN-IP, oeffentliche Seite, Netzwerkfehler,
+  // HTTP-Fehler), kommen die statischen Platzhalter-Werte mit Marker _offline:true zurueck,
+  // damit das UI ein sichtbares Offline-Signal zeigen kann.
+  const N8N_WEBHOOK_URL = 'http://192.168.20.10:5678/webhook/case-b-vorhaben-check';
+
+  function platzhalterWerte(){
     return {
       titel:       'Digitale Zeiterfassung',
       kapazitaet:  'mittel',
       risiko:      'hoch',
       empfehlung:  'zuschneiden',
-      begruendung: 'Hoher Nutzen, aber abhängig von IT-Freigabe im Q3'
+      begruendung: 'Hoher Nutzen, aber abhängig von IT-Freigabe im Q3',
+      _offline:    true
     };
+  }
+
+  async function verarbeite(eingabeText){
+    try {
+      const res = await fetch(N8N_WEBHOOK_URL, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({text: eingabeText})
+      });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const daten = await res.json();   // {titel, kapazitaet, risiko, empfehlung, begruendung}
+      daten._offline = false;
+      return daten;
+    } catch (err) {
+      console.warn('n8n-Webhook nicht erreichbar, Fallback auf Platzhalter:', err);
+      return platzhalterWerte();
+    }
   }
 
   // ---------- Sci-Fi-Dekodier-Effekt fuer die Ergebniswerte ----------
@@ -626,7 +647,7 @@
     elEingabe.focus();
   });
 
-  elSenden.addEventListener('click', () => {
+  elSenden.addEventListener('click', async () => {
     const text = elEingabe.value.trim();
     if (!text){
       elEingabe.focus();
@@ -634,12 +655,28 @@
       elFhint.textContent = 'Bitte zuerst ein Vorhaben beschreiben (Excel-Zeile, Beispiel oder Freitext).';
       return;
     }
-    // Button-Feuereffekt
+    // Button-Feuereffekt + Ladestatus
     elSenden.classList.remove('firing');
     void elSenden.offsetWidth;
     elSenden.classList.add('firing');
+    const originalLabel = elSenden.textContent;
+    elSenden.disabled = true;
+    elSenden.textContent = 'Analysiere …';
 
-    const daten = verarbeite(text);
+    const daten = await verarbeite(text);   // S11: live vom n8n-Webhook oder Fallback (offline)
+
+    elSenden.disabled = false;
+    elSenden.textContent = originalLabel;
+
+    // Sichtbares Signal: live vom Webhook oder Offline-Platzhalter
+    if (daten._offline){
+      elBadge.textContent = 'OFFLINE · Platzhalter (Webhook nicht erreichbar)';
+      elBadge.classList.add('offline');
+    } else {
+      elBadge.textContent = 'LIVE · n8n-Webhook · S11';
+      elBadge.classList.remove('offline');
+    }
+
     elFelder.innerHTML = '';
     elErgebnis.classList.remove('visible');
     void elErgebnis.offsetWidth; // Re-Trigger der Materialisier-Animation
