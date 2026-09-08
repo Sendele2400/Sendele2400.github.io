@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DANKE. · 4 Wochen KI-Intensivtraining</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,300;0,400;0,600;0,700;0,800;0,900;1,400;1,700&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#0c121c;
+    --navy-2:#121a28;
+    --blue:#3e41f4;
+    --blue-deep:#0b0ec1;
+    --sky:#70a5ff;
+    --mint:#5bdfbd;
+    --ice:#b7f1f9;
+    --pink:#d94c76;
+    --cream:#f6f1e8;
+    --white:#ffffff;
+    --radius:24px;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    background:var(--navy);
+    color:var(--white);
+    font-family:'Public Sans',sans-serif;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+  ::selection{background:var(--mint);color:var(--navy)}
+
+  /* ---------- Cursor Glow ---------- */
+  .glow{
+    position:fixed;width:520px;height:520px;border-radius:50%;
+    pointer-events:none;z-index:0;
+    background:radial-gradient(circle, rgba(62,65,244,.28), transparent 65%);
+    transform:translate(-50%,-50%);
+    transition:opacity .3s;
+  }
+
+  /* ---------- Noise ---------- */
+  body::before{
+    content:"";position:fixed;inset:0;z-index:1;pointer-events:none;opacity:.05;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  main{position:relative;z-index:2}
+
+  /* ---------- Hero ---------- */
+  .hero{
+    min-height:100svh;
+    display:flex;flex-direction:column;justify-content:center;align-items:center;
+    text-align:center;padding:8rem 1.5rem 6rem;position:relative;
+  }
+  .eyebrow{
+    display:inline-flex;align-items:center;gap:.6rem;
+    font-family:'Space Grotesk',monospace;font-size:.8rem;letter-spacing:.28em;text-transform:uppercase;
+    color:var(--mint);border:1px solid rgba(91,223,189,.4);border-radius:999px;
+    padding:.55rem 1.3rem;margin-bottom:2.5rem;
+    animation:fadeUp .9s .1s both;
+  }
+  .eyebrow .dot{width:8px;height:8px;border-radius:50%;background:var(--mint);animation:pulse 2s infinite}
+  @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(91,223,189,.6)}50%{box-shadow:0 0 0 9px rgba(91,223,189,0)}}
+
+  .mega{
+    font-weight:900;line-height:.88;letter-spacing:-.03em;
+    font-size:clamp(4.5rem,17vw,15rem);
+    text-transform:uppercase;
+    animation:fadeUp .9s .25s both;
+  }
+  .mega .grad{
+    background:linear-gradient(100deg,var(--ice) 0%,var(--sky) 30%,var(--blue) 55%,var(--pink) 85%,var(--mint) 110%);
+    background-size:250% 100%;
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+    animation:shimmer 7s ease-in-out infinite;
+  }
+  @keyframes shimmer{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+  .mega .outline{
+    color:transparent;
+    -webkit-text-stroke:2.5px rgba(183,241,249,.75);
+    display:inline-block;
+    animation:floatY 5s ease-in-out infinite;
+  }
+  @keyframes floatY{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+
+  .hero-sub{
+    max-width:640px;margin:2.5rem auto 0;font-size:clamp(1.1rem,2.2vw,1.5rem);
+    line-height:1.55;color:rgba(255,255,255,.82);font-weight:300;
+    animation:fadeUp .9s .45s both;
+  }
+  .hero-sub strong{color:var(--ice);font-weight:700}
+
+  .scroll-hint{
+    position:absolute;bottom:2.2rem;left:50%;transform:translateX(-50%);
+    font-family:'Space Grotesk';font-size:.7rem;letter-spacing:.3em;text-transform:uppercase;
+    color:rgba(255,255,255,.45);animation:fadeUp 1s 1s both;
+  }
+  .scroll-hint::after{
+    content:"";display:block;width:1px;height:44px;margin:.7rem auto 0;
+    background:linear-gradient(var(--mint),transparent);
+    animation:drip 1.8s ease-in-out infinite;transform-origin:top;
+  }
+  @keyframes drip{0%{transform:scaleY(0)}55%{transform:scaleY(1)}100%{transform:scaleY(1);opacity:0}}
+
+  @keyframes fadeUp{from{opacity:0;transform:translateY(34px)}to{opacity:1;transform:translateY(0)}}
+
+  /* Floating badges */
+  .badge{
+    position:absolute;font-family:'Space Grotesk';font-size:.85rem;font-weight:700;
+    padding:.7rem 1.2rem;border-radius:14px;white-space:nowrap;
+    box-shadow:0 18px 40px rgba(0,0,0,.4);
+    animation:bob 6s ease-in-out infinite;
+    user-select:none;
+  }
+  .badge.b1{top:18%;left:7%;background:var(--mint);color:var(--navy);transform:rotate(-8deg)}
+  .badge.b2{top:26%;right:8%;background:var(--pink);color:var(--white);transform:rotate(6deg);animation-delay:-2s}
+  .badge.b3{bottom:24%;left:11%;background:var(--blue);color:var(--white);transform:rotate(5deg);animation-delay:-4s}
+  .badge.b4{bottom:20%;right:10%;background:var(--cream);color:var(--navy);transform:rotate(-6deg);animation-delay:-1s}
+  @keyframes bob{0%,100%{margin-top:0}50%{margin-top:-16px}}
+  @media(max-width:820px){.badge{display:none}}
+
+  /* ---------- Marquee ---------- */
+  .marquee{
+    overflow:hidden;border-top:1px solid rgba(255,255,255,.1);border-bottom:1px solid rgba(255,255,255,.1);
+    background:linear-gradient(90deg,var(--blue-deep),var(--blue) 50%,var(--blue-deep));
+    padding:1.1rem 0;transform:rotate(-1.2deg) scale(1.02);margin:2rem 0 0;
+  }
+  .marquee-track{display:flex;width:max-content;animation:scroll 22s linear infinite}
+  .marquee span{
+    font-family:'Space Grotesk';font-weight:700;font-size:1.05rem;letter-spacing:.14em;
+    text-transform:uppercase;padding:0 1.6rem;color:var(--white);white-space:nowrap;
+  }
+  .marquee .sep{color:var(--mint)}
+  @keyframes scroll{to{transform:translateX(-50%)}}
+
+  /* ---------- Waves ---------- */
+  .waves{display:block;width:100%;height:120px;margin-top:-1px}
+  .waves path{animation:waveShift 9s ease-in-out infinite alternate}
+  .waves path:nth-child(2){animation-delay:-3s;animation-duration:12s}
+  .waves path:nth-child(3){animation-delay:-6s;animation-duration:15s}
+  @keyframes waveShift{from{transform:translateX(-30px)}to{transform:translateX(30px)}}
+
+  /* ---------- Sections ---------- */
+  section{padding:6.5rem 1.5rem;max-width:1180px;margin:0 auto}
+  .kicker{
+    font-family:'Space Grotesk';font-size:.78rem;letter-spacing:.3em;text-transform:uppercase;
+    color:var(--mint);margin-bottom:1.1rem;display:flex;align-items:center;gap:.8rem;
+  }
+  .kicker::before{content:"";width:34px;height:2px;background:var(--mint)}
+  h2{
+    font-size:clamp(2.1rem,5vw,3.6rem);font-weight:900;line-height:1.05;letter-spacing:-.02em;
+    margin-bottom:3.2rem;text-transform:uppercase;
+  }
+  h2 em{font-style:normal;color:transparent;-webkit-text-stroke:1.5px var(--sky)}
+
+  .reveal{opacity:0;transform:translateY(40px);transition:opacity .8s ease,transform .8s cubic-bezier(.2,.7,.2,1)}
+  .reveal.in{opacity:1;transform:translateY(0)}
+
+  /* ---------- Stats ---------- */
+  .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:1.2rem}
+  .stat{
+    background:var(--navy-2);border:1px solid rgba(255,255,255,.09);border-radius:var(--radius);
+    padding:2.2rem 1.8rem;position:relative;overflow:hidden;
+    transition:transform .35s ease,border-color .35s ease;
+  }
+  .stat:hover{transform:translateY(-8px) rotate(-1deg);border-color:var(--mint)}
+  .stat::after{
+    content:"";position:absolute;inset:auto -30% -60% auto;width:180px;height:180px;border-radius:50%;
+    background:radial-gradient(circle,rgba(91,223,189,.22),transparent 70%);
+    transition:transform .4s;
+  }
+  .stat:hover::after{transform:scale(1.5)}
+  .stat .num{
+    font-family:'Space Grotesk';font-size:clamp(2.8rem,6vw,4.2rem);font-weight:700;line-height:1;
+    background:linear-gradient(120deg,var(--ice),var(--mint));
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  .stat .lbl{margin-top:.7rem;font-size:.95rem;color:rgba(255,255,255,.65);letter-spacing:.04em}
+
+  /* ---------- Learnings ---------- */
+  .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:1.4rem}
+  .card{
+    background:var(--navy-2);border:1px solid rgba(255,255,255,.09);border-radius:var(--radius);
+    padding:2.6rem 2.2rem;position:relative;
+    transition:transform .4s cubic-bezier(.2,.7,.2,1),box-shadow .4s,border-color .4s;
+    transform-style:preserve-3d;
+  }
+  .card:hover{transform:translateY(-10px) rotateX(4deg) rotateY(-3deg);box-shadow:0 30px 60px rgba(11,14,193,.35);border-color:var(--sky)}
+  .card .idx{
+    font-family:'Space Grotesk';font-size:.9rem;font-weight:700;letter-spacing:.2em;
+    color:var(--pink);margin-bottom:1.4rem;display:block;
+  }
+  .card h3{font-size:1.45rem;font-weight:800;margin-bottom:.9rem;line-height:1.25}
+  .card p{color:rgba(255,255,255,.68);line-height:1.65;font-size:.98rem}
+  .card .tag{
+    display:inline-block;margin-top:1.4rem;font-family:'Space Grotesk';font-size:.72rem;
+    letter-spacing:.18em;text-transform:uppercase;color:var(--mint);
+    border:1px solid rgba(91,223,189,.35);border-radius:999px;padding:.35rem .9rem;
+  }
+
+  /* ---------- Quote ---------- */
+  .quote-sec{max-width:900px;text-align:center}
+  .quote-sec blockquote{
+    font-size:clamp(1.5rem,3.4vw,2.5rem);font-weight:700;line-height:1.35;letter-spacing:-.01em;
+  }
+  .quote-sec blockquote .hl{
+    background:linear-gradient(transparent 62%,rgba(217,76,118,.55) 62%);
+  }
+  .quote-sec cite{
+    display:block;margin-top:2rem;font-style:normal;font-family:'Space Grotesk';
+    font-size:.85rem;letter-spacing:.25em;text-transform:uppercase;color:rgba(255,255,255,.5);
+  }
+
+  /* ---------- CTA ---------- */
+  .cta{
+    text-align:center;padding:8rem 1.5rem 9rem;position:relative;
+  }
+  .cta h2{margin-bottom:1.2rem}
+  .cta p{color:rgba(255,255,255,.65);margin-bottom:3rem;font-size:1.1rem}
+  .btn{
+    display:inline-flex;align-items:center;gap:.8rem;
+    font-family:'Space Grotesk';font-weight:700;font-size:1.05rem;letter-spacing:.06em;text-transform:uppercase;
+    color:var(--navy);background:var(--mint);text-decoration:none;
+    padding:1.2rem 2.6rem;border-radius:999px;position:relative;overflow:hidden;
+    transition:transform .3s,box-shadow .3s;
+  }
+  .btn:hover{transform:translateY(-4px) scale(1.03);box-shadow:0 20px 50px rgba(91,223,189,.35)}
+  .btn .arrow{transition:transform .3s}
+  .btn:hover .arrow{transform:translateX(6px)}
+
+  footer{
+    border-top:1px solid rgba(255,255,255,.08);padding:2.4rem 1.5rem;text-align:center;
+    font-family:'Space Grotesk';font-size:.75rem;letter-spacing:.2em;text-transform:uppercase;
+    color:rgba(255,255,255,.35);
+  }
+  footer a{color:var(--sky);text-decoration:none}
+  footer a:hover{color:var(--mint)}
+
+  canvas#confetti{position:fixed;inset:0;pointer-events:none;z-index:50}
+
+  @media (prefers-reduced-motion:reduce){
+    *,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}
+  }
+</style>
+</head>
+<body>
+
+<div class="glow" id="glow"></div>
+<canvas id="confetti"></canvas>
+
+<main>
+
+  <!-- HERO -->
+  <header class="hero">
+    <div class="badge b1">🤖 Prompt-Profi</div>
+    <div class="badge b2">🌊 Voll im Flow</div>
+    <div class="badge b3">⚓ Mission erfüllt</div>
+    <div class="badge b4">🚀 Level: Pro</div>
+
+    <div class="eyebrow"><span class="dot"></span> Academy · Abschlussfahrt</div>
+
+    <h1 class="mega">
+      <span class="grad">Danke</span><span class="outline">.</span>
+    </h1>
+
+    <p class="hero-sub">
+      Für <strong>vier Wochen intensives KI-Training</strong> — vier Wochen voller
+      Aha-Momente, Hands-on-Sessions und neuer Denkweisen.
+      Aus Tool-Nutzung wurde Haltung. Aus Neugier wurde Können.
+    </p>
+
+    <div class="scroll-hint">Weitersegeln</div>
+  </header>
+
+  <!-- MARQUEE -->
+  <div class="marquee" aria-hidden="true">
+    <div class="marquee-track">
+      <span>4 Wochen KI-Intensiv</span><span class="sep">✦</span>
+      <span>Hands-on bis es sitzt</span><span class="sep">✦</span>
+      <span>Verstehen statt Nachmachen</span><span class="sep">✦</span>
+      <span>Danke, Crew!</span><span class="sep">✦</span>
+      <span>Neue Denkweise an Bord</span><span class="sep">✦</span>
+      <span>4 Wochen KI-Intensiv</span><span class="sep">✦</span>
+      <span>Hands-on bis es sitzt</span><span class="sep">✦</span>
+      <span>Verstehen statt Nachmachen</span><span class="sep">✦</span>
+      <span>Danke, Crew!</span><span class="sep">✦</span>
+      <span>Neue Denkweise an Bord</span><span class="sep">✦</span>
+    </div>
+  </div>
+
+  <!-- WAVES -->
+  <svg class="waves" viewBox="0 0 1440 120" preserveAspectRatio="none" aria-hidden="true">
+    <path d="M0,60 C240,110 480,10 720,60 C960,110 1200,10 1440,60 L1440,120 L0,120 Z" fill="rgba(62,65,244,.18)"/>
+    <path d="M0,70 C240,20 480,115 720,70 C960,25 1200,115 1440,70 L1440,120 L0,120 Z" fill="rgba(112,165,255,.14)"/>
+    <path d="M0,85 C260,45 520,120 780,85 C1040,50 1240,120 1440,85 L1440,120 L0,120 Z" fill="rgba(91,223,189,.10)"/>
+  </svg>
+
+  <!-- STATS -->
+  <section>
+    <p class="kicker">Die Fahrt in Zahlen</p>
+    <h2 class="reveal">Vier Wochen.<br><em>Ein Quantensprung.</em></h2>
+    <div class="stats">
+      <div class="stat reveal"><div class="num" data-count="4">0</div><div class="lbl">Wochen Intensivtraining</div></div>
+      <div class="stat reveal"><div class="num" data-count="20">0</div><div class="lbl">Live-Sessions &amp; Workshops</div></div>
+      <div class="stat reveal"><div class="num" data-count="200">0</div><div class="lbl">Prompts, die sitzen</div></div>
+      <div class="stat reveal"><div class="num" data-count="1">0</div><div class="lbl">Crew, die zusammenhält</div></div>
+    </div>
+  </section>
+
+  <!-- LEARNINGS -->
+  <section>
+    <p class="kicker">Was an Bord bleibt</p>
+    <h2 class="reveal">Drei Dinge, die <em>niemand</em> mehr wegnimmt</h2>
+    <div class="cards">
+      <div class="card reveal">
+        <span class="idx">01</span>
+        <h3>Hands-on, bis es richtig sitzt</h3>
+        <p>Nicht nur verstehen, was theoretisch möglich wäre – sondern KI im eigenen Alltag wirklich anwenden. Konkrete Aufgaben, direktes Feedback, Ergebnisse, die funktionieren.</p>
+        <span class="tag">Anwenden &gt; Ausprobieren</span>
+      </div>
+      <div class="card reveal">
+        <span class="idx">02</span>
+        <h3>Verstehen statt Nachmachen</h3>
+        <p>Keine Tool-Tutorials, die nächsten Monat veraltet sind. Sondern das Grundprinzip von GenAI verinnerlicht – übertragbar auf alles, was heute existiert und morgen kommt.</p>
+        <span class="tag">Future-Proof</span>
+      </div>
+      <div class="card reveal">
+        <span class="idx">03</span>
+        <h3>Orientierung durch Urteilskraft</h3>
+        <p>Ein eigenes Gespür dafür, was sich lohnt und was nicht. Souverän entscheiden, welche Tools, Workflows und Ansätze wirklich Sinn ergeben – Hype hin oder her.</p>
+        <span class="tag">Kapitänsblick</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- QUOTE -->
+  <section class="quote-sec">
+    <blockquote class="reveal">
+      „Wir sind nicht bei den ersten Aha-Momenten stehengeblieben –
+      wir haben daraus eine <span class="hl">neue Arbeitsweise</span> gemacht.“
+    </blockquote>
+    <cite class="reveal">— Die Abschluss-Crew · KI-Intensivtraining</cite>
+  </section>
+
+  <!-- CTA -->
+  <section class="cta" style="max-width:none">
+    <h2 class="reveal">Bleib am <em>Wind.</em></h2>
+    <p class="reveal">Die Reise ist zu Ende – die Denkweise bleibt. Danke für euren Einsatz, eure Fragen und eure Energie.</p>
+    <a class="btn reveal" href="https://www.blackboat.com/academy" target="_blank" rel="noopener">
+      Zur Academy <span class="arrow">→</span>
+    </a>
+  </section>
+
+  <footer>
+    Mit ♥ gebaut · Inspiriert von <a href="https://www.blackboat.com" target="_blank" rel="noopener">blackboat.com</a> · Fair winds &amp; following seas
+  </footer>
+
+</main>
+
+<script>
+  // Cursor glow
+  const glow = document.getElementById('glow');
+  let gx = innerWidth/2, gy = innerHeight/2, tx = gx, ty = gy;
+  addEventListener('pointermove', e => { tx = e.clientX; ty = e.clientY; });
+  (function animGlow(){
+    gx += (tx-gx)*.08; gy += (ty-gy)*.08;
+    glow.style.left = gx+'px'; glow.style.top = gy+'px';
+    requestAnimationFrame(animGlow);
+  })();
+
+  // Reveal on scroll
+  const io = new IntersectionObserver(entries => {
+    entries.forEach((en,i) => {
+      if(en.isIntersecting){
+        setTimeout(()=>en.target.classList.add('in'), (i%3)*120);
+        io.unobserve(en.target);
+      }
+    });
+  }, {threshold:.15});
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+  // Count-up stats
+  const countIO = new IntersectionObserver(entries => {
+    entries.forEach(en => {
+      if(!en.isIntersecting) return;
+      const el = en.target, target = +el.dataset.count, t0 = performance.now(), dur = 1400;
+      (function tick(now){
+        const p = Math.min((now-t0)/dur, 1);
+        const ease = 1-Math.pow(1-p,3);
+        el.textContent = Math.round(target*ease) + (target>=100 ? '+' : '');
+        if(p<1) requestAnimationFrame(tick);
+      })(t0);
+      countIO.unobserve(el);
+    });
+  }, {threshold:.6});
+  document.querySelectorAll('.num').forEach(el => countIO.observe(el));
+
+  // Confetti burst on load
+  const cv = document.getElementById('confetti'), ctx = cv.getContext('2d');
+  function resize(){ cv.width = innerWidth; cv.height = innerHeight; }
+  resize(); addEventListener('resize', resize);
+  const COLORS = ['#5bdfbd','#70a5ff','#3e41f4','#d94c76','#b7f1f9','#f6f1e8'];
+  const parts = [];
+  function burst(x, y, n){
+    for(let i=0;i<n;i++){
+      const a = Math.random()*Math.PI*2, v = 4+Math.random()*9;
+      parts.push({x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v-4,g:.22,
+        s:4+Math.random()*6,c:COLORS[Math.random()*COLORS.length|0],
+        r:Math.random()*Math.PI,vr:(Math.random()-.5)*.3,life:120+Math.random()*60});
+    }
+  }
+  setTimeout(()=>{ burst(innerWidth*.3, innerHeight*.35, 70); burst(innerWidth*.7, innerHeight*.3, 70); }, 500);
+  addEventListener('pointerdown', e => burst(e.clientX, e.clientY, 40));
+  (function loop(){
+    ctx.clearRect(0,0,cv.width,cv.height);
+    for(let i=parts.length-1;i>=0;i--){
+      const p = parts[i];
+      p.x+=p.vx; p.y+=p.vy; p.vy+=p.g; p.vx*=.99; p.r+=p.vr; p.life--;
+      if(p.life<=0 || p.y>cv.height+20){ parts.splice(i,1); continue; }
+      ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.r);
+      ctx.globalAlpha = Math.min(1, p.life/60);
+      ctx.fillStyle = p.c; ctx.fillRect(-p.s/2,-p.s/2,p.s,p.s*.6);
+      ctx.restore();
+    }
+    requestAnimationFrame(loop);
+  })();
+</script>
+</body>
+</html>
