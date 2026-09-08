@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WorkWell Services · Vorhaben-Check // SYNAPSE-01</title>
+<meta name="description" content="Mini-App der AI Summer School (S10, Case B): Vorhaben beschreiben, bewerten lassen, Ergebniskarte mit 5 Feldern ansehen.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Space+Grotesk:wght@300;400;600;700&family=JetBrains+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<!-- SheetJS: Excel-Rohdatei wird ausschliesslich im Browser gelesen (kein Upload) -->
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<style>
+  /* ============================================================
+     SYNAPSE-01 · Neural Terminal Design-System
+     Basis: Blackboat #3e41f4 → aufgebrochen zu Cyan/Magenta-Neon
+     ============================================================ */
+  :root{
+    --void:        #05010f;
+    --void-2:      #0b0620;
+    --panel:       rgba(13, 8, 34, .72);
+    --ink:         #e8e6ff;
+    --ink-soft:    #9b93d8;
+    --muted:       #5e549c;
+    --bb:          #3e41f4;              /* Blackboat-Basis */
+    --neon-cyan:   #00f0ff;
+    --neon-pink:   #ff2ea6;
+    --neon-lime:   #a6ff4d;
+    --danger:      #ff4d6d;
+    --grad-neon:   linear-gradient(100deg, #3e41f4, #7b3ff4 30%, #ff2ea6 60%, #00f0ff);
+    --font-disp:   'Orbitron', sans-serif;
+    --font-body:   'Space Grotesk', sans-serif;
+    --font-mono:   'JetBrains Mono', ui-monospace, Consolas, monospace;
+  }
+  @property --spin { syntax:'<angle>'; initial-value:0deg; inherits:false; }
+
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
+  body{
+    font-family:var(--font-body);
+    background:var(--void);
+    color:var(--ink);
+    line-height:1.55;
+    min-height:100vh;
+    padding:52px 20px 80px;
+    overflow-x:hidden;
+    position:relative;
+  }
+
+  /* ---------- Ebenen: Netz, Grid, Scanlines, Vignette ---------- */
+  #neural{position:fixed;inset:0;z-index:0;display:block}
+  .grid-plane{
+    position:fixed;inset:0;z-index:0;pointer-events:none;
+    background:
+      linear-gradient(rgba(62,65,244,.07) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(62,65,244,.07) 1px, transparent 1px);
+    background-size:56px 56px;
+    mask-image:radial-gradient(ellipse 90% 70% at 50% 30%, #000 30%, transparent 75%);
+    animation:grid-drift 24s linear infinite;
+  }
+  @keyframes grid-drift{to{background-position:56px 56px, 56px 56px}}
+  .scanlines{
+    position:fixed;inset:0;z-index:3;pointer-events:none;
+    background:repeating-linear-gradient(0deg, rgba(0,0,0,.16) 0 1px, transparent 1px 3px);
+    mix-blend-mode:overlay;opacity:.5;
+  }
+  .vignette{
+    position:fixed;inset:0;z-index:2;pointer-events:none;
+    background:radial-gradient(ellipse 120% 90% at 50% 20%, transparent 55%, rgba(2,0,12,.85));
+  }
+  /* Gelegentlicher Gesamt-Glitch der Seite (ultra-subtil) */
+  .app{animation:page-flicker 9s steps(1) infinite}
+  @keyframes page-flicker{
+    0%,93.9%,95.1%,100%{filter:none}
+    94%{filter:hue-rotate(24deg) saturate(1.4)}
+    94.6%{filter:none}
+  }
+
+  .app{position:relative;z-index:4;width:100%;max-width:720px;margin:0 auto}
+
+  /* ---------- Kopf ---------- */
+  .eyebrow{
+    font-family:var(--font-mono);font-size:.7rem;letter-spacing:3.5px;text-transform:uppercase;
+    color:var(--neon-cyan);margin-bottom:14px;display:flex;align-items:center;gap:10px;
+  }
+  .eyebrow::before{
+    content:'';width:26px;height:1px;background:var(--neon-cyan);
+    box-shadow:0 0 8px var(--neon-cyan);
+  }
+  .blink-dot{
+    display:inline-block;width:8px;height:8px;border-radius:50%;
+    background:var(--neon-lime);box-shadow:0 0 10px var(--neon-lime);
+    animation:blink 1.6s steps(1) infinite;
+  }
+  @keyframes blink{0%,60%{opacity:1}61%,100%{opacity:.15}}
+
+  h1{
+    font-family:var(--font-disp);font-weight:900;
+    font-size:clamp(2rem, 6.4vw, 3.4rem);
+    letter-spacing:.02em;line-height:1.05;margin-bottom:16px;
+    position:relative;
+    background:var(--grad-neon);
+    background-size:300% 100%;
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+    animation:hueflow 7s linear infinite;
+    filter:drop-shadow(0 0 22px rgba(62,65,244,.55));
+  }
+  @keyframes hueflow{to{background-position:300% 0}}
+  /* Glitch-Layer ueber dem H1 */
+  h1.glitch::before, h1.glitch::after{
+    content:attr(data-text);position:absolute;inset:0;
+    background:none;-webkit-background-clip:initial;background-clip:initial;
+    color:var(--neon-pink);opacity:0;pointer-events:none;
+  }
+  h1.glitch::after{color:var(--neon-cyan)}
+  h1.glitch::before{animation:gl-a 4.2s steps(1) infinite}
+  h1.glitch::after{animation:gl-b 4.2s steps(1) infinite}
+  @keyframes gl-a{
+    0%,91%,94.2%,100%{opacity:0;transform:none;clip-path:inset(0 0 0 0)}
+    92%{opacity:.8;transform:translate(-4px,2px);clip-path:inset(10% 0 55% 0)}
+    93%{opacity:.8;transform:translate(4px,-2px);clip-path:inset(60% 0 8% 0)}
+  }
+  @keyframes gl-b{
+    0%,91%,94.2%,100%{opacity:0;transform:none;clip-path:inset(0 0 0 0)}
+    92.5%{opacity:.8;transform:translate(4px,1px);clip-path:inset(40% 0 30% 0)}
+    93.5%{opacity:.8;transform:translate(-4px,-1px);clip-path:inset(5% 0 75% 0)}
+  }
+  .lead{color:var(--ink-soft);font-weight:300;margin-bottom:34px;max-width:60ch}
+  .lead strong{color:var(--neon-cyan);font-weight:600}
+  .lead code{
+    font-family:var(--font-mono);font-size:.82em;color:var(--neon-lime);
+    background:rgba(166,255,77,.08);border:1px solid rgba(166,255,77,.25);
+    border-radius:4px;padding:1px 6px;
+  }
+
+  /* ---------- Hologramm-Panels (rotierender Neon-Rahmen) ---------- */
+  .panel{
+    position:relative;
+    background:var(--panel);
+    backdrop-filter:blur(14px);
+    -webkit-backdrop-filter:blur(14px);
+    border-radius:14px;
+    padding:26px 26px 28px;
+    margin-bottom:26px;
+    border:1px solid transparent;
+    background-clip:padding-box;
+    box-shadow:0 0 0 1px rgba(62,65,244,.25), 0 24px 60px rgba(0,0,10,.6);
+    overflow:hidden;
+  }
+  .panel::before{ /* rotierender Conic-Rahmen */
+    content:'';position:absolute;inset:-1px;border-radius:14px;padding:1.5px;
+    background:conic-gradient(from var(--spin),
+      var(--bb), transparent 25%, var(--neon-cyan) 45%, transparent 55%,
+      var(--neon-pink) 75%, transparent 90%, var(--bb));
+    -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite:xor;mask-composite:exclude;
+    animation:spin-border 6s linear infinite;
+    pointer-events:none;
+  }
+  @keyframes spin-border{to{--spin:360deg}}
+  .panel::after{ /* Holo-Schimmer */
+    content:'';position:absolute;inset:0;pointer-events:none;
+    background:linear-gradient(115deg, transparent 30%, rgba(0,240,255,.05) 45%, rgba(255,46,166,.05) 55%, transparent 70%);
+    background-size:250% 100%;
+    animation:holo-sweep 9s ease-in-out infinite;
+  }
+  @keyframes holo-sweep{0%,100%{background-position:120% 0}50%{background-position:-20% 0}}
+
+  .panel h2{
+    font-family:var(--font-mono);font-size:.78rem;font-weight:700;
+    letter-spacing:2.2px;text-transform:uppercase;color:var(--neon-pink);
+    margin-bottom:18px;display:flex;align-items:center;gap:10px;
+    text-shadow:0 0 12px rgba(255,46,166,.5);
+  }
+  .panel h2 .tag{
+    color:var(--muted);letter-spacing:0;text-transform:none;font-weight:400;font-size:.75rem;
+  }
+  .panel h2::after{content:'';flex:1;height:1px;background:linear-gradient(90deg, rgba(255,46,166,.5), transparent)}
+
+  /* ---------- Daten-Uplink (Datei) ---------- */
+  .filerow{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+  input[type=file]{
+    font:inherit;font-family:var(--font-mono);font-size:.8rem;color:var(--ink-soft);
+    flex:1 1 240px;min-width:0;
+  }
+  input[type=file]::file-selector-button{
+    font-family:var(--font-mono);font-weight:700;font-size:.75rem;letter-spacing:1px;
+    text-transform:uppercase;color:var(--neon-cyan);
+    background:rgba(0,240,255,.07);border:1px solid rgba(0,240,255,.5);border-radius:8px;
+    padding:9px 16px;margin-right:14px;cursor:pointer;
+    box-shadow:inset 0 0 12px rgba(0,240,255,.12);
+    transition:box-shadow .25s, background .25s;
+  }
+  input[type=file]::file-selector-button:hover{
+    background:rgba(0,240,255,.16);box-shadow:0 0 18px rgba(0,240,255,.4);
+  }
+  .btn-ghost{
+    background:transparent;color:var(--neon-lime);
+    border:1px solid rgba(166,255,77,.55);border-radius:8px;
+    padding:10px 16px;font-family:var(--font-mono);font-weight:700;font-size:.75rem;
+    letter-spacing:1px;text-transform:uppercase;cursor:pointer;white-space:nowrap;
+    box-shadow:inset 0 0 12px rgba(166,255,77,.08);
+    transition:box-shadow .25s, background .25s;
+  }
+  .btn-ghost:hover{background:rgba(166,255,77,.12);box-shadow:0 0 18px rgba(166,255,77,.35)}
+  .fhint{
+    font-family:var(--font-mono);font-size:.74rem;color:var(--muted);margin-top:12px;
+  }
+  .fhint::before{content:'» ';color:var(--neon-pink)}
+  .fhint.ok{color:var(--neon-lime);text-shadow:0 0 10px rgba(166,255,77,.4)}
+
+  select{
+    display:none;width:100%;margin-top:14px;
+    font-family:var(--font-mono);font-size:.85rem;color:var(--ink);
+    padding:12px 14px;background:var(--void-2);
+    border:1px solid rgba(62,65,244,.6);border-radius:8px;cursor:pointer;
+  }
+  select.visible{display:block;animation:slide-in .4s cubic-bezier(.2,.9,.3,1.2)}
+  select:focus{outline:none;border-color:var(--neon-cyan);box-shadow:0 0 0 3px rgba(0,240,255,.18), 0 0 18px rgba(0,240,255,.25)}
+  @keyframes slide-in{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:none}}
+
+  /* ---------- Eingabe-Konsole ---------- */
+  label.fld{
+    display:block;font-family:var(--font-mono);font-size:.8rem;font-weight:700;
+    letter-spacing:1px;color:var(--ink);margin-bottom:10px;
+  }
+  label.fld .opt{font-weight:400;color:var(--muted);font-size:.72rem;margin-left:8px}
+  textarea{
+    width:100%;min-height:130px;resize:vertical;
+    font-family:var(--font-mono);font-size:.92rem;color:var(--neon-cyan);
+    caret-color:var(--neon-lime);
+    background:
+      linear-gradient(rgba(0,240,255,.025) 50%, transparent 50%) 0 0/100% 3.1em,
+      rgba(3,2,16,.85);
+    border:1px solid rgba(62,65,244,.55);border-radius:10px;
+    padding:16px 18px;
+    box-shadow:inset 0 0 30px rgba(62,65,244,.14);
+    transition:border-color .25s, box-shadow .25s;
+  }
+  textarea:focus{
+    outline:none;border-color:var(--neon-cyan);
+    box-shadow:0 0 0 3px rgba(0,240,255,.15), 0 0 28px rgba(0,240,255,.28), inset 0 0 30px rgba(62,65,244,.2);
+  }
+  textarea::placeholder{color:var(--muted);font-style:italic}
+
+  /* ---------- Der Button: BEWERTEN ---------- */
+  .btn-go{
+    margin-top:20px;width:100%;position:relative;overflow:hidden;
+    font-family:var(--font-disp);font-weight:900;font-size:1.05rem;letter-spacing:4px;
+    text-transform:uppercase;color:#fff;
+    background:linear-gradient(100deg, var(--bb), #7b3ff4 50%, var(--bb));
+    background-size:200% 100%;
+    border:none;border-radius:10px;
+    padding:17px 22px;min-height:56px;cursor:pointer;
+    box-shadow:0 0 24px rgba(62,65,244,.55), 0 0 60px rgba(62,65,244,.25), inset 0 0 18px rgba(255,255,255,.12);
+    animation:btn-breathe 2.8s ease-in-out infinite;
+    transition:transform .15s, box-shadow .25s, background-position .5s;
+  }
+  @keyframes btn-breathe{
+    0%,100%{box-shadow:0 0 24px rgba(62,65,244,.55), 0 0 60px rgba(62,65,244,.25), inset 0 0 18px rgba(255,255,255,.12)}
+    50%{box-shadow:0 0 34px rgba(255,46,166,.6), 0 0 80px rgba(0,240,255,.3), inset 0 0 22px rgba(255,255,255,.18)}
+  }
+  .btn-go::before{ /* Energie-Strich, der ueber den Button laeuft */
+    content:'';position:absolute;top:0;bottom:0;width:60px;left:-80px;
+    background:linear-gradient(90deg, transparent, rgba(255,255,255,.55), transparent);
+    transform:skewX(-20deg);
+    animation:btn-shine 3.4s ease-in-out infinite;
+  }
+  @keyframes btn-shine{0%,55%{left:-80px}85%,100%{left:110%}}
+  .btn-go:hover{background-position:100% 0;transform:translateY(-2px) scale(1.01)}
+  .btn-go:active{transform:translateY(1px) scale(.99)}
+  .btn-go.firing{animation:btn-fire .7s ease-out}
+  @keyframes btn-fire{
+    0%{filter:brightness(1)}
+    25%{filter:brightness(2.4) saturate(2);box-shadow:0 0 80px rgba(0,240,255,.9)}
+    100%{filter:brightness(1)}
+  }
+
+  /* ---------- Ergebnis: holografische Karte ---------- */
+  #ergebnis{display:none}
+  #ergebnis.visible{display:block;animation:card-materialize .7s cubic-bezier(.2,.9,.25,1.15)}
+  @keyframes card-materialize{
+    0%{opacity:0;transform:translateY(26px) scale(.94);filter:blur(10px) hue-rotate(90deg)}
+    60%{filter:blur(0) hue-rotate(0)}
+    100%{opacity:1;transform:none;filter:none}
+  }
+  .badge{
+    display:inline-block;font-family:var(--font-mono);font-size:.66rem;font-weight:700;
+    letter-spacing:2px;text-transform:uppercase;
+    color:var(--void);background:linear-gradient(90deg, var(--neon-lime), var(--neon-cyan));
+    border-radius:6px;padding:4px 12px;margin-bottom:16px;
+    box-shadow:0 0 16px rgba(166,255,77,.5);
+    animation:badge-pulse 2.2s ease-in-out infinite;
+  }
+  @keyframes badge-pulse{0%,100%{box-shadow:0 0 16px rgba(166,255,77,.5)}50%{box-shadow:0 0 28px rgba(0,240,255,.7)}}
+
+  .row{
+    display:flex;gap:16px;align-items:baseline;
+    padding:13px 4px;font-size:.95rem;
+    border-bottom:1px dashed rgba(62,65,244,.35);
+    opacity:0;transform:translateX(-14px);
+  }
+  #ergebnis.visible .row{animation:row-boot .45s cubic-bezier(.2,.9,.3,1.1) forwards}
+  #ergebnis.visible .row:nth-child(1){animation-delay:.10s}
+  #ergebnis.visible .row:nth-child(2){animation-delay:.22s}
+  #ergebnis.visible .row:nth-child(3){animation-delay:.34s}
+  #ergebnis.visible .row:nth-child(4){animation-delay:.46s}
+  #ergebnis.visible .row:nth-child(5){animation-delay:.58s}
+  @keyframes row-boot{to{opacity:1;transform:none}}
+  .row:last-child{border-bottom:none}
+  .row b{
+    flex:0 0 150px;font-family:var(--font-mono);font-weight:700;font-size:.8rem;
+    letter-spacing:1.5px;text-transform:uppercase;color:var(--neon-pink);
+    text-shadow:0 0 10px rgba(255,46,166,.45);
+  }
+  .row b::after{content:' :';color:var(--muted);text-shadow:none}
+  .row span{flex:1;min-width:0;color:var(--ink)}
+  .row span.decoding{color:var(--neon-cyan)}
+
+  .foot{
+    font-family:var(--font-mono);font-size:.73rem;color:var(--muted);
+    margin-top:8px;line-height:1.7;
+  }
+  .foot code{
+    font-size:.72rem;color:var(--neon-cyan);
+    background:rgba(0,240,255,.08);border:1px solid rgba(0,240,255,.22);
+    border-radius:4px;padding:1px 5px;
+  }
+
+  @media (max-width:520px){
+    body{padding:34px 14px 56px}
+    .panel{padding:20px 18px 22px}
+    .row{flex-direction:column;gap:3px}
+    .row b{flex:none}
+  }
+  @media (prefers-reduced-motion:reduce){
+    *,*::before,*::after{animation:none !important;transition:none !important}
+  }
+</style>
+</head>
+<body>
+
+<!-- Lebendiges Neuronen-Netz als Hintergrund -->
+<canvas id="neural" aria-hidden="true"></canvas>
+<div class="grid-plane" aria-hidden="true"></div>
+<div class="vignette" aria-hidden="true"></div>
+<div class="scanlines" aria-hidden="true"></div>
+
+<main class="app">
+  <header>
+    <p class="eyebrow"><span class="blink-dot"></span>WorkWell Services · Case B · AI Summer School · Node SYNAPSE-01</p>
+    <h1 class="glitch" data-text="VORHABEN-CHECK">VORHABEN-CHECK</h1>
+    <p class="lead">Beschreibe dein Vorhaben mit Titel und Kurzbeschreibung – per Excel-Zeile, Beispiel-Text oder Freitext. Ein Klick auf <strong>Bewerten</strong> feuert das neuronale Netz und materialisiert die Ergebniskarte. Heute kommen die Werte aus einem Platzhalter, ab S11 antwortet hier dein <code>n8n</code>-Workflow live.</p>
+  </header>
+
+  <!-- 1. Datenquelle: Excel (bleibt im Browser) oder Beispiel -->
+  <section class="panel" aria-labelledby="quelle-h">
+    <h2 id="quelle-h">01 · Data-Uplink <span class="tag">(optional)</span></h2>
+    <div class="filerow">
+      <input type="file" id="datei" accept=".xlsx,.xls,.csv" aria-label="Excel-Datei auswählen">
+      <button class="btn-ghost" id="beispiel" type="button">Ohne Datei: Beispiel laden</button>
+    </div>
+    <select id="zeile" aria-label="Zeile aus der Excel-Datei wählen"></select>
+    <p class="fhint" id="fhint">Roh-Excel deines Case aus Woche 3 (liegt im Campus, S07-Ordner). Die Datei wird nicht hochgeladen – sie bleibt komplett in deinem Browser.</p>
+  </section>
+
+  <!-- 2. Eingabe -->
+  <section class="panel" aria-labelledby="eingabe-h">
+    <h2 id="eingabe-h">02 · Neuronale Eingabe</h2>
+    <label class="fld" for="eingabe">Titel und Kurzbeschreibung <span class="opt">// Pflichtfeld</span></label>
+    <textarea id="eingabe" placeholder="z. B. Digitale Zeiterfassung: Papier-Stundenzettel an drei Standorten ablösen, IT-Freigabe steht aus, zwei Teams ab Q3 verfügbar …"></textarea>
+    <button class="btn-go" id="senden" type="button">Bewerten</button>
+  </section>
+
+  <!-- 3. Ergebnis -->
+  <section class="panel" id="ergebnis" aria-labelledby="ergebnis-h" aria-live="polite">
+    <span class="badge">Platzhalter · S10 · Simulation</span>
+    <h2 id="ergebnis-h">03 · Output-Matrix</h2>
+    <div id="felder"></div>
+  </section>
+
+  <p class="foot">Beispiel-App der AI Summer School (S10-Rettungsanker). Die Funktion <code>verarbeite()</code> liefert heute statische Platzhalter-Werte. Genau diese Stelle wird in S11 durch einen <code>fetch()</code>-POST an deinen n8n-Webhook ersetzt – dann kommt hier die echte Antwort deines Agenten an.</p>
+</main>
+
+<script>
+  /* ============================================================
+     TEIL A — Hintergrund: lebendiges Neuronen-Netz (Canvas)
+     ============================================================ */
+  (function(){
+    const cv = document.getElementById('neural');
+    const ctx = cv.getContext('2d');
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let W, H, nodes = [], pulses = [];
+    const COLORS = ['62,65,244', '0,240,255', '255,46,166'];
+    const mouse = {x:-9999, y:-9999};
+
+    function resize(){
+      W = cv.width = innerWidth;
+      H = cv.height = innerHeight;
+      const n = Math.min(130, Math.floor(W * H / 16000));
+      nodes = Array.from({length:n}, () => ({
+        x: Math.random()*W, y: Math.random()*H,
+        vx: (Math.random()-.5)*.45, vy: (Math.random()-.5)*.45,
+        r: 1 + Math.random()*2.2,
+        c: COLORS[Math.floor(Math.random()*COLORS.length)],
+        ph: Math.random()*Math.PI*2
+      }));
+    }
+    addEventListener('resize', resize);
+    addEventListener('pointermove', e => { mouse.x = e.clientX; mouse.y = e.clientY; });
+    addEventListener('pointerleave', () => { mouse.x = mouse.y = -9999; });
+    resize();
+
+    let t = 0;
+    function frame(){
+      t += .016;
+      ctx.clearRect(0,0,W,H);
+
+      // Knoten bewegen + zeichnen
+      for (const n of nodes){
+        n.x += n.vx; n.y += n.vy;
+        if (n.x < -20) n.x = W+20; if (n.x > W+20) n.x = -20;
+        if (n.y < -20) n.y = H+20; if (n.y > H+20) n.y = -20;
+        const dm = Math.hypot(n.x-mouse.x, n.y-mouse.y);
+        if (dm < 140 && dm > 1){ // Maus stoesst Neuronen sanft ab
+          n.x += (n.x-mouse.x)/dm * .9;
+          n.y += (n.y-mouse.y)/dm * .9;
+        }
+        const glow = .55 + .45*Math.sin(t*2 + n.ph);
+        ctx.beginPath();
+        ctx.arc(n.x, n.y, n.r, 0, Math.PI*2);
+        ctx.fillStyle = 'rgba(' + n.c + ',' + (0.55*glow + .2) + ')';
+        ctx.shadowColor = 'rgba(' + n.c + ',.9)';
+        ctx.shadowBlur = 12*glow;
+        ctx.fill();
+        ctx.shadowBlur = 0;
+      }
+
+      // Synapsen-Verbindungen
+      for (let i=0;i<nodes.length;i++){
+        for (let j=i+1;j<nodes.length;j++){
+          const a = nodes[i], b = nodes[j];
+          const d = Math.hypot(a.x-b.x, a.y-b.y);
+          if (d < 130){
+            ctx.beginPath();
+            ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y);
+            ctx.strokeStyle = 'rgba(' + a.c + ',' + (0.16*(1 - d/130)) + ')';
+            ctx.lineWidth = 1;
+            ctx.stroke();
+            // Signal-Pulse entlang der Kanten zuechten
+            if (Math.random() < .0009 && pulses.length < 26){
+              pulses.push({a, b, p:0, c: COLORS[Math.floor(Math.random()*COLORS.length)]});
+            }
+          }
+        }
+      }
+
+      // Pulse = wandernede Signale zwischen Neuronen
+      pulses = pulses.filter(p => p.p <= 1);
+      for (const p of pulses){
+        p.p += .03;
+        const x = p.a.x + (p.b.x - p.a.x)*p.p;
+        const y = p.a.y + (p.b.y - p.a.y)*p.p;
+        ctx.beginPath();
+        ctx.arc(x, y, 2.2, 0, Math.PI*2);
+        ctx.fillStyle = 'rgba(' + p.c + ',.95)';
+        ctx.shadowColor = 'rgba(' + p.c + ',1)';
+        ctx.shadowBlur = 14;
+        ctx.fill();
+        ctx.shadowBlur = 0;
+      }
+
+      if (!reduced) requestAnimationFrame(frame);
+    }
+    if (!reduced) frame(); else { /* statisches Einzelbild */ frame(); }
+  })();
+
+  /* ============================================================
+     TEIL B — App-Logik (S10: Platzhalter, S11: n8n-Webhook)
+     ============================================================ */
+
+  // Spaltennamen der Roh-Excel, die als Titel bzw. Text einer Zeile herangezogen werden.
+  const LABEL_COLS = ['Projekt', 'Titel', 'titel'];
+  const TEXT_COLS  = ['Bemerkung', 'Kapazität', 'Status'];
+
+  // Fallback-Texte, falls keine Excel-Datei zur Hand ist.
+  const BEISPIELE = [
+    'Digitale Zeiterfassung: Papier-Stundenzettel an drei Standorten, IT-Freigabe steht aus, Betriebsrat offen. Zwei von fünf Teams ab Q3 frei.',
+    'CRM-Ablösung: Altvertrag läuft Ende Q3 aus, Datenmigration unklar, Projektleitung überlastet.'
+  ];
+
+  // Die exakt 5 Felder der Ergebniskarte: [Anzeige-Label, Schluessel im Ergebnis-Objekt]
+  const FELDER = [
+    ['Titel',       'titel'],
+    ['Kapazität',  'kapazitaet'],
+    ['Risiko',      'risiko'],
+    ['Empfehlung',  'empfehlung'],
+    ['Begründung', 'begruendung']
+  ];
+
+  // ---------- Zustand ----------
+  let zeilen = [];   // geladene Excel-Zeilen (Objekte, Schluessel = Spaltenueberschriften)
+  let beispielIndex = 0;
+
+  // ---------- DOM ----------
+  const elDatei    = document.getElementById('datei');
+  const elBeispiel = document.getElementById('beispiel');
+  const elZeile    = document.getElementById('zeile');
+  const elFhint    = document.getElementById('fhint');
+  const elEingabe  = document.getElementById('eingabe');
+  const elSenden   = document.getElementById('senden');
+  const elErgebnis = document.getElementById('ergebnis');
+  const elFelder   = document.getElementById('felder');
+
+  // ---------- Hilfsfunktionen ----------
+  function ersteGefuellteSpalte(row, spalten){
+    const v = spalten.map(k => row[k]).find(x => x != null && String(x).trim() !== '');
+    return v != null ? String(v).trim() : '';
+  }
+  function rowLabel(row){
+    return ersteGefuellteSpalte(row, LABEL_COLS) || '(Zeile ohne Titel)';
+  }
+  function rowText(row){
+    const titel = ersteGefuellteSpalte(row, LABEL_COLS);
+    const teile = TEXT_COLS
+      .map(k => row[k])
+      .filter(x => x != null && String(x).trim() !== '')
+      .map(x => String(x).trim());
+    return (titel ? titel + ': ' : '') + teile.join('. ');
+  }
+
+  // ---------- Kern: Verarbeitung ----------
+  // S10 (heute): statische Platzhalter-Werte – die App verkabelt und das UI testen.
+  // >>> S11: DIESE FUNKTION wird ersetzt durch einen fetch()-POST an den n8n-Webhook,
+  //     z. B.:
+  //     async function verarbeite(eingabeText){
+  //       const res = await fetch('https://<dein-n8n>/webhook/<pfad>', {
+  //         method: 'POST',
+  //         headers: {'Content-Type': 'application/json'},
+  //         body: JSON.stringify({text: eingabeText})
+  //       });
+  //       return await res.json();   // {titel, kapazitaet, risiko, empfehlung, begruendung}
+  //     }
+  function verarbeite(eingabeText){
+    return {
+      titel:       'Digitale Zeiterfassung',
+      kapazitaet:  'mittel',
+      risiko:      'hoch',
+      empfehlung:  'zuschneiden',
+      begruendung: 'Hoher Nutzen, aber abhängig von IT-Freigabe im Q3'
+    };
+  }
+
+  // ---------- Sci-Fi-Dekodier-Effekt fuer die Ergebniswerte ----------
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const GLYPHS = '!<>-_\\/[]{}—=+*^?#01アイウエオカキクケコ';
+  function decodeInto(span, finalText, delay){
+    if (reducedMotion){ span.textContent = finalText; return; }
+    span.classList.add('decoding');
+    setTimeout(() => {
+      let frame = 0;
+      const total = Math.max(14, finalText.length * 1.6);
+      const iv = setInterval(() => {
+        frame++;
+        const reveal = Math.floor((frame/total) * finalText.length);
+        let out = finalText.slice(0, reveal);
+        for (let i = reveal; i < Math.min(finalText.length, reveal + 6); i++){
+          out += GLYPHS[Math.floor(Math.random()*GLYPHS.length)];
+        }
+        span.textContent = out;
+        if (frame >= total){
+          clearInterval(iv);
+          span.textContent = finalText;   // Endwert ist immer exakt
+          span.classList.remove('decoding');
+        }
+      }, 28);
+    }, delay);
+  }
+
+  // ---------- Events: Excel-Upload (Fast Track) ----------
+  elDatei.addEventListener('change', (ev) => {
+    const f = ev.target.files[0];
+    if (!f) return;
+    elFhint.classList.remove('ok');
+    if (typeof XLSX === 'undefined'){
+      elFhint.textContent = 'Die Excel-Bibliothek konnte nicht geladen werden (offline?). Nutze den Beispiel-Button oder tippe direkt.';
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const wb = XLSX.read(new Uint8Array(e.target.result), {type: 'array'});
+        zeilen = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], {defval: ''});
+        elZeile.innerHTML = '';
+        zeilen.forEach((row, i) => {
+          const o = document.createElement('option');
+          o.value = i;
+          o.textContent = (i + 1) + '. ' + rowLabel(row);
+          elZeile.appendChild(o);
+        });
+        elZeile.classList.toggle('visible', zeilen.length > 0);
+        if (zeilen.length){
+          elEingabe.value = rowText(zeilen[0]);
+          elFhint.textContent = zeilen.length + ' Zeilen geladen – Zeile oben auswählen. Die Datei bleibt in deinem Browser.';
+          elFhint.classList.add('ok');
+        } else {
+          elFhint.textContent = 'Keine Zeilen in der Datei gefunden.';
+        }
+      } catch (err){
+        elFhint.textContent = 'Datei konnte nicht gelesen werden: ' + err.message;
+      }
+    };
+    reader.onerror = () => { elFhint.textContent = 'Datei konnte nicht gelesen werden.'; };
+    reader.readAsArrayBuffer(f);
+  });
+
+  elZeile.addEventListener('change', (ev) => {
+    const row = zeilen[+ev.target.value];
+    if (row) elEingabe.value = rowText(row);
+  });
+
+  // ---------- Events: Beispiel & Bewerten ----------
+  elBeispiel.addEventListener('click', () => {
+    elEingabe.value = BEISPIELE[beispielIndex % BEISPIELE.length];
+    beispielIndex++;
+    elEingabe.focus();
+  });
+
+  elSenden.addEventListener('click', () => {
+    const text = elEingabe.value.trim();
+    if (!text){
+      elEingabe.focus();
+      elFhint.classList.remove('ok');
+      elFhint.textContent = 'Bitte zuerst ein Vorhaben beschreiben (Excel-Zeile, Beispiel oder Freitext).';
+      return;
+    }
+    // Button-Feuereffekt
+    elSenden.classList.remove('firing');
+    void elSenden.offsetWidth;
+    elSenden.classList.add('firing');
+
+    const daten = verarbeite(text);
+    elFelder.innerHTML = '';
+    elErgebnis.classList.remove('visible');
+    void elErgebnis.offsetWidth; // Re-Trigger der Materialisier-Animation
+
+    let i = 0;
+    for (const [label, key] of FELDER){
+      const row = document.createElement('div');
+      row.className = 'row';
+      const b = document.createElement('b');
+      b.textContent = label;
+      const s = document.createElement('span');
+      const wert = daten[key] != null ? String(daten[key]) : '';
+      row.append(b, s);
+      elFelder.appendChild(row);
+      decodeInto(s, wert, 250 + i * 160);   // Werte "dekodieren" sich nacheinander
+      i++;
+    }
+    elErgebnis.classList.add('visible');
+    elErgebnis.scrollIntoView({behavior: reducedMotion ? 'auto' : 'smooth', block: 'nearest'});
+  });
+</script>
+</body>
+</html>
