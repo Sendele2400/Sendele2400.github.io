@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="KI-Werkstatt Hyper-Promptwerk — privater KI-Stammtisch. Montag, 21.09.2026, 19:00–20:00 Uhr. Komm in die Werkstatt — bring dein Projekt mit.">
+<title>KI-Werkstatt · Hyper-Promptwerk — Stammtisch 21.09.2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   HYPER-PROMPTWERK — Design-Token "Prompt-Schmiede"
+   ============================================================ */
+:root{
+  /* Grund: tiefes Anthrazit / Graphit */
+  --bg:        #141518;
+  --bg-2:      #1a1c20;
+  --surface:   #202329;
+  --surface-2: #262a31;
+  --line:      #34383f;
+  --line-soft: #2b2f36;
+
+  /* Text */
+  --ink:       #ece9e2;
+  --ink-dim:   #a9a49a;
+  --ink-faint: #7d7970;
+
+  /* Glut / Bernstein (glühendes Metall) */
+  --ember:     #ff6a2b;
+  --ember-hot: #ff8a3d;
+  --amber:     #f5a524;
+  --ember-glow: rgba(255,106,43,.55);
+
+  /* Kobaltblau (KI / Neural) */
+  --cobalt:    #4d7cff;
+  --cobalt-soft: #6f96ff;
+
+  /* Werkbank-Akzente */
+  --wb-lukas:  #ff6a2b;  /* Glut-Orange */
+  --wb-bruder: #f5a524;  /* Bernstein   */
+  --wb-neffe:  #4d7cff;  /* Kobalt      */
+  --wb-thomas: #37c2a0;  /* Kupfer-Patina / Verdigris */
+
+  --mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  --display: "Space Grotesk", "Segoe UI", system-ui, -apple-system, sans-serif;
+
+  --radius: 4px;
+  --maxw: 72rem;
+}
+
+*,*::before,*::after{ box-sizing:border-box; }
+html{ scroll-behavior:smooth; }
+@media (prefers-reduced-motion: reduce){
+  html{ scroll-behavior:auto; }
+}
+
+body{
+  margin:0;
+  background:
+    radial-gradient(1200px 600px at 85% -10%, rgba(255,106,43,.07), transparent 60%),
+    radial-gradient(900px 500px at -10% 30%, rgba(77,124,255,.06), transparent 55%),
+    var(--bg);
+  color:var(--ink);
+  font-family:var(--display);
+  font-size:1.0625rem;
+  line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+}
+
+/* Feines Werkstatt-Raster als Textur */
+body::before{
+  content:"";
+  position:fixed; inset:0;
+  pointer-events:none;
+  background-image:
+    linear-gradient(var(--line-soft) 1px, transparent 1px),
+    linear-gradient(90deg, var(--line-soft) 1px, transparent 1px);
+  background-size:48px 48px;
+  opacity:.14;
+  mask-image:radial-gradient(ellipse at 50% 20%, black 0%, transparent 75%);
+  -webkit-mask-image:radial-gradient(ellipse at 50% 20%, black 0%, transparent 75%);
+  z-index:0;
+}
+main, header.site, footer.site{ position:relative; z-index:1; }
+
+::selection{ background:var(--ember); color:#14100c; }
+
+/* ---------- Skip-Link / Fokus ---------- */
+.skip-link{
+  position:absolute; left:.75rem; top:-4rem;
+  background:var(--ember); color:#14100c;
+  font-family:var(--mono); font-weight:600; font-size:.875rem;
+  padding:.6rem 1rem; border-radius:var(--radius);
+  z-index:100; transition:top .15s ease;
+}
+.skip-link:focus{ top:.75rem; }
+
+a{ color:var(--cobalt-soft); text-underline-offset:.2em; }
+a:hover{ color:var(--ember-hot); }
+
+:focus-visible{
+  outline:2px solid var(--ember);
+  outline-offset:3px;
+  border-radius:2px;
+}
+
+/* ---------- Layout-Helfer ---------- */
+.wrap{ max-width:var(--maxw); margin-inline:auto; padding-inline:clamp(1rem,4vw,2.5rem); }
+
+section{ padding-block:clamp(3.5rem,8vw,6rem); }
+
+/* ---------- Meta-Label (Monospace) ---------- */
+.label{
+  font-family:var(--mono);
+  font-size:.78rem;
+  font-weight:500;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  color:var(--ink-dim);
+  display:flex; align-items:center; gap:.6rem;
+  margin:0 0 1.25rem;
+}
+.label::before{
+  content:"";
+  width:1.6rem; height:2px;
+  background:var(--ember);
+  box-shadow:0 0 8px var(--ember-glow);
+  flex:none;
+}
+.label .idx{ color:var(--ember); }
+
+/* ============================================================
+   Header
+   ============================================================ */
+header.site{
+  border-bottom:1px solid var(--line);
+  background:rgba(20,21,24,.85);
+  backdrop-filter:blur(8px);
+  position:sticky; top:0; z-index:50;
+}
+header.site .wrap{
+  display:flex; align-items:center; justify-content:space-between;
+  gap:1rem; padding-block:.85rem;
+}
+.brand{
+  font-family:var(--mono); font-weight:600; font-size:.95rem;
+  color:var(--ink); text-decoration:none;
+  display:flex; align-items:center; gap:.55rem;
+}
+.brand .dot{
+  width:.65rem; height:.65rem; border-radius:50%;
+  background:var(--ember);
+  box-shadow:0 0 10px var(--ember-glow);
+  animation:pulse 2.6s ease-in-out infinite;
+}
+.brand:hover{ color:var(--ember-hot); }
+nav.site ul{
+  list-style:none; margin:0; padding:0;
+  display:flex; gap:clamp(.75rem,2.5vw,1.75rem); flex-wrap:wrap;
+}
+nav.site a{
+  font-family:var(--mono); font-size:.8rem; letter-spacing:.06em;
+  color:var(--ink-dim); text-decoration:none;
+  padding:.4rem .2rem;
+}
+nav.site a:hover{ color:var(--ember-hot); }
+nav.site a::before{ content:"› "; color:var(--ember); }
+
+/* ============================================================
+   Hero — Terminal
+   ============================================================ */
+.hero{ padding-top:clamp(3rem,7vw,5.5rem); }
+
+.terminal{
+  border:1px solid var(--line);
+  border-radius:8px;
+  background:linear-gradient(180deg, var(--surface) 0%, var(--bg-2) 100%);
+  box-shadow:0 24px 60px rgba(0,0,0,.45), 0 0 0 1px rgba(255,106,43,.05);
+  overflow:hidden;
+  max-width:56rem;
+}
+.terminal-bar{
+  display:flex; align-items:center; gap:.5rem;
+  padding:.65rem 1rem;
+  border-bottom:1px solid var(--line);
+  background:var(--surface-2);
+  font-family:var(--mono); font-size:.75rem; color:var(--ink-faint);
+}
+.terminal-bar .led{ width:.6rem; height:.6rem; border-radius:50%; background:var(--line); }
+.terminal-bar .led.hot{ background:var(--ember); box-shadow:0 0 8px var(--ember-glow); }
+.terminal-bar .title{ margin-left:.5rem; }
+.terminal-body{
+  padding:clamp(1.25rem,4vw,2.5rem);
+  font-family:var(--mono);
+}
+.cmdline{
+  font-size:clamp(.95rem,2.6vw,1.15rem);
+  color:var(--ink-dim);
+  margin:0 0 .5rem;
+}
+.cmdline .prompt{ color:var(--ember); }
+.cmdline .cmd{ color:var(--cobalt-soft); }
+
+.hero-title{
+  font-family:var(--display);
+  font-weight:700;
+  font-size:clamp(2.4rem,7.5vw,4.6rem);
+  line-height:1.02;
+  letter-spacing:-.02em;
+  margin:.35rem 0 0;
+  color:var(--ink);
+}
+.hero-title .glow{
+  color:var(--ember);
+  text-shadow:0 0 24px var(--ember-glow);
+}
+/* Tipp-Cursor */
+.caret{
+  display:inline-block;
+  width:.55em; height:1em;
+  margin-left:.12em;
+  background:var(--ember);
+  box-shadow:0 0 12px var(--ember-glow);
+  transform:translateY(.14em);
+  animation:blink 1.05s steps(1) infinite;
+}
+.hero-sub{
+  font-family:var(--display);
+  color:var(--ink-dim);
+  font-size:clamp(1rem,2.4vw,1.2rem);
+  max-width:42ch;
+  margin:1.4rem 0 0;
+}
+.hero-sub strong{ color:var(--ink); font-weight:700; }
+
+/* Termin-Block */
+.date-strip{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(13rem,1fr));
+  gap:1px;
+  background:var(--line);
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  overflow:hidden;
+  margin-top:clamp(2rem,5vw,3rem);
+}
+.date-cell{
+  background:var(--surface);
+  padding:1rem 1.25rem;
+}
+.date-cell dt{
+  font-family:var(--mono); font-size:.72rem; letter-spacing:.14em;
+  text-transform:uppercase; color:var(--ink-faint);
+  margin:0 0 .3rem;
+}
+.date-cell dd{
+  margin:0;
+  font-family:var(--mono); font-weight:600;
+  font-size:1rem; color:var(--ink);
+}
+.date-cell dd .hot{ color:var(--ember); }
+
+.hero-cta{
+  margin-top:2rem;
+  display:flex; flex-wrap:wrap; gap:1rem; align-items:center;
+}
+.btn{
+  font-family:var(--mono); font-weight:600; font-size:.9rem;
+  text-decoration:none;
+  padding:.85rem 1.5rem;
+  border-radius:var(--radius);
+  border:1px solid var(--line);
+  color:var(--ink);
+  background:var(--surface);
+  display:inline-flex; align-items:center; gap:.6rem;
+  min-height:44px;
+  transition:transform .15s ease, border-color .15s ease, background .15s ease;
+}
+.btn:hover{ transform:translateY(-2px); border-color:var(--ember); color:var(--ink); }
+.btn.primary{
+  background:linear-gradient(180deg, var(--ember-hot), var(--ember));
+  border-color:var(--ember);
+  color:#17110a;
+  box-shadow:0 6px 24px rgba(255,106,43,.25);
+}
+.btn.primary:hover{ color:#17110a; filter:brightness(1.08); }
+
+/* Funken (dezent, rein dekorativ) */
+.sparks{
+  position:absolute; inset:0; overflow:hidden;
+  pointer-events:none; z-index:0;
+}
+.spark{
+  position:absolute;
+  width:3px; height:3px; border-radius:50%;
+  background:var(--ember-hot);
+  box-shadow:0 0 8px var(--ember-glow);
+  opacity:0;
+  animation:spark-rise linear infinite;
+}
+.hero{ position:relative; }
+
+/* ============================================================
+   Werkbänke (Teilnehmer)
+   ============================================================ */
+.benches{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(min(100%,17rem),1fr));
+  gap:1.25rem;
+  margin-top:2.5rem;
+}
+.bench{
+  --accent:var(--ember);
+  position:relative;
+  border:1px solid var(--line);
+  border-top:3px solid var(--accent);
+  border-radius:var(--radius);
+  background:linear-gradient(180deg, var(--surface) 0%, var(--bg-2) 100%);
+  padding:1.5rem 1.4rem 1.4rem;
+  transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+}
+.bench:hover, .bench:focus-within{
+  transform:translateY(-4px);
+  box-shadow:0 14px 34px rgba(0,0,0,.4), 0 0 0 1px var(--accent);
+}
+.bench.wb-lukas { --accent:var(--wb-lukas); }
+.bench.wb-bruder{ --accent:var(--wb-bruder); }
+.bench.wb-neffe { --accent:var(--wb-neffe); }
+.bench.wb-thomas{ --accent:var(--wb-thomas); }
+
+.bench .slot{
+  font-family:var(--mono); font-size:.72rem; letter-spacing:.14em;
+  color:var(--ink-faint); text-transform:uppercase;
+  display:flex; justify-content:space-between;
+  margin-bottom:.9rem;
+}
+.bench .slot .no{ color:var(--accent); }
+.bench h3{
+  margin:0 0 .5rem;
+  font-size:1.5rem; font-weight:700; letter-spacing:-.01em;
+}
+.bench h3 .spark-dot{
+  display:inline-block; width:.5rem; height:.5rem; border-radius:50%;
+  background:var(--accent);
+  box-shadow:0 0 10px var(--accent);
+  margin-right:.45rem;
+  vertical-align:middle;
+}
+.bench .role{
+  font-family:var(--mono); font-size:.8rem;
+  color:var(--accent);
+  margin:0 0 .8rem;
+  letter-spacing:.03em;
+}
+.bench p{ margin:0; color:var(--ink-dim); font-size:.95rem; }
+/* Werkbank-Kante: glühender Draht */
+.bench::after{
+  content:"";
+  position:absolute; left:0; right:0; top:-3px; height:3px;
+  background:linear-gradient(90deg, transparent, var(--accent), transparent);
+  background-size:200% 100%;
+  opacity:0;
+  transition:opacity .2s ease;
+  animation:wire-glow 3.2s linear infinite;
+}
+.bench:hover::after, .bench:focus-within::after{ opacity:1; }
+
+/* ============================================================
+   Schichtplan (Agenda / Zeitstrahl)
+   ============================================================ */
+.shiftplan{
+  margin-top:2.5rem;
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  background:var(--bg-2);
+  overflow:hidden;
+}
+.shiftplan-head{
+  display:flex; justify-content:space-between; align-items:baseline;
+  gap:1rem; flex-wrap:wrap;
+  padding:1rem 1.4rem;
+  border-bottom:1px solid var(--line);
+  background:var(--surface-2);
+  font-family:var(--mono); font-size:.78rem; letter-spacing:.1em;
+  text-transform:uppercase; color:var(--ink-dim);
+}
+.shiftplan-head .total{ color:var(--ember); font-weight:600; }
+
+.shift{ list-style:none; margin:0; padding:0; }
+.shift li{
+  display:grid;
+  grid-template-columns:5.5rem 1.5rem 1fr;
+  gap:clamp(.5rem,2vw,1.25rem);
+  padding:1.15rem 1.4rem;
+  border-bottom:1px solid var(--line-soft);
+  position:relative;
+}
+.shift li:last-child{ border-bottom:none; }
+.shift time{
+  font-family:var(--mono); font-weight:600; font-size:.95rem;
+  color:var(--ember);
+  white-space:nowrap;
+  padding-top:.15rem;
+}
+/* Zeitstrahl-Achse */
+.shift .rail{
+  position:relative;
+  display:flex; justify-content:center;
+}
+.shift .rail::before{
+  content:"";
+  position:absolute; top:-1.15rem; bottom:-1.15rem;
+  width:2px; background:var(--line);
+}
+.shift li:first-child .rail::before{ top:1.35rem; }
+.shift li:last-child .rail::before{ bottom:auto; height:1.35rem; }
+.shift .rail::after{
+  content:"";
+  width:.7rem; height:.7rem; border-radius:50%;
+  margin-top:.5rem;
+  background:var(--bg);
+  border:2px solid var(--ember);
+  box-shadow:0 0 8px var(--ember-glow);
+  z-index:1;
+  flex:none;
+}
+.shift .what h3{
+  margin:0 0 .2rem;
+  font-size:1.12rem; font-weight:700;
+}
+.shift .what h3 .dur{
+  font-family:var(--mono); font-weight:400; font-size:.75rem;
+  color:var(--ink-faint); margin-left:.6rem; letter-spacing:.05em;
+}
+.shift .what p{ margin:0; color:var(--ink-dim); font-size:.95rem; }
+.shift li:hover{ background:rgba(255,106,43,.04); }
+
+/* ============================================================
+   Roadmap / Tooling-Ausblick
+   ============================================================ */
+.roadmap{ margin-top:2.5rem; display:grid; gap:1.25rem; }
+@media (min-width:56rem){
+  .roadmap{ grid-template-columns:1.1fr .9fr; align-items:start; }
+}
+.roadmap .intro{ color:var(--ink-dim); max-width:52ch; }
+.roadmap .intro strong{ color:var(--ink); }
+
+.phases{ list-style:none; margin:0; padding:0; display:grid; gap:1rem; }
+.phase{
+  border:1px solid var(--line);
+  border-left:3px solid var(--cobalt);
+  border-radius:var(--radius);
+  background:var(--surface);
+  padding:1.1rem 1.25rem;
+}
+.phase.soon{ border-left-color:var(--ember); }
+.phase .tag{
+  font-family:var(--mono); font-size:.72rem; letter-spacing:.14em;
+  text-transform:uppercase;
+  color:var(--cobalt-soft);
+  display:block; margin-bottom:.35rem;
+}
+.phase.soon .tag{ color:var(--amber); }
+.phase h3{ margin:0 0 .35rem; font-size:1.1rem; font-weight:700; }
+.phase p{ margin:0; color:var(--ink-dim); font-size:.95rem; }
+
+/* ============================================================
+   Einladung / Footer-CTA
+   ============================================================ */
+.invite{
+  text-align:left;
+  border-top:1px solid var(--line);
+}
+.invite .big{
+  font-size:clamp(1.8rem,5vw,3rem);
+  font-weight:700; letter-spacing:-.02em; line-height:1.12;
+  margin:0 0 1rem; max-width:22ch;
+}
+.invite .big .glow{ color:var(--ember); text-shadow:0 0 22px var(--ember-glow); }
+.invite p{ color:var(--ink-dim); max-width:52ch; margin:0 0 1.75rem; }
+
+footer.site{
+  border-top:1px solid var(--line);
+  padding-block:1.75rem;
+}
+footer.site .wrap{
+  display:flex; justify-content:space-between; gap:1rem; flex-wrap:wrap;
+  font-family:var(--mono); font-size:.78rem; color:var(--ink-faint);
+}
+footer.site .promptline{ color:var(--ink-dim); }
+footer.site .promptline .prompt{ color:var(--ember); }
+
+/* ============================================================
+   Animationen
+   ============================================================ */
+@keyframes blink{
+  0%,55%{ opacity:1; }
+  56%,100%{ opacity:0; }
+}
+@keyframes pulse{
+  0%,100%{ opacity:1; box-shadow:0 0 10px var(--ember-glow); }
+  50%{ opacity:.55; box-shadow:0 0 3px var(--ember-glow); }
+}
+@keyframes wire-glow{
+  0%{ background-position:200% 0; }
+  100%{ background-position:-200% 0; }
+}
+@keyframes spark-rise{
+  0%{ transform:translateY(0) translateX(0); opacity:0; }
+  8%{ opacity:.9; }
+  100%{ transform:translateY(-42vh) translateX(var(--drift,1rem)); opacity:0; }
+}
+
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{
+    animation-duration:.001s !important;
+    animation-iteration-count:1 !important;
+    transition-duration:.001s !important;
+  }
+  .caret{ animation:none; opacity:1; }
+  .sparks{ display:none; }
+}
+
+/* ---------- Responsive Feinschliff ---------- */
+@media (max-width:40rem){
+  .shift li{ grid-template-columns:4.4rem 1.25rem 1fr; padding:1rem; }
+  .terminal-body{ padding:1.25rem 1rem; }
+}
+</style>
+</head>
+<body>
+
+<a class="skip-link" href="#inhalt">Zum Inhalt springen</a>
+
+<header class="site">
+  <div class="wrap">
+    <a class="brand" href="#top"><span class="dot" aria-hidden="true"></span>hyper-promptwerk<span aria-hidden="true">_</span></a>
+    <nav class="site" aria-label="Hauptnavigation">
+      <ul>
+        <li><a href="#werkbaenke">Werkbänke</a></li>
+        <li><a href="#schichtplan">Schichtplan</a></li>
+        <li><a href="#ausblick">Ausblick</a></li>
+        <li><a href="#einladung">Einladung</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<main id="inhalt">
+
+  <!-- ==================== HERO ==================== -->
+  <section class="hero wrap" id="top" aria-labelledby="hero-title">
+    <div class="sparks" aria-hidden="true" id="sparks"></div>
+
+    <p class="label"><span class="idx">00</span> Einladung · Privater KI-Stammtisch</p>
+
+    <div class="terminal" role="group" aria-label="Terminal: Werkstatt-Start">
+      <div class="terminal-bar" aria-hidden="true">
+        <span class="led hot"></span><span class="led"></span><span class="led"></span>
+        <span class="title">schmiede@werkstatt: ~/hyper-promptwerk</span>
+      </div>
+      <div class="terminal-body">
+        <p class="cmdline"><span class="prompt">&gt;</span> <span class="cmd" id="typed-cmd">werkstatt --start</span><span class="caret" id="caret" aria-hidden="true"></span></p>
+        <h1 class="hero-title" id="hero-title">KI-Werkstatt<br><span class="glow">Hyper-Promptwerk</span></h1>
+        <p class="hero-sub">Vier Leute, vier Projekte, eine Stunde. Kein Vortragsformat — <strong>kurzer Impuls, Show-and-Tell, Austausch, Learning-by-Doing</strong>. Wir schmieden an Prompts, Workflows und Ideen.</p>
+      </div>
+    </div>
+
+    <dl class="date-strip" aria-label="Termin und Ort">
+      <div class="date-cell">
+        <dt>Datum</dt>
+        <dd>Montag, <span class="hot">21.09.2026</span></dd>
+      </div>
+      <div class="date-cell">
+        <dt>Schicht</dt>
+        <dd>19:00 – 20:00 Uhr <span class="hot">(1 h)</span></dd>
+      </div>
+      <div class="date-cell">
+        <dt>Ort</dt>
+        <dd>wird vorab bekannt gegeben</dd>
+      </div>
+    </dl>
+
+    <div class="hero-cta">
+      <a class="btn primary" href="#schichtplan">Schichtplan ansehen ↓</a>
+      <a class="btn" href="#werkbaenke">Die vier Werkbänke</a>
+    </div>
+  </section>
+
+  <!-- ==================== WERKBÄNKE ==================== -->
+  <section class="wrap" id="werkbaenke" aria-labelledby="wb-title">
+    <p class="label"><span class="idx">01</span> Werkbänke · Wer woran schmiedet</p>
+    <h2 id="wb-title" class="hero-title" style="font-size:clamp(1.8rem,4.5vw,2.6rem);">Vier Werkbänke, vier Projekte</h2>
+
+    <div class="benches">
+      <article class="bench wb-lukas" tabindex="0">
+        <p class="slot"><span>Werkbank</span><span class="no">01</span></p>
+        <h3><span class="spark-dot" aria-hidden="true"></span>Lukas</h3>
+        <p class="role">lokale Modelle · Gaming-PC</p>
+        <p>Lokale KI-Modelle auf dem Gaming-PC — Bild-Workflows direkt auf der eigenen Hardware, ohne Cloud.</p>
+      </article>
+
+      <article class="bench wb-bruder" tabindex="0">
+        <p class="slot"><span>Werkbank</span><span class="no">02</span></p>
+        <h3><span class="spark-dot" aria-hidden="true"></span>Bruder</h3>
+        <p class="role">Fashion-Business · Bild-Pipelines</p>
+        <p>Bildfreistellung &amp; -aufbereitung für den Shop — Zalando-Pipelines, die Produktfotos automatisiert aufbereiten.</p>
+      </article>
+
+      <article class="bench wb-neffe" tabindex="0">
+        <p class="slot"><span>Werkbank</span><span class="no">03</span></p>
+        <h3><span class="spark-dot" aria-hidden="true"></span>Neffe</h3>
+        <p class="role">Vibe-Coding · Shopify</p>
+        <p>Vibe-Coding mit Claude für Shopify — eher nicht-technisch, dafür mit Gespür fürs Ergebnis.</p>
+      </article>
+
+      <article class="bench wb-thomas" tabindex="0">
+        <p class="slot"><span>Werkbank</span><span class="no">04</span></p>
+        <h3><span class="spark-dot" aria-hidden="true"></span>Thomas</h3>
+        <p class="role">Hermes-Setup · Pods &amp; Agents</p>
+        <p>Hermes-Setup mit Pods und Agents — für Trading, Design und einiges mehr.</p>
+      </article>
+    </div>
+  </section>
+
+  <!-- ==================== SCHICHTPLAN ==================== -->
+  <section class="wrap" id="schichtplan" aria-labelledby="sp-title">
+    <p class="label"><span class="idx">02</span> Ablauf · Jede Schicht getaktet</p>
+    <h2 id="sp-title" class="hero-title" style="font-size:clamp(1.8rem,4.5vw,2.6rem);">Der Schichtplan</h2>
+
+    <div class="shiftplan">
+      <div class="shiftplan-head">
+        <span>Schichtbeginn 19:00 Uhr</span>
+        <span class="total">Gesamtdauer: 60 min</span>
+      </div>
+      <ol class="shift">
+        <li>
+          <time datetime="2026-09-21T19:00">19:00</time>
+          <span class="rail" aria-hidden="true"></span>
+          <div class="what">
+            <h3>Begrüßung <span class="dur">≈ 5 min</span></h3>
+            <p>Ankommen, Material auf den Tisch, kurze Runde: Was liegt diese Woche an?</p>
+          </div>
+        </li>
+        <li>
+          <time datetime="2026-09-21T19:05">19:05</time>
+          <span class="rail" aria-hidden="true"></span>
+          <div class="what">
+            <h3>Kurzer Impuls <span class="dur">5–10 min</span></h3>
+            <p>Ein Tool, ein Trick, ein Prompt — kompakt vorgestellt, direkt nachbaubar.</p>
+          </div>
+        </li>
+        <li>
+          <time datetime="2026-09-21T19:15">19:15</time>
+          <span class="rail" aria-hidden="true"></span>
+          <div class="what">
+            <h3>Show-and-Tell <span class="dur">jeder 5–10 min</span></h3>
+            <p>Jede Werkbank zeigt, woran gerade geschmiedet wird — Fortschritte, Sackgassen, Aha-Momente.</p>
+          </div>
+        </li>
+        <li>
+          <time datetime="2026-09-21T19:40">19:40</time>
+          <span class="rail" aria-hidden="true"></span>
+          <div class="what">
+            <h3>Fragen &amp; Diskussion <span class="dur">≈ 5 min</span></h3>
+            <p>Offene Fragen auf den Amboss: Feedback, Ideen, Querverbindungen zwischen den Projekten.</p>
+          </div>
+        </li>
+        <li>
+          <time datetime="2026-09-21T19:45">19:45</time>
+          <span class="rail" aria-hidden="true"></span>
+          <div class="what">
+            <h3>Gemeinsames Mini-Experiment <span class="dur">≈ 10 min</span></h3>
+            <p>Ein Thema, alle Hände dran: gemeinsam ausprobieren statt nur drüber reden.</p>
+          </div>
+        </li>
+        <li>
+          <time datetime="2026-09-21T19:55">19:55</time>
+          <span class="rail" aria-hidden="true"></span>
+          <div class="what">
+            <h3>Abschluss &amp; Recap <span class="dur">≈ 5 min</span></h3>
+            <p>Was nehmen wir mit? Nächste Schritte, To-dos und das Thema für die nächste Schicht.</p>
+          </div>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- ==================== AUSBLICK ==================== -->
+  <section class="wrap" id="ausblick" aria-labelledby="ab-title">
+    <p class="label"><span class="idx">03</span> Tooling-Ausblick · Nächste Schritte</p>
+    <h2 id="ab-title" class="hero-title" style="font-size:clamp(1.8rem,4.5vw,2.6rem);">Was die Werkstatt kriegt</h2>
+
+    <div class="roadmap">
+      <div class="intro">
+        <p><strong>Live-Transkription beim Treffen:</strong> Die KI hört mit und erstellt danach automatisch Zusammenfassung, To-dos, Links und Ideen — nichts geht verloren, alles landet in der gemeinsamen kleinen Web-Oberfläche.</p>
+      </div>
+      <ol class="phases">
+        <li class="phase soon">
+          <span class="tag">Phase 1 · Start</span>
+          <h3>Themenvorschläge, Voting, Timeline, Recaps</h3>
+          <p>Die gemeinsame Web-Oberfläche startet schlank: Themen einreichen, abstimmen, Termine im Blick, Recaps nachlesen.</p>
+        </li>
+        <li class="phase">
+          <span class="tag">Phase 2 · Später</span>
+          <h3>Teilnehmer-Profile &amp; leichte Gamification</h3>
+          <p>Eigene Profile pro Werkbank, dazu ein spielerischer Fortschritt — gelöste Experimente, gezeigte Projekte, geschmiedete Prompts.</p>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- ==================== EINLADUNG ==================== -->
+  <section class="wrap invite" id="einladung" aria-labelledby="el-title">
+    <p class="label"><span class="idx">04</span> Einladung</p>
+    <h2 id="el-title" class="big">Komm in die Werkstatt — <span class="glow">bring dein Projekt mit.</span></h2>
+    <p>Montag, 21.09.2026, 19:00 bis 20:00 Uhr. Der Ort wird vorab bekannt gegeben. Eine Stunde, vier Werkbänke, kein Publikum — nur Leute, die selbst bauen.</p>
+    <div class="hero-cta">
+      <a class="btn primary" href="#top">Dabei sein: 21.09. · 19:00 Uhr</a>
+      <a class="btn" href="#schichtplan">Nochmal der Schichtplan</a>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site">
+  <div class="wrap">
+    <span class="promptline"><span class="prompt">&gt;</span> werkstatt --ende <span aria-hidden="true">// bis Montag</span></span>
+    <span>Hyper-Promptwerk · Privater KI-Stammtisch · 21.09.2026</span>
+  </div>
+</footer>
+
+<script>
+(function(){
+  "use strict";
+  var reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  /* ---------- Tippender Prompt-Cursor im Hero ---------- */
+  var cmdEl = document.getElementById("typed-cmd");
+  var fullCmd = "werkstatt --start";
+  if (cmdEl && !reduced) {
+    cmdEl.textContent = "";
+    var i = 0;
+    var typeTimer = window.setInterval(function(){
+      i++;
+      cmdEl.textContent = fullCmd.slice(0, i);
+      if (i >= fullCmd.length) { window.clearInterval(typeTimer); }
+    }, 90);
+  } else if (cmdEl) {
+    cmdEl.textContent = fullCmd;
+  }
+
+  /* ---------- Dezente Funken im Hero ---------- */
+  var sparkBox = document.getElementById("sparks");
+  if (sparkBox && !reduced) {
+    var COUNT = 7;
+    for (var s = 0; s < COUNT; s++) {
+      var sp = document.createElement("span");
+      sp.className = "spark";
+      sp.style.left = (8 + Math.random() * 84) + "%";
+      sp.style.bottom = (4 + Math.random() * 22) + "%";
+      sp.style.setProperty("--drift", (Math.random() * 4 - 2).toFixed(2) + "rem");
+      sp.style.animationDuration = (4.5 + Math.random() * 4).toFixed(2) + "s";
+      sp.style.animationDelay = (Math.random() * 6).toFixed(2) + "s";
+      sparkBox.appendChild(sp);
+    }
+  }
+})();
+</script>
+
+</body>
+</html>
