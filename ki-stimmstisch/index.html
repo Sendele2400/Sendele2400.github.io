@@ -527,6 +527,47 @@ footer.site .promptline .prompt{ color:var(--ember); }
   .shift li{ grid-template-columns:4.4rem 1.25rem 1fr; padding:1rem; }
   .terminal-body{ padding:1.25rem 1rem; }
 }
+
+/* ============================================================
+   Kanban-Board (To-dos)
+   ============================================================ */
+.kanban{ margin-top:2.5rem; }
+.kanban-grid{ display:grid; gap:1rem; }
+@media (min-width:56rem){ .kanban-grid{ grid-template-columns:repeat(3,1fr); align-items:start; } }
+.kanban-col{
+  background:var(--surface);
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  padding:1rem;
+  display:flex; flex-direction:column; gap:.7rem;
+}
+.col-head{
+  display:flex; align-items:center; justify-content:space-between;
+  font-family:var(--mono); font-size:.72rem; letter-spacing:.14em; text-transform:uppercase;
+  color:var(--ink-dim);
+  padding:.35rem .6rem .5rem;
+  border-bottom:1px solid var(--line-soft);
+}
+.col-head .count{ color:var(--ink-faint); }
+.kanban-col.todo .col-head{ border-left:3px solid var(--cobalt); }
+.kanban-col.doing .col-head{ border-left:3px solid var(--amber); }
+.kanban-col.done .col-head{ border-left:3px solid var(--wb-thomas); }
+.kanban-card{
+  background:var(--bg-2);
+  border:1px solid var(--line-soft);
+  border-radius:var(--radius);
+  padding:.7rem .85rem;
+  font-size:.92rem;
+  color:var(--ink);
+}
+.kanban-card .k-label{
+  display:block;
+  font-family:var(--mono); font-size:.66rem; letter-spacing:.08em;
+  color:var(--ink-faint);
+  margin-bottom:.3rem;
+}
+.kanban-card.done{ opacity:.72; }
+.kanban-card.done .k-text{ text-decoration:line-through; color:var(--ink-dim); }
 </style>
 </head>
 <body>
@@ -542,6 +583,7 @@ footer.site .promptline .prompt{ color:var(--ember); }
         <li><a href="#schichtplan">Schichtplan</a></li>
         <li><a href="#ausblick">Ausblick</a></li>
         <li><a href="#einladung">Einladung</a></li>
+        <li><a href="#brett">To-dos</a></li>
       </ul>
     </nav>
   </div>
@@ -719,6 +761,42 @@ footer.site .promptline .prompt{ color:var(--ember); }
     <div class="hero-cta">
       <a class="btn primary" href="#top">Dabei sein: 21.09. · 19:30 Uhr</a>
       <a class="btn" href="#schichtplan">Nochmal der Schichtplan</a>
+    </div>
+  </section>
+
+
+  <!-- ==================== KANBAN / TO-DOS ==================== -->
+  <section class="wrap" id="brett" aria-labelledby="br-title">
+    <p class="label"><span class="idx">05</span> To-dos · Das Brett</p>
+    <h2 id="br-title" class="hero-title" style="font-size:clamp(1.8rem,4.5vw,2.6rem);">Was noch ansteht</h2>
+
+    <div class="kanban">
+      <div class="kanban-grid">
+
+        <div class="kanban-col todo">
+          <div class="col-head"><span>To-do</span><span class="count">5</span></div>
+          <div class="kanban-card"><span class="k-label">Phase 1 · Start</span><span class="k-text">Themenvorschläge &amp; Voting</span></div>
+          <div class="kanban-card"><span class="k-label">Phase 1 · Start</span><span class="k-text">Timeline &amp; Recaps</span></div>
+          <div class="kanban-card"><span class="k-label">Nach Treffen 1</span><span class="k-text">KI-Zusammenfassung (To-dos, Links, Ideen)</span></div>
+          <div class="kanban-card"><span class="k-label">Phase 2 · Später</span><span class="k-text">Teilnehmer-Profile</span></div>
+          <div class="kanban-card"><span class="k-label">Phase 2 · Später</span><span class="k-text">Leichte Gamification</span></div>
+        </div>
+
+        <div class="kanban-col doing">
+          <div class="col-head"><span>Doing</span><span class="count">2</span></div>
+          <div class="kanban-card"><span class="k-label">Diese Woche</span><span class="k-text">Erstes Treffen vorbereiten — Agenda &amp; Impuls „How to Prompt“</span></div>
+          <div class="kanban-card"><span class="k-label">Beim Treffen</span><span class="k-text">Live-Transkription</span></div>
+        </div>
+
+        <div class="kanban-col done">
+          <div class="col-head"><span>Done</span><span class="count">4</span></div>
+          <div class="kanban-card done"><span class="k-label">Konzept</span><span class="k-text">„Hyper-Promptwerk“ steht</span></div>
+          <div class="kanban-card done"><span class="k-label">Werkbänke</span><span class="k-text">Lukas, Markus, Marius, Thomas</span></div>
+          <div class="kanban-card done"><span class="k-label">Seite</span><span class="k-text">Landing-/Einladungsseite live</span></div>
+          <div class="kanban-card done"><span class="k-label">Termin</span><span class="k-text">21.09. · 19:30 · Wahl Besprechungsraum</span></div>
+        </div>
+
+      </div>
     </div>
   </section>
 
