@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gut prompten &amp; Contextfenster · KI-Werkstatt</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:        #141518;
+  --bg-2:      #1a1c20;
+  --surface:   #202329;
+  --surface-2: #262a31;
+  --line:      #34383f;
+  --line-soft: #2b2f36;
+
+  --ink:       #ece9e2;
+  --ink-dim:   #a9a49a;
+  --ink-faint: #7d7970;
+
+  --ember:     #ff6a2b;
+  --ember-hot: #ff8a3d;
+  --amber:     #f5a524;
+  --ember-glow: rgba(255,106,43,.5);
+
+  --cobalt:    #4d7cff;
+  --cobalt-soft:#6f96ff;
+  --verdigris: #37c2a0;
+
+  --mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --display: "Space Grotesk", "Segoe UI", system-ui, sans-serif;
+  --radius: 6px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{
+  background:var(--bg);
+  color:var(--ink);
+  font-family:var(--display);
+  overflow:hidden;
+  -webkit-font-smoothing:antialiased;
+}
+body::before{
+  content:"";position:fixed;inset:0;pointer-events:none;
+  background:
+    radial-gradient(1100px 500px at 85% -10%, rgba(255,106,43,.10), transparent 60%),
+    radial-gradient(900px 500px at 0% 110%, rgba(77,124,255,.10), transparent 60%);
+}
+
+.deck{position:relative;height:100vh;width:100vw}
+.slide{
+  position:absolute;inset:0;
+  display:flex;flex-direction:column;
+  padding:clamp(1rem,4vw,3rem) clamp(1rem,5vw,4rem) 5.5rem;
+  opacity:0;transform:translateX(30px);pointer-events:none;
+  transition:opacity .45s ease, transform .45s ease;
+  max-width:1200px;margin:0 auto;
+  overflow-y:auto;
+}
+.slide.active{opacity:1;transform:translateX(0);pointer-events:auto}
+
+/* Kopfzeile */
+.label{font-family:var(--mono);font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-faint);display:flex;align-items:center;gap:.6rem;margin:0 0 .4rem}
+.label .idx{color:var(--ember);font-weight:600}
+h1{
+  font-size:clamp(1.9rem,5vw,3.4rem);
+  line-height:1.05;margin:0 0 1rem;font-weight:800;letter-spacing:-.02em;
+}
+h1 .glow{color:var(--ember);text-shadow:0 0 22px var(--ember-glow)}
+h1 .cold{color:var(--cobalt);text-shadow:0 0 22px rgba(77,124,255,.45)}
+.sub{font-size:clamp(1rem,2vw,1.25rem);color:var(--ink-dim);max-width:60ch;margin:0 0 2rem;line-height:1.5}
+
+/* Layout-Hilfen */
+.split{display:grid;gap:2rem;align-items:center;flex:1}
+@media (min-width:60rem){.split{grid-template-columns:1fr 1.1fr}}
+
+/* ===== Slide 1: Dreieck ===== */
+.tri-wrap{display:flex;justify-content:center;align-items:center;padding:1rem}
+.tri-wrap svg{width:min(100%,420px);height:auto;filter:drop-shadow(0 0 30px rgba(77,124,255,.15))}
+.tri-node{fill:var(--surface);stroke:var(--cobalt);stroke-width:2;font-family:var(--mono)}
+.tri-node text{fill:var(--ink);font-family:var(--mono);font-size:15px;font-weight:600}
+.tri-center{fill:var(--ember);font-family:var(--mono)}
+.tri-center text{fill:#1a1c20;font-family:var(--mono);font-size:14px;font-weight:700}
+.basics-para{color:var(--ink-dim);line-height:1.6;font-size:1.02rem;max-width:46ch}
+.basics-para strong{color:var(--ink)}
+
+/* ===== Slide 2: Promptbausteine ===== */
+.blocks{display:grid;grid-template-columns:repeat(3,1fr);gap:.9rem;flex:1;align-content:start}
+@media (max-width:44rem){.blocks{grid-template-columns:repeat(2,1fr)}}
+.block{
+  background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+  padding:1rem 1.05rem;position:relative;overflow:hidden;
+}
+.block::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--cobalt)}
+.block .n{font-family:var(--mono);font-size:.66rem;letter-spacing:.1em;color:var(--ink-faint);display:block;margin-bottom:.45rem;text-transform:uppercase}
+.block h3{margin:0 0 .35rem;font-size:1.02rem;font-weight:700}
+.block h3 .protect{
+  display:inline-block;font-family:var(--mono);font-size:.58rem;letter-spacing:.1em;
+  background:rgba(255,106,43,.15);color:var(--ember);border:1px solid rgba(255,106,43,.4);
+  border-radius:3px;padding:.1rem .35rem;margin-left:.4rem;vertical-align:middle;text-transform:uppercase;
+}
+.block p{margin:0;color:var(--ink-dim);font-size:.86rem;line-height:1.45}
+.tpl{
+  margin-top:1.6rem;background:var(--bg-2);border:1px solid var(--line);border-left:3px solid var(--ember);
+  border-radius:var(--radius);padding:1rem 1.2rem;
+}
+.tpl .k{font-family:var(--mono);font-size:.68rem;letter-spacing:.14em;color:var(--ink-faint);text-transform:uppercase;margin-bottom:.5rem}
+.tpl code{
+  font-family:var(--mono);font-size:clamp(.82rem,1.6vw,1rem);color:var(--ink);line-height:1.7;
+}
+.tpl code b{color:var(--ember);font-weight:600}
+
+/* ===== Slide 3: Contextfenster ===== */
+.chart-wrap{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:1.2rem 1.2rem .4rem;position:relative}
+.chart-wrap svg{width:100%;height:auto;display:block}
+.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:.9rem;margin-top:.9rem}
+.metric{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:.9rem 1rem;text-align:center}
+.metric .k{font-family:var(--mono);font-size:.64rem;letter-spacing:.12em;color:var(--ink-faint);text-transform:uppercase;display:block;margin-bottom:.3rem}
+.metric .v{font-size:1.5rem;font-weight:800}
+.metric .v.hot{color:var(--ember)}
+.metric .v.cold{color:var(--cobalt)}
+.metric .v.green{color:var(--verdigris)}
+.conclusion{
+  margin-top:1rem;background:var(--bg-2);border:1px solid var(--line);border-left:3px solid var(--verdigris);
+  border-radius:var(--radius);padding:.9rem 1.1rem;color:var(--ink-dim);font-size:.95rem;line-height:1.55;
+}
+.conclusion strong{color:var(--ink)}
+
+/* ===== Steuerung ===== */
+.controls{
+  position:fixed;left:0;right:0;bottom:0;height:4.5rem;
+  display:flex;align-items:center;justify-content:space-between;gap:1rem;
+  padding:0 clamp(1rem,4vw,2rem);
+  background:linear-gradient(transparent, var(--bg) 40%);
+  z-index:10;
+}
+.arrow{
+  width:2.7rem;height:2.7rem;border-radius:50%;border:1px solid var(--line);
+  background:var(--surface);color:var(--ink);cursor:pointer;
+  display:flex;align-items:center;justify-content:center;font-size:1.1rem;
+  transition:border-color .2s, color .2s, background .2s;
+}
+.arrow:hover{border-color:var(--ember);color:var(--ember)}
+.arrow:disabled{opacity:.25;cursor:default}
+.dots{display:flex;gap:.5rem}
+.dot{width:.55rem;height:.55rem;border-radius:50%;background:var(--line);border:none;cursor:pointer;padding:0;transition:background .2s, transform .2s}
+.dot.active{background:var(--ember);transform:scale(1.3)}
+.counter{font-family:var(--mono);font-size:.72rem;color:var(--ink-faint);letter-spacing:.1em}
+.badge{
+  position:fixed;top:1rem;right:1rem;z-index:11;
+  font-family:var(--mono);font-size:.62rem;letter-spacing:.12em;color:var(--ink-faint);
+  background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:.35rem .7rem;
+}
+.badge b{color:var(--ember);font-weight:600}
+
+@media (max-width:44rem){
+  .metrics{grid-template-columns:repeat(3,1fr);gap:.5rem}
+  .metric .v{font-size:1.1rem}
+}
+</style>
+</head>
+<body>
+<div class="badge">KI-WERKSTATT · HYPER-PROMPTWERK · <b>IMPULS</b></div>
+
+<div class="deck">
+
+  <!-- ==================== SLIDE 1: GenAI-Dreieck ==================== -->
+  <section class="slide active" id="s0">
+    <p class="label"><span class="idx">00</span> Die Basics</p>
+    <h1>Das <span class="cold">GenAI-Dreieck</span></h1>
+    <p class="sub">Nur die Kombination aus <strong style="color:var(--ink)">drei Elementen</strong> führt zu einem guten Ergebnis.</p>
+    <div class="split">
+      <div class="basics-para">
+        <p>Das Ergebnis steht nicht am Ende, sondern <strong>im Zentrum</strong>: Erst wenn klar ist, was brauchbar sein soll, lassen sich <strong style="color:var(--cobalt)">Modell</strong>, <strong style="color:var(--amber)">Kontext</strong> und <strong style="color:var(--ember)">Prompt</strong> sinnvoll wählen.</p>
+        <p>Heute Abend geht es um zwei der drei Ecken: <strong style="color:var(--ember)">gut prompten</strong> und das <strong style="color:var(--amber)">Contextfenster</strong> richtig füllen.</p>
+      </div>
+      <div class="tri-wrap">
+        <svg viewBox="0 0 420 360" role="img" aria-label="GenAI-Dreieck: Modell, Prompt, Kontext, Ergebnis im Zentrum">
+          <line x1="210" y1="40" x2="210" y2="180" stroke="#34383f" stroke-dasharray="4 5" stroke-width="1.2"/>
+          <line x1="210" y1="180" x2="80" y2="300" stroke="#34383f" stroke-dasharray="4 5" stroke-width="1.2"/>
+          <line x1="210" y1="180" x2="340" y2="300" stroke="#34383f" stroke-dasharray="4 5" stroke-width="1.2"/>
+          <polygon points="210,40 80,300 340,300" fill="rgba(77,124,255,.04)" stroke="#4d7cff" stroke-width="2"/>
+          <circle cx="210" cy="180" r="26" fill="#ff6a2b"/>
+          <text x="210" y="184" text-anchor="middle" fill="#1a1c20" font-family="IBM Plex Mono, monospace" font-size="12.5" font-weight="700">ERGBN</text>
+          <g>
+            <rect x="150" y="14" width="120" height="28" rx="6" fill="#202329" stroke="#4d7cff"/>
+            <text x="210" y="33" text-anchor="middle" fill="#ece9e2" font-family="IBM Plex Mono, monospace" font-size="13" font-weight="600">MODELL</text>
+          </g>
+          <g>
+            <rect x="20" y="304" width="120" height="28" rx="6" fill="#202329" stroke="#ff6a2b"/>
+            <text x="80" y="323" text-anchor="middle" fill="#ece9e2" font-family="IBM Plex Mono, monospace" font-size="13" font-weight="600">PROMPT</text>
+          </g>
+          <g>
+            <rect x="280" y="304" width="120" height="28" rx="6" fill="#202329" stroke="#f5a524"/>
+            <text x="340" y="323" text-anchor="middle" fill="#ece9e2" font-family="IBM Plex Mono, monospace" font-size="13" font-weight="600">KONTEXT</text>
+          </g>
+        </svg>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== SLIDE 2: Promptaufbau ==================== -->
+  <section class="slide" id="s1">
+    <p class="label"><span class="idx">01</span> Promptaufbau</p>
+    <h1>Sechs Bausteine machen einen Prompt <span class="glow">steuerbar.</span></h1>
+    <p class="sub" style="margin-bottom:1.2rem">Kein Voodoo — ein Prompt ist ein Satz aus klaren Zutaten.</p>
+    <div class="blocks">
+      <div class="block"><span class="n">01</span><h3>Rolle</h3><p>Aus welcher Perspektive soll das Tool arbeiten?</p></div>
+      <div class="block"><span class="n">02</span><h3>Aufgabe</h3><p>Was soll konkret getan werden?</p></div>
+      <div class="block"><span class="n">03</span><h3>Kontext</h3><p>Welche Informationen muss das Tool kennen?</p></div>
+      <div class="block"><span class="n">04</span><h3>Format</h3><p>Wie soll die Antwort aussehen?</p></div>
+      <div class="block"><span class="n">05</span><h3>Qualitätskriterien</h3><p>Woran erkennt man eine gute Antwort?</p></div>
+      <div class="block"><span class="n">06</span><h3>Restriktionen <span class="protect">Schutzlinie</span></h3><p>Was soll ausdrücklich nicht passieren?</p></div>
+    </div>
+    <div class="tpl">
+      <div class="k">So klingt das zusammengesetzt</div>
+      <code>„Agiere als <b>[Rolle]</b> und löse für mich <b>[Aufgabe]</b>. Nutze dazu <b>[Kontext]</b>, liefere das Ergebnis als <b>[Format]</b>, achte auf <b>[Qualität]</b> und vermeide <b>[Restriktionen]</b>.“</code>
+    </div>
+  </section>
+
+  <!-- ==================== SLIDE 3: Contextfenster ==================== -->
+  <section class="slide" id="s2">
+    <p class="label"><span class="idx">02</span> Contextfenster</p>
+    <h1>Mehr Kontext ist <span class="cold">nicht immer besser.</span></h1>
+    <p class="sub" style="margin-bottom:1rem">Qualität braucht den <strong style="color:var(--verdigris)">Sweet Spot</strong> — zu wenig lässt rätseln, zu viel lässt abschweifen.</p>
+    <div class="split" style="grid-template-columns:1.35fr 1fr;gap:1.4rem">
+      <div class="chart-wrap">
+        <svg viewBox="0 0 560 250" role="img" aria-label="Kurve: Qualität über Tokens im Kontext, mit Zonen Zu wenig, Sweet Spot, Context Rot">
+          <!-- Zonen -->
+          <rect x="50" y="30" width="160" height="170" fill="rgba(77,124,255,.06)"/>
+          <rect x="210" y="30" width="120" height="170" fill="rgba(55,194,160,.10)"/>
+          <rect x="330" y="30" width="180" height="170" fill="rgba(245,165,36,.08)"/>
+          <!-- Achsen -->
+          <line x1="50" y1="200" x2="510" y2="200" stroke="#34383f" stroke-width="1.5"/>
+          <line x1="50" y1="30" x2="50" y2="200" stroke="#34383f" stroke-width="1.5"/>
+          <!-- Sweet-Spot-Marker -->
+          <line x1="270" y1="40" x2="270" y2="200" stroke="#37c2a0" stroke-width="1.5" stroke-dasharray="5 5"/>
+          <!-- Kurve -->
+          <path d="M50,150 C120,140 180,80 270,60 C360,80 420,120 510,120"
+                fill="none" stroke="#4d7cff" stroke-width="3.5" stroke-linecap="round"/>
+          <circle cx="270" cy="60" r="6" fill="#37c2a0"/>
+          <!-- Achsen-Labels -->
+          <text x="280" y="222" fill="#a9a49a" font-family="IBM Plex Mono, monospace" font-size="12">Tokens im Kontext →</text>
+          <text x="14" y="120" fill="#a9a49a" font-family="IBM Plex Mono, monospace" font-size="12" transform="rotate(-90 14 120)">Qualität</text>
+          <!-- Zonen-Labels -->
+          <text x="130" y="238" text-anchor="middle" fill="#6f96ff" font-family="IBM Plex Mono, monospace" font-size="11">ZU WENIG</text>
+          <text x="270" y="238" text-anchor="middle" fill="#37c2a0" font-family="IBM Plex Mono, monospace" font-size="11" font-weight="600">SWEET SPOT</text>
+          <text x="420" y="238" text-anchor="middle" fill="#f5a524" font-family="IBM Plex Mono, monospace" font-size="11">CONTEXT ROT</text>
+        </svg>
+      </div>
+      <div>
+        <div class="metrics">
+          <div class="metric"><span class="k">Tokens</span><span class="v cold">mittel</span></div>
+          <div class="metric"><span class="k">Antwort-Qualität</span><span class="v green">hoch</span></div>
+          <div class="metric"><span class="k">Kosten / Anfrage</span><span class="v hot">ok</span></div>
+        </div>
+        <div class="conclusion">
+          <strong>Merk dir:</strong> Zu wenig Kontext → das Modell rät. Zu viel → es verliert den Faden und du zahlst drauf. Der Sweet Spot liegt dort, wo <strong>nur das Relevante</strong> drinsteht.
+        </div>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<nav class="controls">
+  <button class="arrow" id="prev" aria-label="Zurück">‹</button>
+  <div class="dots" id="dots"></div>
+  <span class="counter" id="counter">01 / 03</span>
+  <button class="arrow" id="next" aria-label="Weiter">›</button>
+</nav>
+
+<script>
+(function(){
+  var slides = Array.prototype.slice.call(document.querySelectorAll('.slide'));
+  var dots = document.getElementById('dots');
+  var counter = document.getElementById('counter');
+  var prev = document.getElementById('prev');
+  var next = document.getElementById('next');
+  var cur = 0;
+
+  slides.forEach(function(_, i){
+    var d = document.createElement('button');
+    d.className = 'dot' + (i === 0 ? ' active' : '');
+    d.setAttribute('aria-label', 'Folie ' + (i+1));
+    d.addEventListener('click', function(){ go(i); });
+    dots.appendChild(d);
+  });
+
+  function go(i){
+    cur = (i + slides.length) % slides.length;
+    slides.forEach(function(s, k){ s.classList.toggle('active', k === cur); });
+    Array.prototype.forEach.call(dots.children, function(d, k){ d.classList.toggle('active', k === cur); });
+    counter.textContent = ('0' + (cur+1)).slice(-2) + ' / ' + ('0' + slides.length).slice(-2);
+    prev.disabled = (cur === 0);
+    next.disabled = (cur === slides.length - 1);
+  }
+
+  prev.addEventListener('click', function(){ go(cur - 1); });
+  next.addEventListener('click', function(){ go(cur + 1); });
+
+  document.addEventListener('keydown', function(e){
+    if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') { e.preventDefault(); go(cur + 1); }
+    else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); go(cur - 1); }
+    else if (e.key === 'Home') { go(0); }
+    else if (e.key === 'End') { go(slides.length - 1); }
+  });
+
+  go(0);
+})();
+</script>
+</body>
+</html>
