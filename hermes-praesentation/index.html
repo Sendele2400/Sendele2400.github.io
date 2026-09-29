@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hermes — Meine persönliche KI-Infrastruktur</title>
+<style>
+  :root{
+    --bg:#07080c; --bg2:#0d0f15; --card:#12151d; --card2:#171b25;
+    --line:rgba(255,255,255,.075); --line2:rgba(255,255,255,.13);
+    --tx:#eef0f5; --mut:#98a1b3; --faint:#5d6677;
+    --gold:#f0b429; --gold2:#ffd76a; --gold-soft:rgba(240,180,41,.13);
+    --violet:#8b5cf6; --cyan:#38bdf8; --green:#34d399; --red:#f87171;
+    --radius:16px;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0; background:var(--bg); color:var(--tx);
+    font-family:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    overflow:hidden; -webkit-font-smoothing:antialiased;
+  }
+  /* Hintergrund-Glow */
+  .glow{position:fixed; inset:0; z-index:0; pointer-events:none;
+    background:
+      radial-gradient(900px 600px at 12% -5%, rgba(139,92,246,.16), transparent 60%),
+      radial-gradient(800px 500px at 90% 8%, rgba(240,180,41,.12), transparent 55%),
+      radial-gradient(700px 700px at 55% 110%, rgba(56,189,248,.10), transparent 60%);
+  }
+  .noise{position:fixed; inset:0; z-index:0; pointer-events:none; opacity:.5;
+    background-image:radial-gradient(rgba(255,255,255,.028) 1px, transparent 1px);
+    background-size:26px 26px;}
+
+  /* Deck */
+  .deck{position:relative; z-index:1; height:100%; width:100%}
+  .slide{position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+    padding:56px 7vw 88px; opacity:0; visibility:hidden; transform:translateX(26px);
+    transition:opacity .5s ease, transform .5s ease, visibility .5s;}
+  .slide.active{opacity:1; visibility:visible; transform:translateX(0)}
+  .slide .inner{width:100%; max-width:1180px; height:100%; display:flex; flex-direction:column; justify-content:center;}
+
+  /* Fortschritt & Nav */
+  .bar{position:fixed; top:0; left:0; height:3px; background:linear-gradient(90deg,var(--gold),var(--violet)); z-index:50;
+    transition:width .45s cubic-bezier(.4,0,.2,1); border-radius:0 3px 3px 0;}
+  .topbrand{position:fixed; top:22px; left:0; right:0; display:flex; align-items:center; justify-content:space-between;
+    padding:0 7vw; z-index:40; pointer-events:none;}
+  .topbrand .logo{font-weight:800; letter-spacing:-.02em; font-size:1.05rem; display:flex; align-items:center; gap:9px; color:var(--tx)}
+  .topbrand .logo .dot{width:11px; height:11px; border-radius:50%; background:var(--gold); box-shadow:0 0 14px var(--gold)}
+  .topbrand .page{color:var(--faint); font-variant-numeric:tabular-nums; font-size:.85rem}
+  .dots{position:fixed; bottom:26px; left:50%; transform:translateX(-50%); display:flex; gap:9px; z-index:40}
+  .dots button{width:9px; height:9px; border-radius:99px; border:0; cursor:pointer; background:rgba(255,255,255,.18);
+    transition:all .3s; padding:0}
+  .dots button.on{background:var(--gold); width:26px; box-shadow:0 0 12px rgba(240,180,41,.5)}
+  .arrow{position:fixed; right:26px; bottom:22px; z-index:40; color:var(--faint); font-size:.82rem; display:flex; gap:14px; align-items:center}
+  .arrow kbd{background:var(--card2); border:1px solid var(--line2); border-radius:6px; padding:2px 7px; font-size:.72rem; font-family:inherit; color:var(--mut)}
+
+  /* Typo */
+  h1{font-size:clamp(2.4rem,6.4vw,5rem); line-height:1.02; margin:0; letter-spacing:-.03em; font-weight:800}
+  .kicker{text-transform:uppercase; letter-spacing:.18em; font-size:.72rem; font-weight:700; color:var(--gold); margin:0 0 18px}
+  .lead{color:var(--mut); font-size:clamp(1rem,1.7vw,1.25rem); max-width:720px; margin:18px 0 0; line-height:1.55}
+  .h2{font-size:clamp(1.7rem,3.6vw,2.6rem); letter-spacing:-.02em; font-weight:800; margin:0 0 6px}
+  .sub{color:var(--mut); margin:0 0 30px; font-size:1rem}
+
+  /* Cover */
+  .cover .big{font-size:clamp(4rem,13vw,9.5rem); letter-spacing:-.045em; font-weight:900; line-height:.95;
+    background:linear-gradient(120deg,#fff 5%,var(--gold2) 45%,var(--gold) 80%); -webkit-background-clip:text; background-clip:text; color:transparent;}
+  .cover .tag{display:inline-flex; align-items:center; gap:8px; margin-top:26px; padding:9px 16px; border:1px solid var(--line2);
+    border-radius:99px; background:var(--gold-soft); color:var(--gold2); font-size:.86rem; font-weight:600}
+  .cover .foot{position:absolute; bottom:20px; left:7vw; color:var(--faint); font-size:.82rem}
+
+  /* Karten / Grids */
+  .grid{display:grid; gap:16px}
+  .g2{grid-template-columns:repeat(2,1fr)} .g3{grid-template-columns:repeat(3,1fr)} .g4{grid-template-columns:repeat(4,1fr)}
+  .card{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); padding:22px 22px; position:relative; overflow:hidden}
+  .card::before{content:""; position:absolute; inset:0; background:linear-gradient(140deg,rgba(255,255,255,.045),transparent 45%); pointer-events:none}
+  .card h3{margin:0 0 6px; font-size:1.02rem; font-weight:700; letter-spacing:-.01em}
+  .card p{margin:0; color:var(--mut); font-size:.9rem; line-height:1.5}
+  .card .ic{font-size:1.5rem; line-height:1; margin-bottom:10px; display:block}
+  .num{font-size:2rem; font-weight:800; letter-spacing:-.02em; color:var(--tx)}
+  .num small{font-size:.95rem; font-weight:600; color:var(--mut)}
+
+  /* Flow (Architektur) */
+  .flow{display:flex; align-items:stretch; gap:14px; flex-wrap:wrap}
+  .flow .node{flex:1; min-width:170px; background:var(--card); border:1px solid var(--line); border-radius:var(--radius); padding:20px; text-align:center}
+  .flow .node .ic{font-size:1.8rem; margin-bottom:8px}
+  .flow .node b{display:block; font-size:.98rem; margin-bottom:4px}
+  .flow .node span{display:block; color:var(--mut); font-size:.8rem; line-height:1.45}
+  .flow .arr{align-self:center; color:var(--gold); font-size:1.4rem; flex:0 0 auto}
+  .node.core{border-color:rgba(240,180,41,.45); background:linear-gradient(160deg,rgba(240,180,41,.12),var(--card)); box-shadow:0 0 30px rgba(240,180,41,.10)}
+
+  /* Connector-Hub */
+  .hub{display:flex; align-items:center; justify-content:center; gap:8px; flex-wrap:wrap; margin-bottom:26px}
+  .hub .core{font-weight:800; padding:14px 22px; border-radius:99px; border:1px solid rgba(240,180,41,.5); background:var(--gold-soft); color:var(--gold2); box-shadow:0 0 26px rgba(240,180,41,.16)}
+  .cat{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); padding:16px 18px}
+  .cat h3{margin:0 0 10px; font-size:.74rem; text-transform:uppercase; letter-spacing:.14em; color:var(--gold); font-weight:700}
+  .chips{display:flex; flex-wrap:wrap; gap:8px}
+  .chip{background:var(--card2); border:1px solid var(--line2); border-radius:99px; padding:6px 13px; font-size:.84rem; color:var(--tx); white-space:nowrap}
+  .chip b{color:var(--gold2)}
+
+  /* Bot-Grid */
+  .bots{grid-template-columns:repeat(4,1fr); gap:13px; overflow-y:auto; max-height:100%}
+  .bot{display:flex; align-items:center; gap:12px; background:var(--card); border:1px solid var(--line); border-radius:13px; padding:11px 13px}
+  .bot img{width:44px; height:44px; border-radius:50%; object-fit:cover; border:2px solid var(--line2); background:var(--card2); flex:0 0 auto}
+  .bot .n{font-weight:700; font-size:.92rem; letter-spacing:-.01em}
+  .bot .c{color:var(--faint); font-size:.72rem; margin-top:1px}
+  .bot .m{color:var(--mut); font-size:.76rem; line-height:1.35; margin-top:2px}
+
+  /* Balken */
+  .bars{display:flex; flex-direction:column; gap:12px}
+  .row{display:grid; grid-template-columns:170px 1fr 74px; align-items:center; gap:14px; font-size:.88rem}
+  .row .lbl{color:var(--mut); white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+  .row .trk{background:var(--card2); border-radius:8px; height:14px; overflow:hidden; border:1px solid var(--line)}
+  .row .fill{height:100%; border-radius:8px; background:linear-gradient(90deg,var(--gold),var(--violet)); transition:width .8s ease}
+  .row .val{text-align:right; color:var(--tx); font-variant-numeric:tabular-nums; font-weight:600}
+  .stat{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); padding:20px 22px; text-align:center}
+  .stat .num{color:var(--gold2)}
+
+  @media(max-width:900px){
+    .g2,.g3,.g4{grid-template-columns:repeat(2,1fr)}
+    .bots{grid-template-columns:repeat(2,1fr)}
+    .slide{padding:70px 5vw 100px}
+    .row{grid-template-columns:120px 1fr 60px}
+  }
+  @media(max-width:520px){ .g2,.g3,.g4{grid-template-columns:1fr} .bots{grid-template-columns:1fr} }
+</style>
+</head>
+<body>
+<div class="glow"></div><div class="noise"></div>
+<div class="bar" id="bar"></div>
+
+<div class="topbrand">
+  <div class="logo"><span class="dot"></span>Hermes · KI-Infrastruktur</div>
+  <div class="page" id="pageNum">01 / 06</div>
+</div>
+
+<div class="deck" id="deck">
+
+  <!-- 1 COVER -->
+  <section class="slide cover active">
+    <div class="inner">
+      <p class="kicker">Überblick für die IT · September 2026</p>
+      <h1 class="big">Hermes</h1>
+      <p class="lead">Meine persönliche KI-Infrastruktur auf dem eigenen Rechner — ein zentraler Agent,
+        der über <b>22 spezialisierte Bots</b> tägliche Arbeit automatisiert: von CAD über Dokumente
+        bis zur Datenbank.</p>
+      <div class="tag">⚡ lokal · selbst gehostet · voll kontrolliert</div>
+    </div>
+    <div class="foot">Präsentiert von Thomas Wahl · → zum Navigieren</div>
+  </section>
+
+  <!-- 2 AUFBAU -->
+  <section class="slide">
+    <div class="inner">
+      <p class="kicker">Aufbau</p>
+      <h2 class="h2">Wie Hermes auf dem Rechner läuft</h2>
+      <p class="sub">Open-Source-Framework (Nous Research), installiert als Windows-Anwendung.</p>
+      <div class="flow">
+        <div class="node"><span class="ic">🖥️</span><b>Windows-Rechner</b><span>Desktop-App + Gateway-Prozess, läuft lokal (kein Cloud-Agent)</span></div>
+        <div class="arr">→</div>
+        <div class="node core"><span class="ic">🧠</span><b>Hermes-Kern</b><span>Ein Agent-Kern · Memory · Skills · Tools</span></div>
+        <div class="arr">→</div>
+        <div class="node"><span class="ic">🤖</span><b>22 Profile (Bots)</b><span>Jeder Bot = eigenes Modell, eigene Skills &amp; Memory</span></div>
+        <div class="arr">→</div>
+        <div class="node"><span class="ic">📋</span><b>Kanban-Board</b><span>Orchestrierung: Aufgaben delegieren &amp; verifizieren</span></div>
+      </div>
+      <div class="grid g4" style="margin-top:18px">
+        <div class="card"><span class="ic">📦</span><h3>Installation</h3><p>Über hermes-setup.exe; Daten unter <code>AppData\Local\hermes</code></p></div>
+        <div class="card"><span class="ic">🎨</span><h3>Oberflächen</h3><p>Desktop-App, Terminal-TUI und Web-Dashboard</p></div>
+        <div class="card"><span class="ic">🔌</span><h3>Gateway</h3><p>Bettet Hermes in Telegram &amp; WhatsApp ein</p></div>
+        <div class="card"><span class="ic">🧩</span><h3>Erweiterbar</h3><p>Skills, MCP-Server, Plugins &amp; Cron-Jobs</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3 CONNECTOREN -->
+  <section class="slide">
+    <div class="inner">
+      <p class="kicker">Verknüpfung</p>
+      <h2 class="h2">Womit Hermes verbunden ist</h2>
+      <p class="sub">Ein Kern, viele Anschlüsse — alles lokal, nichts wandert ungewollt in fremde Clouds.</p>
+      <div class="hub"><div class="core">🧠 Hermes-Kern</div></div>
+      <div class="grid g3">
+        <div class="cat"><h3>Kommunikation</h3><div class="chips">
+          <span class="chip"><b>Telegram</b></span><span class="chip"><b>WhatsApp</b></span></div></div>
+        <div class="cat"><h3>Konstruktion &amp; Design</h3><div class="chips">
+          <span class="chip"><b>Fusion 360</b> (MCP)</span><span class="chip"><b>draw.io</b> (NAS)</span></div></div>
+        <div class="cat"><h3>Fertigung</h3><div class="chips">
+          <span class="chip"><b>xTool Laser</b> P1 + MetalFab</span></div></div>
+        <div class="cat"><h3>Daten &amp; Automatisierung (NAS)</h3><div class="chips">
+          <span class="chip"><b>Supabase</b></span><span class="chip"><b>n8n</b></span><span class="chip"><b>Paperless-ngx</b></span></div></div>
+        <div class="cat"><h3>Cloud &amp; Web</h3><div class="chips">
+          <span class="chip"><b>Google Workspace</b> (Kalender)</span><span class="chip"><b>GitHub Pages</b></span><span class="chip"><b>Coinbase API</b></span></div></div>
+        <div class="cat"><h3>Sprache &amp; Wissen</h3><div class="chips">
+          <span class="chip"><b>whisperX</b> (Transkription)</span><span class="chip"><b>ElevenLabs / edge</b> (TTS)</span><span class="chip"><b>Obsidian</b> (Memory)</span></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4 LLMs -->
+  <section class="slide">
+    <div class="inner">
+      <p class="kicker">Modelle</p>
+      <h2 class="h2">Welche LLMs im Einsatz sind</h2>
+      <p class="sub">Provider-agnostisch — pro Bot das passende Modell, gewechselt ohne Umbau.</p>
+      <div class="grid g3">
+        <div class="card"><span class="ic">🏆</span><h3>DeepSeek V4 Pro</h3><p><b>Standardmodell</b> — 16 Bots + Hauptassistent. DeepSeek-API.</p></div>
+        <div class="card"><span class="ic">⚡</span><h3>DeepSeek V4 Flash</h3><p>Leicht &amp; günstig für 5 einfache Bots (Kalender, Laser, Übersetzung).</p></div>
+        <div class="card"><span class="ic">🎨</span><h3>Kimi K3</h3><p>Designer-Bot — visuelles Design &amp; Frontend.</p></div>
+        <div class="card"><span class="ic">🟠</span><h3>Anthropic Claude</h3><p>Opus &amp; Sonnet — Referenzmodelle für die MoA-Aggregation.</p></div>
+        <div class="card"><span class="ic">🔭</span><h3>Gemini</h3><p>Google Deep Research — quellenzitierte Tiefenrecherche.</p></div>
+        <div class="card"><span class="ic">💻</span><h3>Lokal: Qwen3.6-35B</h3><p>Eigenes Modell via llama.cpp — komplett offline &amp; kostenlos.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5 BOTS -->
+  <section class="slide">
+    <div class="inner" style="justify-content:flex-start; padding-top:6px">
+      <p class="kicker">Das Team</p>
+      <h2 class="h2" style="font-size:clamp(1.5rem,3vw,2.2rem)">22 Bots — ein Team</h2>
+      <p class="sub" style="margin-bottom:16px">Jeder Bot hat eine Spezialaufgabe und sein eigenes Gesicht.</p>
+      <div class="grid bots" id="bots"></div>
+    </div>
+  </section>
+
+  <!-- 6 TOKEN -->
+  <section class="slide">
+    <div class="inner">
+      <p class="kicker">Nutzung</p>
+      <h2 class="h2">Tokenverbrauch — letzte 30 Tage</h2>
+      <p class="sub">725,6 Mio. Tokens über alle Bots · Kosten ca. 45,66&nbsp;$ (≈&nbsp;42&nbsp;€).</p>
+      <div class="grid g4" style="margin-bottom:22px">
+        <div class="stat"><div class="num">725,6&nbsp;Mio.</div><div class="sub" style="margin:6px 0 0">Tokens gesamt</div></div>
+        <div class="stat"><div class="num">271</div><div class="sub" style="margin:6px 0 0">Sessions</div></div>
+        <div class="stat"><div class="num">11.623</div><div class="sub" style="margin:6px 0 0">Nachrichten</div></div>
+        <div class="stat"><div class="num">5.887</div><div class="sub" style="margin:6px 0 0">Tool-Aufrufe</div></div>
+      </div>
+      <div class="grid g2">
+        <div class="card">
+          <h3 style="color:var(--gold)">Top-Modelle</h3>
+          <div class="bars" id="barsModel"></div>
+        </div>
+        <div class="card">
+          <h3 style="color:var(--gold)">Top-Bots</h3>
+          <div class="bars" id="barsBot"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<div class="dots" id="dots"></div>
+<div class="arrow"><span>Pfeiltasten</span><kbd>←</kbd><kbd>→</kbd></div>
+
+<script>
+  const slides=[...document.querySelectorAll('.slide')];
+  const bar=document.getElementById('bar'), dots=document.getElementById('dots'), pg=document.getElementById('pageNum');
+  let i=0;
+  slides.forEach((_,k)=>{const b=document.createElement('button'); b.onclick=()=>go(k); dots.appendChild(b);});
+  function go(k){i=Math.max(0,Math.min(slides.length-1,k));
+    slides.forEach((s,j)=>s.classList.toggle('active',j===i));
+    [...dots.children].forEach((d,j)=>d.classList.toggle('on',j===i));
+    bar.style.width=((i+1)/slides.length*100)+'%';
+    pg.textContent=String(i+1).padStart(2,'0')+' / '+String(slides.length).padStart(2,'0');}
+  window.addEventListener('keydown',e=>{
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();go(i+1);}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(i-1);}
+    else if(e.key==='Home')go(0); else if(e.key==='End')go(slides.length-1);});
+  let sx=0; document.addEventListener('touchstart',e=>sx=e.touches[0].clientX);
+  document.addEventListener('touchend',e=>{const d=e.changedTouches[0].clientX-sx; if(Math.abs(d)>50) go(i+(d<0?1:-1));});
+
+  // Bots
+  const bots=[
+    ['coach','KI-Coach','Sparring-Partner: Reflexion & blinde Flecken','pro'],
+    ['coder','Programmierer','Full-Stack, APIs, DevOps & Reviews','pro'],
+    ['projektleiter','Projektleiter','Zerlegt Aufgaben & koordiniert das Team','pro'],
+    ['researcher','Researcher','Internetrecherche & Faktenprüfung','pro'],
+    ['deep-researcher','Deep Researcher','Quellenzitierte Tiefenrecherche (Gemini)','pro'],
+    ['designer','Designer','Websites, Slides & UI/UX','kimi'],
+    ['writer','Writer','Blog, Webtexte & Marketing-Copy','pro'],
+    ['translator','Übersetzer','Deutsch ↔ Englisch','flash'],
+    ['familienplaner','Familienplaner','Termine in den Google-Kalender','flash'],
+    ['bueroassistent','Büroassistent','Rechnungen & Belege auswerten','pro'],
+    ['paperless-admin','Paperless-Admin','Dokumentenstruktur (Paperless-ngx)','pro'],
+    ['protokollant','Protokollant','Gespräche aufnehmen & transkribieren','pro'],
+    ['fusion-konstrukteur','CAD-Konstrukteur','Fusion 360 per MCP','pro'],
+    ['laser-bot','Laser-Operator','SVG → xTool-Projekte (.xs)','flash'],
+    ['drawio','Diagramm-Designer','draw.io-Diagramme (NAS)','pro'],
+    ['elektriker','Elektriker','KNX-Fachplanung & ETS-Dateien','pro'],
+    ['supabase-admin','Datenbank-Agent','Supabase auf der NAS','pro'],
+    ['n8n-operator','n8n-Agent','Workflows per REST-API','pro'],
+    ['coinbase-trader','Trader','Crypto-Trading (Coinbase API)','pro'],
+    ['usage-analyst','Token-Controller','Tokenverbrauch & Kosten','flash'],
+    ['personalleiter','Personalleiter','Prüft Modell-Level der Bots','pro'],
+    ['thermi','Sendeverfolger','Leichtes Chat-Gehirn (Thermagotschi)','flash'],
+  ];
+  const mTag={pro:'DeepSeek V4 Pro',flash:'DeepSeek V4 Flash',kimi:'Kimi K3'};
+  document.getElementById('bots').innerHTML=bots.map(([slug,name,cap,m])=>
+    `<div class="bot"><img src="assets/${slug}.png" alt="${name}" loading="lazy"><div><div class="n">${name}</div><div class="m">${cap}</div><div class="c">${mTag[m]}</div></div></div>`).join('');
+
+  // Token-Balken
+  const models=[['DeepSeek V4 Pro',662.9],['DeepSeek V4 Flash',17.1],['Kimi K3',13.2],['Claude Opus 4.8',12.5],['Qwen 35B (lokal)',10.1]];
+  const botsU=[['Hermes (Hauptassistent)',390.7],['n8n-Operator',146.8],['Projektleiter',85.3],['Coinbase-Trader',51.7],['Paperless-Admin',16.7],['Designer',13.2]];
+  const maxM=Math.max(...models.map(x=>x[1])), maxB=Math.max(...botsU.map(x=>x[1]));
+  const barHtml=(arr,max)=>arr.map(([l,v])=>
+    `<div class="row"><span class="lbl">${l}</span><div class="trk"><div class="fill" style="width:${(v/max*100).toFixed(1)}%"></div></div><span class="val">${v.toLocaleString('de-DE')} M</span></div>`).join('');
+  document.getElementById('barsModel').innerHTML=barHtml(models,maxM);
+  document.getElementById('barsBot').innerHTML=barHtml(botsU,maxB);
+
+  go(0);
+</script>
+</body>
+</html>
