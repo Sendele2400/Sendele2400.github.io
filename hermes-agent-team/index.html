@@ -1,314 +1,760 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Das Hermes Agent Team — eine Übersicht der spezialisierten KI-Bots für Design, Code, Recherche, Text und mehr.">
-  <title>Hermes Agent Team</title>
-  <style>
-    :root {
-      --bg: #0d1117;
-      --bg-soft: #161b26;
-      --card: #1a2130;
-      --card-hover: #222c42;
-      --border: #2a3450;
-      --text: #e8edf7;
-      --text-dim: #9aa7c0;
-      --accent: #6ea8fe;
-      --accent-2: #a78bfa;
-      --accent-3: #34d399;
-      --radius: 14px;
-      --max-w: 1100px;
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Hermes Agent Team — ChatGPT übergibt, der Projektleiter orchestriert, Spezialisten-Bots liefern. Ein Blick in den Workflow eines autonomen KI-Teams.">
+<title>Hermes Agent Team</title>
+<style>
+  :root {
+    --bg: #0a0e1a;
+    --bg-soft: #10162a;
+    --bg-card: rgba(255, 255, 255, 0.04);
+    --border: rgba(255, 255, 255, 0.09);
+    --text: #eef1f8;
+    --muted: #9aa4bd;
+    --accent-1: #7c5cff;
+    --accent-2: #22d3ee;
+    --accent-3: #f472b6;
+    --radius: 18px;
+    --font: "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+  }
 
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
 
-    html { scroll-behavior: smooth; }
+  html { scroll-behavior: smooth; }
 
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      line-height: 1.6;
-      overflow-x: hidden;
-    }
+  body {
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
 
-    /* ---------- Hero ---------- */
-    .hero {
-      position: relative;
-      text-align: center;
-      padding: 5rem 1.25rem 3.5rem;
-      background:
-        radial-gradient(ellipse 80% 60% at 50% -10%, rgba(110, 168, 254, 0.18), transparent),
-        radial-gradient(ellipse 50% 40% at 80% 10%, rgba(167, 139, 250, 0.12), transparent),
-        var(--bg);
-    }
+  /* ---------- Hintergrund-Deko ---------- */
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -2;
+    background:
+      radial-gradient(600px 400px at 15% 0%, rgba(124, 92, 255, 0.22), transparent 65%),
+      radial-gradient(700px 500px at 90% 15%, rgba(34, 211, 238, 0.14), transparent 65%),
+      radial-gradient(500px 500px at 50% 100%, rgba(244, 114, 182, 0.10), transparent 65%);
+  }
 
-    .hero-badge {
-      display: inline-block;
-      padding: 0.3rem 0.9rem;
-      border: 1px solid var(--border);
-      border-radius: 999px;
-      font-size: 0.8rem;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: var(--accent);
-      background: rgba(110, 168, 254, 0.08);
-      margin-bottom: 1.25rem;
-    }
+  body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+    background-size: 44px 44px;
+    mask-image: radial-gradient(ellipse 90% 60% at 50% 0%, #000 30%, transparent 75%);
+    -webkit-mask-image: radial-gradient(ellipse 90% 60% at 50% 0%, #000 30%, transparent 75%);
+  }
 
-    .hero h1 {
-      font-size: clamp(2rem, 6vw, 3.4rem);
-      font-weight: 800;
-      letter-spacing: -0.02em;
-      background: linear-gradient(120deg, var(--accent), var(--accent-2), var(--accent-3));
-      -webkit-background-clip: text;
-      background-clip: text;
-      -webkit-text-fill-color: transparent;
-      margin-bottom: 1rem;
-    }
+  .wrap {
+    max-width: 1140px;
+    margin: 0 auto;
+    padding: 0 22px;
+  }
 
-    .hero p {
-      max-width: 620px;
-      margin: 0 auto;
-      color: var(--text-dim);
-      font-size: clamp(1rem, 2.5vw, 1.15rem);
-    }
+  /* ---------- Navigation ---------- */
+  nav {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    background: rgba(10, 14, 26, 0.72);
+    border-bottom: 1px solid var(--border);
+  }
 
-    .hero-stats {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 2rem;
-      margin-top: 2.5rem;
-    }
+  nav .wrap {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 62px;
+  }
 
-    .stat { text-align: center; }
-    .stat .num {
-      font-size: 1.6rem;
-      font-weight: 700;
-      color: var(--text);
-    }
-    .stat .label {
-      font-size: 0.8rem;
-      color: var(--text-dim);
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-    }
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 700;
+    font-size: 1.05rem;
+    letter-spacing: 0.2px;
+    text-decoration: none;
+    color: var(--text);
+  }
 
-    /* ---------- Team Grid ---------- */
-    main {
-      max-width: var(--max-w);
-      margin: 0 auto;
-      padding: 1rem 1.25rem 4rem;
-    }
+  .logo-mark {
+    width: 32px;
+    height: 32px;
+    border-radius: 9px;
+    background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+    display: grid;
+    place-items: center;
+    font-size: 0.95rem;
+    box-shadow: 0 4px 18px rgba(124, 92, 255, 0.45);
+  }
 
-    .section-title {
-      text-align: center;
-      font-size: clamp(1.4rem, 3.5vw, 2rem);
-      font-weight: 700;
-      margin: 2.5rem 0 0.5rem;
-    }
+  .nav-links { display: flex; gap: 26px; }
 
-    .section-sub {
-      text-align: center;
-      color: var(--text-dim);
-      margin-bottom: 2.5rem;
-    }
+  .nav-links a {
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 0.92rem;
+    transition: color 0.2s ease;
+  }
 
-    .team-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 1.25rem;
-    }
+  .nav-links a:hover { color: var(--text); }
 
-    .card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 1.6rem 1.4rem;
-      display: flex;
-      flex-direction: column;
-      gap: 0.7rem;
-      transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
-      opacity: 0;
-      transform: translateY(18px);
-    }
+  /* ---------- Hero ---------- */
+  header.hero {
+    text-align: center;
+    padding: 96px 0 72px;
+  }
 
-    .card.visible {
-      opacity: 1;
-      transform: translateY(0);
-      transition: opacity 0.5s ease, transform 0.5s ease,
-                  background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
-    }
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.82rem;
+    color: var(--accent-2);
+    background: rgba(34, 211, 238, 0.08);
+    border: 1px solid rgba(34, 211, 238, 0.28);
+    padding: 6px 16px;
+    border-radius: 999px;
+    margin-bottom: 26px;
+  }
 
-    .card:hover {
-      background: var(--card-hover);
-      border-color: var(--accent);
-      transform: translateY(-4px);
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
-    }
+  .badge .dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--accent-2);
+    animation: pulse 2.2s ease-in-out infinite;
+  }
 
-    .card-icon {
-      width: 52px;
-      height: 52px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.7rem;
-      border-radius: 12px;
-      background: linear-gradient(135deg, rgba(110, 168, 254, 0.15), rgba(167, 139, 250, 0.15));
-      border: 1px solid var(--border);
-    }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(34, 211, 238, 0.5); }
+    50% { opacity: 0.6; box-shadow: 0 0 0 6px rgba(34, 211, 238, 0); }
+  }
 
-    .card h3 {
-      font-size: 1.15rem;
-      font-weight: 700;
-    }
+  h1 {
+    font-size: clamp(2.4rem, 6.5vw, 4.4rem);
+    line-height: 1.08;
+    font-weight: 800;
+    letter-spacing: -1.5px;
+    margin-bottom: 22px;
+  }
 
-    .card h3 .tag {
-      font-size: 0.7rem;
-      font-weight: 600;
-      color: var(--accent-3);
-      border: 1px solid rgba(52, 211, 153, 0.4);
-      border-radius: 999px;
-      padding: 0.1rem 0.55rem;
-      margin-left: 0.5rem;
-      vertical-align: middle;
-      white-space: nowrap;
-    }
+  h1 .grad {
+    background: linear-gradient(92deg, var(--accent-1) 5%, var(--accent-2) 55%, var(--accent-3) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
 
-    .card p {
-      color: var(--text-dim);
-      font-size: 0.95rem;
-    }
+  .hero p.lead {
+    max-width: 660px;
+    margin: 0 auto 38px;
+    color: var(--muted);
+    font-size: clamp(1rem, 2.2vw, 1.18rem);
+  }
 
-    /* ---------- Footer ---------- */
-    footer {
-      border-top: 1px solid var(--border);
-      text-align: center;
-      padding: 2rem 1.25rem;
-      color: var(--text-dim);
-      font-size: 0.85rem;
-      background: var(--bg-soft);
-    }
+  .cta-row {
+    display: flex;
+    gap: 14px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
 
-    footer a {
-      color: var(--accent);
-      text-decoration: none;
-    }
-    footer a:hover { text-decoration: underline; }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    padding: 13px 28px;
+    border-radius: 12px;
+    font-size: 0.98rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: transform 0.18s ease, box-shadow 0.18s ease;
+  }
 
-    /* ---------- Responsive: Mobile ---------- */
-    @media (max-width: 640px) {
-      .hero { padding: 3.5rem 1rem 2.5rem; }
-      .hero-stats { gap: 1.25rem; }
-      .team-grid { grid-template-columns: 1fr; gap: 1rem; }
-      .card { padding: 1.25rem 1.1rem; }
-    }
+  .btn-primary {
+    color: #fff;
+    background: linear-gradient(135deg, var(--accent-1), #5b3df0);
+    box-shadow: 0 8px 28px rgba(124, 92, 255, 0.4);
+  }
 
-    /* ---------- Responsive: große Desktops ---------- */
-    @media (min-width: 1400px) {
-      :root { --max-w: 1250px; }
-    }
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 34px rgba(124, 92, 255, 0.55);
+  }
 
-    /* Reduzierte Bewegung respektieren (Barrierefreiheit) */
-    @media (prefers-reduced-motion: reduce) {
-      html { scroll-behavior: auto; }
-      .card, .card.visible { transition: none; opacity: 1; transform: none; }
+  .btn-ghost {
+    color: var(--text);
+    border: 1px solid var(--border);
+    background: var(--bg-card);
+  }
+
+  .btn-ghost:hover {
+    transform: translateY(-2px);
+    border-color: rgba(255, 255, 255, 0.22);
+  }
+
+  /* ---------- Abschnitte ---------- */
+  section { padding: 78px 0; }
+
+  .section-head {
+    text-align: center;
+    max-width: 640px;
+    margin: 0 auto 54px;
+  }
+
+  .kicker {
+    display: inline-block;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    color: var(--accent-1);
+    margin-bottom: 12px;
+  }
+
+  h2 {
+    font-size: clamp(1.7rem, 4vw, 2.5rem);
+    font-weight: 800;
+    letter-spacing: -0.8px;
+    margin-bottom: 14px;
+  }
+
+  .section-head p { color: var(--muted); }
+
+  /* ---------- Workflow ---------- */
+  .flow {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 18px;
+    position: relative;
+  }
+
+  .flow-step {
+    position: relative;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 28px 26px;
+    transition: transform 0.22s ease, border-color 0.22s ease;
+  }
+
+  .flow-step:hover {
+    transform: translateY(-4px);
+    border-color: rgba(124, 92, 255, 0.45);
+  }
+
+  .flow-num {
+    position: absolute;
+    top: -15px;
+    left: 24px;
+    width: 32px;
+    height: 32px;
+    border-radius: 10px;
+    display: grid;
+    place-items: center;
+    font-weight: 800;
+    font-size: 0.9rem;
+    color: #fff;
+    background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+    box-shadow: 0 4px 14px rgba(124, 92, 255, 0.4);
+  }
+
+  .flow-step h3 {
+    font-size: 1.12rem;
+    margin: 6px 0 8px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .flow-step h3 .emoji { font-size: 1.3rem; }
+
+  .flow-step p { color: var(--muted); font-size: 0.95rem; }
+
+  .flow-step .tag {
+    display: inline-block;
+    margin-top: 14px;
+    font-size: 0.74rem;
+    font-weight: 700;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    color: var(--accent-2);
+    background: rgba(34, 211, 238, 0.08);
+    border: 1px solid rgba(34, 211, 238, 0.22);
+    border-radius: 999px;
+    padding: 4px 12px;
+  }
+
+  .flow-step.highlight {
+    background: linear-gradient(160deg, rgba(124, 92, 255, 0.14), rgba(34, 211, 238, 0.07));
+    border-color: rgba(124, 92, 255, 0.5);
+  }
+
+  /* Verbindungspfeile (Desktop) */
+  @media (min-width: 900px) {
+    .flow { grid-template-columns: repeat(4, 1fr); }
+    .flow-step:not(:last-child)::after {
+      content: "→";
+      position: absolute;
+      top: 50%;
+      right: -19px;
+      transform: translateY(-50%);
+      font-size: 1.35rem;
+      color: var(--accent-1);
+      z-index: 2;
+      text-shadow: 0 0 12px rgba(124, 92, 255, 0.7);
     }
-  </style>
+  }
+
+  /* ---------- Team-Karten ---------- */
+  .team-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  @media (min-width: 560px) {
+    .team-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  @media (min-width: 900px) {
+    .team-grid { grid-template-columns: repeat(4, 1fr); }
+  }
+
+  .bot-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 28px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    transition: transform 0.22s ease, border-color 0.22s ease, box-shadow 0.22s ease;
+  }
+
+  .bot-card:hover {
+    transform: translateY(-5px);
+    border-color: rgba(255, 255, 255, 0.22);
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
+  }
+
+  .bot-card.lead-bot {
+    grid-column: 1 / -1;
+    flex-direction: row;
+    align-items: center;
+    gap: 26px;
+    background: linear-gradient(135deg, rgba(124, 92, 255, 0.16), rgba(34, 211, 238, 0.08));
+    border-color: rgba(124, 92, 255, 0.5);
+    padding: 34px 30px;
+  }
+
+  .bot-icon {
+    width: 54px;
+    height: 54px;
+    flex-shrink: 0;
+    border-radius: 14px;
+    display: grid;
+    place-items: center;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid var(--border);
+  }
+
+  .bot-icon svg { width: 27px; height: 27px; }
+
+  .lead-bot .bot-icon {
+    width: 74px;
+    height: 74px;
+    border-radius: 18px;
+    background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+    border: none;
+    box-shadow: 0 10px 30px rgba(124, 92, 255, 0.45);
+  }
+
+  .lead-bot .bot-icon svg { width: 38px; height: 38px; }
+
+  .bot-card h3 { font-size: 1.08rem; }
+
+  .bot-card h3 code {
+    font-family: "Cascadia Code", "Consolas", monospace;
+    font-size: 0.78rem;
+    color: var(--accent-2);
+    background: rgba(34, 211, 238, 0.08);
+    border: 1px solid rgba(34, 211, 238, 0.2);
+    border-radius: 6px;
+    padding: 2px 8px;
+    margin-left: 8px;
+    vertical-align: middle;
+  }
+
+  .bot-card p { color: var(--muted); font-size: 0.93rem; }
+
+  .bot-skills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+    margin-top: auto;
+  }
+
+  .bot-skills span {
+    font-size: 0.74rem;
+    color: var(--muted);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 3px 11px;
+  }
+
+  @media (max-width: 640px) {
+    .bot-card.lead-bot { flex-direction: column; align-items: flex-start; }
+  }
+
+  /* ---------- Prinzipien ---------- */
+  .principles {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  @media (min-width: 760px) {
+    .principles { grid-template-columns: repeat(3, 1fr); }
+  }
+
+  .principle {
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 30px 26px;
+    background: var(--bg-soft);
+  }
+
+  .principle .big {
+    font-size: 1.9rem;
+    margin-bottom: 14px;
+    display: block;
+  }
+
+  .principle h3 { font-size: 1.05rem; margin-bottom: 8px; }
+
+  .principle p { color: var(--muted); font-size: 0.93rem; }
+
+  /* ---------- Abschluss-CTA ---------- */
+  .final-cta {
+    text-align: center;
+    border: 1px solid rgba(124, 92, 255, 0.35);
+    border-radius: 26px;
+    padding: 66px 30px;
+    background:
+      radial-gradient(400px 200px at 50% 0%, rgba(124, 92, 255, 0.18), transparent 70%),
+      var(--bg-soft);
+  }
+
+  .final-cta h2 { margin-bottom: 16px; }
+
+  .final-cta p {
+    color: var(--muted);
+    max-width: 520px;
+    margin: 0 auto 32px;
+  }
+
+  /* ---------- Footer ---------- */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 34px 0;
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.88rem;
+  }
+
+  /* ---------- Reveal-Animation ---------- */
+  .reveal {
+    opacity: 0;
+    transform: translateY(26px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    .reveal { opacity: 1; transform: none; transition: none; }
+    .badge .dot { animation: none; }
+    * { transition-duration: 0.01ms !important; }
+  }
+</style>
 </head>
 <body>
 
-  <header class="hero">
-    <span class="hero-badge">🤖 KI-gestützt · Ortsunabhängig · Immer bereit</span>
-    <h1>Hermes Agent Team</h1>
-    <p>
-      Ein Team spezialisierter KI-Bots, die Hand in Hand arbeiten — vom ersten Entwurf
-      über den Code bis zur Veröffentlichung. Jeder Bot hat seine Stärke, gemeinsam
-      liefern sie Ergebnisse.
-    </p>
-    <div class="hero-stats">
-      <div class="stat"><div class="num" id="bot-count">9</div><div class="label">Bots im Team</div></div>
-      <div class="stat"><div class="num">24/7</div><div class="label">Einsatzbereit</div></div>
-      <div class="stat"><div class="num">1</div><div class="label">Gemeinsames Ziel</div></div>
+<nav>
+  <div class="wrap">
+    <a class="logo" href="#top">
+      <span class="logo-mark">⚡</span>
+      Hermes Agent Team
+    </a>
+    <div class="nav-links">
+      <a href="#workflow">Workflow</a>
+      <a href="#team">Das Team</a>
+      <a href="#prinzipien">Prinzipien</a>
     </div>
-  </header>
+  </div>
+</nav>
 
-  <main>
-    <h2 class="section-title">Das Team im Überblick</h2>
-    <p class="section-sub">Neun Spezialisten — klar definierte Rollen, ein gemeinsamer Workflow.</p>
+<header class="hero" id="top">
+  <div class="wrap">
+    <span class="badge"><span class="dot"></span> Autonomes KI-Team · rund um die Uhr einsatzbereit</span>
+    <h1>Hermes <span class="grad">Agent Team</span></h1>
+    <p class="lead">
+      Eine Aufgabe reicht. ChatGPT übergibt sie an Hermes — ein Projektleiter-Bot zerlegt sie
+      in Teilaufgaben, koordiniert spezialisierte Bots und liefert das geprüfte Ergebnis zurück.
+    </p>
+    <div class="cta-row">
+      <a class="btn btn-primary" href="#workflow">▶ &nbsp;Workflow ansehen</a>
+      <a class="btn btn-ghost" href="#team">Team kennenlernen</a>
+    </div>
+  </div>
+</header>
 
-    <section class="team-grid" id="team-grid" aria-label="Team-Mitglieder">
-      <!-- Karten werden per JS aus den Team-Daten gerendert -->
-    </section>
-  </main>
+<section id="workflow">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="kicker">Der Ablauf</span>
+      <h2>Von der Idee zum Ergebnis — in vier Schritten</h2>
+      <p>Kein Prompt-Ping-Pong, kein Mikromanagement: Der Projektleiter orchestriert, die Spezialisten liefern.</p>
+    </div>
 
-  <footer>
-    <p>Gebaut mit dem <strong>Hermes Agent Team</strong> · Alle Inhalte auf Deutsch · Kein externes Tracking</p>
-  </footer>
+    <div class="flow">
+      <article class="flow-step reveal">
+        <span class="flow-num">1</span>
+        <h3><span class="emoji">💬</span> Übergabe</h3>
+        <p>Du beschreibst dein Vorhaben in ChatGPT. Die Aufgabe wird strukturiert an Hermes übergeben — mit Ziel, Kontext und Akzeptanzkriterien.</p>
+        <span class="tag">ChatGPT → Hermes</span>
+      </article>
 
-  <script>
-    // Team-Daten: Name, Rolle (1 Satz), Icon
-    const team = [
-      { name: "projektleiter",   icon: "🧭", tag: "Lead",     role: "Orchestriert das Team, zerlegt Aufgaben und hält alle Fäden zusammen." },
-      { name: "designer",        icon: "🎨", tag: "Kreativ",  role: "Gestaltet moderne, responsive Oberflächen und setzt sie in sauberem HTML & CSS um." },
-      { name: "coder",           icon: "💻", tag: "Tech",     role: "Schreibt und prüft Code, automatisiert Abläufe und bringt Projekte live." },
-      { name: "writer",          icon: "✍️", tag: "Text",     role: "Formuliert klare Texte, Berichte und Dokumentationen — verständlich und auf den Punkt." },
-      { name: "researcher",      icon: "🔎", tag: "Wissen",   role: "Recherchiert Fakten, Quellen und Hintergründe und bereitet sie sauber auf." },
-      { name: "n8n-operator",    icon: "⚙️", tag: "Automation", role: "Baut und betreut Workflows in n8n, damit Prozesse von allein laufen." },
-      { name: "bueroassistent",  icon: "🗂️", tag: "Büro",     role: "Organisiert Ablage, E-Mails und Termine und sorgt für Ordnung im Alltag." },
-      { name: "coach",           icon: "🧠", tag: "Sparring", role: "Hinterfragt Ideen kritisch, gibt ehrliches Feedback und hilft beim Sortieren." },
-      { name: "familienplaner",  icon: "📅", tag: "Planung",  role: "Plant Kalender, Termine und Familienlogistik, damit nichts durchrutscht." }
-    ];
+      <article class="flow-step highlight reveal">
+        <span class="flow-num">2</span>
+        <h3><span class="emoji">🧭</span> Analyse &amp; Zerlegung</h3>
+        <p>Der Projektleiter-Bot nimmt den Auftrag entgegen, analysiert ihn und zerlegt ihn in klare Teilaufgaben für das Team.</p>
+        <span class="tag">Orchestrierung</span>
+      </article>
 
-    const grid = document.getElementById("team-grid");
+      <article class="flow-step reveal">
+        <span class="flow-num">3</span>
+        <h3><span class="emoji">🤖</span> Facharbeit</h3>
+        <p>Coder, Designer, Writer, Researcher und weitere Spezialisten-Bots bearbeiten ihre Teilaufgaben — parallel und mit eigenem Toolset.</p>
+        <span class="tag">Spezialisten</span>
+      </article>
 
-    team.forEach(function (bot) {
-      const card = document.createElement("article");
-      card.className = "card";
+      <article class="flow-step reveal">
+        <span class="flow-num">4</span>
+        <h3><span class="emoji">✅</span> Ergebnis</h3>
+        <p>Der Projektleiter prüft und fügt alles zusammen. Das verifizierte Gesamtergebnis geht zurück an dich — fertig zur Nutzung.</p>
+        <span class="tag">Rückgabe an dich</span>
+      </article>
+    </div>
+  </div>
+</section>
 
-      const icon = document.createElement("div");
-      icon.className = "card-icon";
-      icon.setAttribute("aria-hidden", "true");
-      icon.textContent = bot.icon;
+<section id="team">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="kicker">Das Team</span>
+      <h2>Ein Orchestrator, sieben Spezialisten</h2>
+      <p>Jeder Bot hat eine klare Rolle und ein eigenes Profil — zusammen decken sie den kompletten Workflow ab.</p>
+    </div>
 
-      const heading = document.createElement("h3");
-      heading.textContent = bot.name + " ";
-      const tag = document.createElement("span");
-      tag.className = "tag";
-      tag.textContent = bot.tag;
-      heading.appendChild(tag);
+    <div class="team-grid">
 
-      const text = document.createElement("p");
-      text.textContent = bot.role;
+      <article class="bot-card lead-bot reveal">
+        <div class="bot-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="5" r="2.6"/>
+            <circle cx="4.5" cy="19" r="2.2"/>
+            <circle cx="19.5" cy="19" r="2.2"/>
+            <path d="M10.6 7.2 5.8 16.9M13.4 7.2l4.8 9.7M6.8 19h10.4"/>
+          </svg>
+        </div>
+        <div>
+          <h3>Projektleiter <code>projektleiter</code></h3>
+          <p>
+            Der Orchestrator des Teams. Er analysiert jeden Auftrag, zerlegt ihn in Teilaufgaben,
+            delegiert an die passenden Spezialisten, prüft deren Ergebnisse und verifiziert das Gesamtpaket,
+            bevor es zurück an dich geht.
+          </p>
+          <div class="bot-skills">
+            <span>Analyse</span><span>Zerlegung</span><span>Delegation</span><span>Verifikation</span>
+          </div>
+        </div>
+      </article>
 
-      card.appendChild(icon);
-      card.appendChild(heading);
-      card.appendChild(text);
-      grid.appendChild(card);
-    });
+      <article class="bot-card reveal">
+        <div class="bot-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#22d3ee" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m8 6-5 6 5 6M16 6l5 6-5 6M13.5 4l-3 16"/>
+          </svg>
+        </div>
+        <h3>Coder <code>coder</code></h3>
+        <p>Programmierung, Code und Skripte — von der Web-App bis zur Automatisierung, sauber getestet und deployed.</p>
+        <div class="bot-skills"><span>Code</span><span>Skripte</span><span>Git</span></div>
+      </article>
 
-    // Bot-Anzahl im Hero automatisch setzen
-    document.getElementById("bot-count").textContent = team.length;
+      <article class="bot-card reveal">
+        <div class="bot-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#f472b6" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="13.5" cy="6.5" r="1.4"/>
+            <circle cx="17.5" cy="10.5" r="1.4"/>
+            <circle cx="8.5" cy="7.5" r="1.4"/>
+            <circle cx="6.5" cy="12.5" r="1.4"/>
+            <path d="M12 2a10 10 0 0 0 0 20 1.8 1.8 0 0 0 1.2-3.2 1.8 1.8 0 0 1 1.2-3.1H17a5 5 0 0 0 5-5c0-4.8-4.5-8.7-10-8.7Z"/>
+          </svg>
+        </div>
+        <h3>Designer <code>designer</code></h3>
+        <p>Design, Visuals und Layout — Websites, Präsentationen und Grafiken, modern und responsiv umgesetzt.</p>
+        <div class="bot-skills"><span>UI/UX</span><span>Visuals</span><span>Layout</span></div>
+      </article>
 
-    // Sanftes Einblenden der Karten beim Scrollen (mit Fallback)
-    const cards = grid.querySelectorAll(".card");
-    if ("IntersectionObserver" in window) {
-      const observer = new IntersectionObserver(function (entries) {
-        entries.forEach(function (entry) {
-          if (entry.isIntersecting) {
-            entry.target.classList.add("visible");
-            observer.unobserve(entry.target);
-          }
-        });
-      }, { threshold: 0.1 });
-      cards.forEach(function (card) { observer.observe(card); });
-    } else {
-      cards.forEach(function (card) { card.classList.add("visible"); });
+      <article class="bot-card reveal">
+        <div class="bot-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#7c5cff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/>
+          </svg>
+        </div>
+        <h3>Writer <code>writer</code></h3>
+        <p>Texte, Dokumente und Berichte — klar strukturiert, stilsicher und auf den Punkt formuliert.</p>
+        <div class="bot-skills"><span>Texte</span><span>Dokumente</span><span>Berichte</span></div>
+      </article>
+
+      <article class="bot-card reveal">
+        <div class="bot-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="7"/>
+            <path d="m21 21-4.3-4.3"/>
+          </svg>
+        </div>
+        <h3>Researcher <code>researcher</code></h3>
+        <p>Schnelle Recherche — findet Fakten, Quellen und aktuelle Informationen, wenn es zügig gehen muss.</p>
+        <div class="bot-skills"><span>Fakten</span><span>Quellen</span><span>Speed</span></div>
+      </article>
+
+      <article class="bot-card reveal">
+        <div class="bot-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/>
+            <circle cx="12" cy="12" r="3"/>
+          </svg>
+        </div>
+        <h3>Deep-Researcher <code>deep-researcher</code></h3>
+        <p>Tiefe Analysen — gründliche, mehrstufige Recherche mit Belegen für komplexe Fragestellungen.</p>
+        <div class="bot-skills"><span>Analysen</span><span>Studien</span><span>Tiefe</span></div>
+      </article>
+
+      <article class="bot-card reveal">
+        <div class="bot-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#fb7185" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="4" width="7" height="7" rx="1.5"/>
+            <rect x="14" y="13" width="7" height="7" rx="1.5"/>
+            <path d="M10 7.5h4.5a2 2 0 0 1 2 2V13M14 16.5H9.5a2 2 0 0 1-2-2V11"/>
+          </svg>
+        </div>
+        <h3>n8n-Operator <code>n8n-operator</code></h3>
+        <p>Workflow- und Prozess-Automation — verbindet Tools und APIs zu selbstlaufenden n8n-Workflows.</p>
+        <div class="bot-skills"><span>n8n</span><span>APIs</span><span>Automation</span></div>
+      </article>
+
+      <article class="bot-card reveal">
+        <div class="bot-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 21s-7.5-4.6-9.8-9A5.6 5.6 0 0 1 12 6.4 5.6 5.6 0 0 1 21.8 12c-2.3 4.4-9.8 9-9.8 9Z"/>
+          </svg>
+        </div>
+        <h3>Coach <code>coach</code></h3>
+        <p>Coaching und Sparring — hinterfragt Ideen, schärft Strategien und hält dich auf Kurs.</p>
+        <div class="bot-skills"><span>Sparring</span><span>Strategie</span><span>Fokus</span></div>
+      </article>
+
+    </div>
+  </div>
+</section>
+
+<section id="prinzipien">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="kicker">Arbeitsweise</span>
+      <h2>Drei Prinzipien, ein Anspruch</h2>
+      <p>Was das Hermes Agent Team von einem einzelnen Chatbot unterscheidet.</p>
+    </div>
+
+    <div class="principles">
+      <article class="principle reveal">
+        <span class="big">🎯</span>
+        <h3>Spezialisierung statt Generalismus</h3>
+        <p>Jede Teilaufgabe landet beim Bot mit dem passenden Profil und Toolset — Code beim Coder, Recherche beim Researcher, Layout beim Designer.</p>
+      </article>
+      <article class="principle reveal">
+        <span class="big">🔍</span>
+        <h3>Verifikation vor Rückgabe</h3>
+        <p>Der Projektleiter prüft jedes Teilergebnis gegen die Akzeptanzkriterien. Erst wenn alles sitzt, geht das Gesamtpaket raus.</p>
+      </article>
+      <article class="principle reveal">
+        <span class="big">🧾</span>
+        <h3>Transparenz auf dem Board</h3>
+        <p>Jeder Schritt ist als Karte auf dem Kanban-Board nachvollziehbar: wer was tut, wo es hakt, was fertig ist.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="final-cta reveal">
+      <h2>Bereit für dein nächstes Projekt?</h2>
+      <p>Beschreibe dein Vorhaben — das Hermes Agent Team übernimmt Planung, Umsetzung und Qualitätskontrolle.</p>
+      <a class="btn btn-primary" href="#workflow">▶ &nbsp;So funktioniert's</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    Hermes Agent Team · Ein Projektleiter, sieben Spezialisten, ein Ergebnis.
+  </div>
+</footer>
+
+<script>
+  // Sanfte Reveal-Animation beim Scrollen
+  (function () {
+    var elements = document.querySelectorAll('.reveal');
+    if (!('IntersectionObserver' in window)) {
+      elements.forEach(function (el) { el.classList.add('visible'); });
+      return;
     }
-  </script>
+    var observer = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.12 });
+    elements.forEach(function (el) { observer.observe(el); });
+  })();
+</script>
 
 </body>
 </html>
