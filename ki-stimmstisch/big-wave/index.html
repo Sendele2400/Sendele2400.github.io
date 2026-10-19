@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Big Wave · Persönliches KI-Betriebssystem — KI-Stammtisch</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:        #141518;
+  --bg-2:      #1a1c20;
+  --surface:   #202329;
+  --surface-2: #262a31;
+  --line:      #34383f;
+  --line-soft: #2b2f36;
+
+  --ink:       #ece9e2;
+  --ink-dim:   #a9a49a;
+  --ink-faint: #7d7970;
+
+  --ember:     #ff6a2b;
+  --ember-hot: #ff8a3d;
+  --amber:     #f5a524;
+  --ember-glow: rgba(255,106,43,.5);
+
+  --cobalt:    #4d7cff;
+  --cobalt-soft:#6f96ff;
+  --verdigris: #37c2a0;
+
+  --mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --display: "Space Grotesk", "Segoe UI", system-ui, sans-serif;
+  --radius: 6px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{
+  background:var(--bg);
+  color:var(--ink);
+  font-family:var(--display);
+  overflow:hidden;
+  -webkit-font-smoothing:antialiased;
+}
+body::before{
+  content:"";position:fixed;inset:0;pointer-events:none;
+  background:
+    radial-gradient(1100px 500px at 85% -10%, rgba(255,106,43,.10), transparent 60%),
+    radial-gradient(900px 500px at 0% 110%, rgba(77,124,255,.10), transparent 60%);
+}
+.bg{
+  position:fixed;inset:0;z-index:0;pointer-events:none;
+  background-image:radial-gradient(rgba(236,233,226,.045) 1px, transparent 1px);
+  background-size:26px 26px;
+}
+
+.deck{position:relative;z-index:1;height:100vh;width:100vw}
+.slide{
+  position:absolute;inset:0;
+  display:flex;flex-direction:column;
+  padding:clamp(1rem,4vw,3rem) clamp(1rem,5vw,4rem) 5.5rem;
+  opacity:0;transform:translateX(30px);pointer-events:none;
+  transition:opacity .45s ease, transform .45s ease;
+  max-width:1240px;margin:0 auto;
+  overflow-y:auto;
+}
+.slide.active{opacity:1;transform:translateX(0);pointer-events:auto}
+
+/* Kopfzeile */
+.label{font-family:var(--mono);font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-faint);display:flex;align-items:center;gap:.6rem;margin:0 0 .4rem}
+.label .idx{color:var(--ember);font-weight:600}
+h1{
+  font-size:clamp(1.7rem,4.6vw,3.2rem);
+  line-height:1.04;margin:0 0 1rem;font-weight:800;letter-spacing:-.02em;
+}
+h1 .glow{color:var(--ember);text-shadow:0 0 22px var(--ember-glow)}
+h1 .cold{color:var(--cobalt);text-shadow:0 0 22px rgba(77,124,255,.45)}
+h1 .green{color:var(--verdigris);text-shadow:0 0 22px rgba(55,194,160,.4)}
+.sub{font-size:clamp(1rem,2vw,1.25rem);color:var(--ink-dim);max-width:64ch;margin:0 0 1.6rem;line-height:1.5}
+.sub strong{color:var(--ink)}
+
+/* Layout-Hilfen */
+.split{display:grid;gap:2rem;align-items:center;flex:1}
+@media (min-width:60rem){.split{grid-template-columns:1fr 1fr}}
+.kicker{font-family:var(--mono);font-size:.68rem;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-faint);margin:0 0 .5rem}
+
+/* ===== Slide 1: Prinzipien + KPI ===== */
+.principles{display:grid;gap:.9rem;align-content:start}
+.principle{
+  display:grid;grid-template-columns:5.5rem 1fr;gap:1rem;align-items:start;
+  background:var(--surface);border:1px solid var(--line);border-left:3px solid var(--cobalt);
+  border-radius:var(--radius);padding:1rem 1.15rem;
+}
+.principle .k{font-family:var(--mono);font-size:.72rem;letter-spacing:.1em;color:var(--cobalt-soft);text-transform:uppercase;padding-top:.15rem}
+.principle p{margin:0;color:var(--ink-dim);font-size:1rem;line-height:1.5}
+.principle p strong{color:var(--ink)}
+.kpi{
+  background:radial-gradient(120% 120% at 50% 0%, rgba(255,106,43,.12), transparent 60%), var(--surface);
+  border:1px solid var(--line);border-top:3px solid var(--ember);
+  border-radius:var(--radius);padding:2.2rem 1.6rem;text-align:center;
+}
+.kpi .up{
+  font-family:var(--mono);color:var(--ember);font-size:2.2rem;line-height:1;
+  text-shadow:0 0 22px var(--ember-glow);display:block;margin-bottom:.6rem;
+}
+.kpi .v{font-size:clamp(2rem,5vw,3rem);font-weight:800;letter-spacing:-.02em;display:block}
+.kpi .v .unit{font-size:.45em;color:var(--ink-dim);font-weight:600}
+.kpi .k{display:block;margin-top:.5rem;font-family:var(--mono);font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-faint)}
+.kpi .note{margin-top:1rem;color:var(--ink-dim);font-size:.92rem;line-height:1.5}
+
+/* ===== Slide 2: Autonomie-SVG ===== */
+.chart-wrap{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:1.2rem 1.2rem .6rem;overflow-x:auto}
+.chart-wrap svg{width:100%;height:auto;display:block;min-width:900px}
+
+/* ===== Slide 3: Waves ===== */
+.wave-grid{display:grid;gap:1rem;grid-template-columns:repeat(2,1fr);flex:1;align-content:start}
+@media (max-width:52rem){.wave-grid{grid-template-columns:1fr}}
+.wave{
+  background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+  padding:1.2rem 1.3rem;display:flex;flex-direction:column;gap:.55rem;position:relative;overflow:hidden;
+}
+.wave::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--cobalt)}
+.wave.w2::before{background:var(--verdigris)}
+.wave.w3::before{background:var(--amber)}
+.wave.w4::before{background:var(--ember)}
+.wave .wh{display:flex;justify-content:space-between;align-items:center;gap:.75rem;flex-wrap:wrap}
+.wave .wtag{font-family:var(--mono);font-size:.66rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-faint)}
+.wave h3{margin:0;font-size:1.28rem;font-weight:700;letter-spacing:-.01em}
+.wave .orig{font-family:var(--mono);font-size:.68rem;color:var(--ink-faint);letter-spacing:.03em}
+.wave p{margin:0;color:var(--ink-dim);font-size:.9rem;line-height:1.5}
+.wave p strong{color:var(--ink);font-weight:600}
+.wave .ziel{font-size:.92rem}
+.status{font-family:var(--mono);font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;padding:.3rem .62rem;border-radius:999px;border:1px solid;white-space:nowrap}
+.st-ok{color:var(--verdigris);border-color:rgba(55,194,160,.5);background:rgba(55,194,160,.08)}
+.st-warn{color:var(--amber);border-color:rgba(245,165,36,.5);background:rgba(245,165,36,.08)}
+.st-open{color:var(--ember);border-color:rgba(255,106,43,.5);background:rgba(255,106,43,.08)}
+.wave-note{
+  margin-top:1.1rem;font-size:.86rem;color:var(--ink-faint);line-height:1.5;
+  border-top:1px solid var(--line-soft);padding-top:.8rem;
+}
+.wave-note b{color:var(--amber)}
+
+/* ===== Slide 4: Crew ===== */
+.photo{
+  position:relative;aspect-ratio:4/3;overflow:hidden;
+  border:1px solid var(--line);border-radius:var(--radius);background:var(--surface-2);
+}
+.photo-ph{
+  position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.5rem;text-align:center;padding:1.5rem;
+}
+.photo-ph .ph-label{font-family:var(--mono);font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-dim)}
+.photo-ph .ph-sub{font-size:.95rem;color:var(--ink-faint)}
+.photo img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:var(--surface);display:block}
+.photo img.noimg{display:none}
+.crew-facts{display:grid;gap:.9rem;align-content:center}
+.crew-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:.7rem}
+@media (max-width:52rem){.crew-stats{grid-template-columns:repeat(2,1fr)}}
+.cstat{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:.9rem .7rem;text-align:center}
+.cstat .v{font-size:1.5rem;font-weight:800;display:block}
+.cstat .v.hot{color:var(--ember)}
+.cstat .v.cold{color:var(--cobalt)}
+.cstat .v.green{color:var(--verdigris)}
+.cstat .k{font-family:var(--mono);font-size:.62rem;letter-spacing:.1em;color:var(--ink-faint);text-transform:uppercase;display:block;margin-top:.25rem}
+.crew-line{color:var(--ink-dim);font-size:1.02rem;line-height:1.55;margin:0}
+.crew-line strong{color:var(--ink)}
+
+/* ===== Slide 5: Kette ===== */
+.chain{display:flex;align-items:stretch;gap:.6rem;flex:1;align-content:start;flex-wrap:wrap}
+.node{
+  flex:1 1 9.5rem;min-width:9.5rem;
+  background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+  padding:1rem 1rem;display:flex;flex-direction:column;gap:.5rem;position:relative;
+}
+.node .step{font-family:var(--mono);font-size:.62rem;letter-spacing:.1em;color:var(--ink-faint);text-transform:uppercase}
+.node .nm{font-size:1.05rem;font-weight:700;line-height:1.2}
+.node .g{font-size:1.5rem;line-height:1}
+.node .ds{font-size:.8rem;color:var(--ink-dim);line-height:1.45}
+.g-ok{color:var(--verdigris)}
+.g-warn{color:var(--amber)}
+.g-lock{color:var(--ember)}
+.chain-arrow{align-self:center;color:var(--ink-faint);font-family:var(--mono);font-size:1.2rem;flex:none}
+.node.ok{border-top:3px solid var(--verdigris)}
+.node.warn{border-top:3px solid var(--amber)}
+.node.lock{border-top:3px solid var(--ember)}
+.legend{margin-top:1.1rem;display:flex;gap:1.4rem;flex-wrap:wrap;font-family:var(--mono);font-size:.78rem;color:var(--ink-dim)}
+.legend b{font-weight:600}
+.legend .lg-ok{color:var(--verdigris)}
+.legend .lg-warn{color:var(--amber)}
+.legend .lg-open{color:var(--ember)}
+
+/* ===== Slide 6: Stand & Learnings ===== */
+.stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.9rem}
+@media (max-width:52rem){.stat-grid{grid-template-columns:1fr 1fr}}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:1rem 1.15rem}
+.stat .v{font-size:clamp(1.5rem,3.4vw,2.1rem);font-weight:800;display:block}
+.stat .v.green{color:var(--verdigris)}
+.stat .v.hot{color:var(--ember)}
+.stat .v.cold{color:var(--cobalt)}
+.stat .k{font-family:var(--mono);font-size:.64rem;letter-spacing:.12em;color:var(--ink-faint);text-transform:uppercase;display:block;margin-top:.25rem}
+.running{margin-top:1.1rem}
+.running .kicker{margin-bottom:.6rem}
+.services{display:flex;gap:.55rem;flex-wrap:wrap}
+.service{
+  font-family:var(--mono);font-size:.78rem;color:var(--ink);
+  background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:.4rem .85rem;
+}
+.service .dot{display:inline-block;width:.45rem;height:.45rem;border-radius:50%;background:var(--verdigris);box-shadow:0 0 8px rgba(55,194,160,.7);margin-right:.4rem;vertical-align:middle}
+.learnings{display:grid;grid-template-columns:repeat(3,1fr);gap:.9rem;margin-top:1.1rem}
+@media (max-width:52rem){.learnings{grid-template-columns:1fr}}
+.learning{
+  background:var(--bg-2);border:1px solid var(--line);border-left:3px solid var(--ember);
+  border-radius:var(--radius);padding:1rem 1.1rem;
+}
+.learning .n{font-family:var(--mono);font-size:.66rem;letter-spacing:.1em;color:var(--ember);display:block;margin-bottom:.4rem}
+.learning p{margin:0;color:var(--ink-dim);font-size:.9rem;line-height:1.5}
+.learning p strong{color:var(--ink)}
+
+/* ===== Slide 7: Nächste Wave ===== */
+.next-hero{
+  background:radial-gradient(120% 140% at 20% 0%, rgba(255,106,43,.12), transparent 55%), var(--surface);
+  border:1px solid var(--line);border-left:4px solid var(--ember);
+  border-radius:var(--radius);padding:1.5rem 1.6rem;margin-bottom:1.2rem;
+}
+.next-hero .kicker{color:var(--ember)}
+.next-hero h2{margin:0 0 .5rem;font-size:clamp(1.4rem,3.4vw,2rem);font-weight:800;letter-spacing:-.01em}
+.next-hero p{margin:0;color:var(--ink-dim);font-size:.95rem;line-height:1.5}
+.next-hero p strong{color:var(--ink)}
+.decisions .kicker{margin-bottom:.6rem}
+.chips{display:flex;gap:.55rem;flex-wrap:wrap}
+.chip{
+  font-family:var(--mono);font-size:.78rem;color:var(--ink-dim);
+  background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:.45rem .9rem;
+}
+.chip:hover{border-color:var(--ember);color:var(--ink)}
+.outlook{display:grid;grid-template-columns:1fr 1fr;gap:.9rem;margin-top:1.4rem}
+@media (max-width:52rem){.outlook{grid-template-columns:1fr}}
+.phase{
+  background:var(--bg-2);border:1px solid var(--line);border-left:3px solid var(--cobalt);
+  border-radius:var(--radius);padding:1rem 1.15rem;
+}
+.phase.p5{border-left-color:var(--verdigris)}
+.phase .tag{font-family:var(--mono);font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:var(--cobalt-soft);display:block;margin-bottom:.3rem}
+.phase.p5 .tag{color:var(--verdigris)}
+.phase h3{margin:0 0 .25rem;font-size:1.05rem;font-weight:700}
+.phase p{margin:0;color:var(--ink-dim);font-size:.88rem;line-height:1.45}
+
+/* ===== Steuerung ===== */
+.controls{
+  position:fixed;left:0;right:0;bottom:0;height:4.5rem;
+  display:flex;align-items:center;justify-content:space-between;gap:1rem;
+  padding:0 clamp(1rem,4vw,2rem);
+  background:linear-gradient(transparent, var(--bg) 40%);
+  z-index:10;
+}
+.arrow{
+  width:2.7rem;height:2.7rem;border-radius:50%;border:1px solid var(--line);
+  background:var(--surface);color:var(--ink);cursor:pointer;
+  display:flex;align-items:center;justify-content:center;font-size:1.1rem;
+  transition:border-color .2s, color .2s, background .2s;
+}
+.arrow:hover{border-color:var(--ember);color:var(--ember)}
+.arrow:disabled{opacity:.25;cursor:default}
+.dots{display:flex;gap:.5rem}
+.dot{width:.55rem;height:.55rem;border-radius:50%;background:var(--line);border:none;cursor:pointer;padding:0;transition:background .2s, transform .2s}
+.dot.active{background:var(--ember);transform:scale(1.3)}
+.counter{font-family:var(--mono);font-size:.72rem;color:var(--ink-faint);letter-spacing:.1em}
+.badge{
+  position:fixed;top:1rem;right:1rem;z-index:11;
+  font-family:var(--mono);font-size:.62rem;letter-spacing:.12em;color:var(--ink-faint);
+  background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:.35rem .7rem;
+}
+.badge b{color:var(--ember);font-weight:600}
+</style>
+</head>
+<body>
+<div class="bg" aria-hidden="true"></div>
+<div class="badge">BIG WAVE · PERSÖNLICHES KI-BETRIEBSSYSTEM · <b>19.10.2026</b></div>
+
+<div class="deck">
+
+  <!-- ==================== FOLIE 1: Ziel & Motivation ==================== -->
+  <section class="slide active" id="s0">
+    <p class="label"><span class="idx">00</span> Ziel &amp; Motivation</p>
+    <h1>Persönliches KI-Betriebssystem<br><span class="glow">privat + Business.</span></h1>
+    <p class="sub">Routineautomatisierung so weit wie möglich — <strong>mehr Zeit für Familie, Gesundheit, Sport.</strong></p>
+    <div class="split">
+      <div class="principles">
+        <div class="principle"><span class="k">Thomas</span><p><strong>Richtung + Freigaben.</strong> Legt Ziele und Leitplanken fest, gibt jeden Freigabeschritt frei.</p></div>
+        <div class="principle"><span class="k">Agenten</span><p><strong>Ausführung im Regelrahmen.</strong> Arbeiten selbstständig — aber nur innerhalb klar definierter Grenzen.</p></div>
+        <div class="principle"><span class="k">Ziel</span><p><strong>Routine weg, Zeit zurück.</strong> Was automatisiert werden kann, wird automatisiert.</p></div>
+      </div>
+      <div class="kpi">
+        <span class="up" aria-hidden="true">▲</span>
+        <span class="v">Stunden<span class="unit"> / Woche</span></span>
+        <span class="k">Leit-KPI</span>
+        <p class="note">Zurückgewonnene Zeit — der eigentliche Gewinn des Systems, nicht die Anzahl der Bots.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== FOLIE 2: KI-Systeme & Autonomie ==================== -->
+  <section class="slide" id="s1">
+    <p class="label"><span class="idx">01</span> KI-Systeme &amp; Autonomie</p>
+    <h1>Mehr Autonomie, <span class="cold">mehr Verantwortung.</span></h1>
+    <p class="sub" style="margin-bottom:1rem">Fünf Systemtypen — und wo <strong>Hermes Big Wave</strong> einzuordnen ist.</p>
+    <div class="chart-wrap">
+      <svg viewBox="0 0 1240 820" role="img" aria-label="Matrix: Systemtyp gegen Autonomiegrad. Chatbot, Werkzeug-Assistent, Workflow, Einzelagent, Agentensystem. Big Wave sitzt im Agentensystem auf höchster Autonomiestufe, mit Freigaben an Prüfpunkten und Mensch überwacht.">
+        <defs>
+          <filter id="glow" x="-60%" y="-60%" width="220%" height="220%">
+            <feGaussianBlur stdDeviation="6" result="b"/>
+            <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+          <linearGradient id="badgeGrad" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#ff8a3d"/>
+            <stop offset="1" stop-color="#ff6a2b"/>
+          </linearGradient>
+        </defs>
+
+        <!-- Achsen-Titel -->
+        <text x="14" y="36" fill="#7d7970" font-family="IBM Plex Mono, monospace" font-size="12">AUTONOMIE ▲</text>
+        <text x="1228" y="36" text-anchor="end" fill="#7d7970" font-family="IBM Plex Mono, monospace" font-size="12">SYSTEMTYP →</text>
+
+        <!-- y-Achsen-Labels (Autonomie, unten→oben) -->
+        <g font-family="IBM Plex Mono, monospace" font-size="13" fill="#a9a49a" text-anchor="end">
+          <text x="158" y="164">Selbstständig im</text>
+          <text x="158" y="183">Regelrahmen</text>
+          <text x="158" y="294">Rückfragen bei</text>
+          <text x="158" y="313">Ausnahmen</text>
+          <text x="158" y="424">Freigaben an</text>
+          <text x="158" y="443">Prüfpunkten</text>
+          <text x="158" y="564">Mensch steuert</text>
+        </g>
+
+        <!-- y-Achsen-Linie -->
+        <line x1="170" y1="140" x2="170" y2="585" stroke="#34383f" stroke-width="1.5"/>
+
+        <!-- Horizontale Führungslinien je Autonomiestufe -->
+        <g stroke="#2b2f36" stroke-width="1" opacity=".55">
+          <line x1="170" y1="170" x2="1228" y2="170"/>
+          <line x1="170" y1="300" x2="1228" y2="300"/>
+          <line x1="170" y1="430" x2="1228" y2="430"/>
+          <line x1="170" y1="560" x2="1228" y2="560"/>
+        </g>
+
+        <!-- Spalten-Überschriften -->
+        <g font-family="Space Grotesk, sans-serif" font-size="16" font-weight="700" fill="#ece9e2" text-anchor="middle">
+          <text x="266" y="74">Chatbot</text>
+          <text x="482" y="62">Werkzeug-</text>
+          <text x="482" y="86">Assistent</text>
+          <text x="698" y="74">Workflow</text>
+          <text x="914" y="74">Einzelagent</text>
+          <text x="1130" y="74">Agentensystem</text>
+        </g>
+
+        <!-- ===== Chips: Chatbot (1 Chip) ===== -->
+        <rect x="168" y="535" width="196" height="50" rx="9" fill="#202329" stroke="#34383f"/>
+        <text x="266" y="565" text-anchor="middle" fill="#ece9e2" font-family="IBM Plex Mono, monospace" font-size="13.5">Frage – Antwort</text>
+
+        <!-- ===== Chips: Werkzeug-Assistent (1 Chip) ===== -->
+        <rect x="384" y="535" width="196" height="50" rx="9" fill="#202329" stroke="#34383f"/>
+        <text x="482" y="565" text-anchor="middle" fill="#ece9e2" font-family="IBM Plex Mono, monospace" font-size="12.5">Werkzeug auf Anfrage</text>
+
+        <!-- ===== Chips: Workflow (3 Chips) ===== -->
+        <rect x="600" y="535" width="196" height="50" rx="9" fill="#202329" stroke="#34383f"/>
+        <text x="698" y="556" text-anchor="middle" fill="#ece9e2" font-family="IBM Plex Mono, monospace" font-size="13">Schritte einzeln</text>
+        <text x="698" y="575" text-anchor="middle" fill="#ece9e2" font-family="IBM Plex Mono, monospace" font-size="13">starten</text>
+        <rect x="600" y="405" width="196" height="50" rx="9" fill="#202329" stroke="#34383f"/>
+        <text x="698" y="426" text-anchor="middle" fill="#ece9e2" font-family="IBM Plex Mono, monospace" font-size="13">fester Ablauf</text>
+        <text x="698" y="445" text-anchor="middle" fill="#ece9e2" font-family="IBM Plex Mono, monospace" font-size="13">mit Freigaben</text>
+        <rect x="600" y="275" width="196" height="50" rx="9" fill="#202329" stroke="#34383f"/>
+        <text x="698" y="296" text-anchor="middle" fill="#ece9e2" font-family="IBM Plex Mono, monospace" font-size="13">fester Ablauf mit</text>
+        <text x="698" y="315" text-anchor="middle" fill="#ece9e2" font-family="IBM Plex Mono, monospace" font-size="13">Ausnahmestopp</text>
+
+        <!-- ===== Chips: Einzelagent (4 Chips) ===== -->
+        <rect x="816" y="535" width="196" height="50" rx="9" fill="#202329" stroke="#34383f"/>
+        <text x="914" y="556" text-anchor="middle" fill="#ece9e2" font-family="IBM Plex Mono, monospace" font-size="13">jede Aktion</text>
+        <text x="914" y="575" text-anchor="middle" fill="#ece9e2" font-family="IBM Plex Mono, monospace" font-size="13">bestätigen</text>
+        <rect x="816" y="405" width="196" height="50" rx="9" fill="#202329" stroke="#34383f"/>
+        <text x="914" y="426" text-anchor="middle" fill="#ece9e2" font-family="IBM Plex Mono, monospace" font-size="13">Plan &amp; Meilensteine</text>
+        <text x="914" y="445" text-anchor="middle" fill="#ece9e2" font-family="IBM Plex Mono, monospace" font-size="13">freigeben</text>
+        <rect x="816" y="275" width="196" height="50" rx="9" fill="#202329" stroke="#34383f"/>
+        <text x="914" y="296" text-anchor="middle" fill="#ece9e2" font-family="IBM Plex Mono, monospace" font-size="13">bei Problemen</text>
+        <text x="914" y="315" text-anchor="middle" fill="#ece9e2" font-family="IBM Plex Mono, monospace" font-size="13">nachfragen</text>
+        <rect x="816" y="145" width="196" height="50" rx="9" fill="#202329" stroke="#34383f"/>
+        <text x="914" y="166" text-anchor="middle" fill="#ece9e2" font-family="IBM Plex Mono, monospace" font-size="13">Ziel selbstständig</text>
+        <text x="914" y="185" text-anchor="middle" fill="#ece9e2" font-family="IBM Plex Mono, monospace" font-size="13">bearbeiten</text>
+
+        <!-- ===== Agentensystem: Harness-Rahmen ===== -->
+        <rect x="1022" y="42" width="216" height="554" rx="12" fill="rgba(77,124,255,.03)" stroke="#4d7cff" stroke-width="1.5" stroke-dasharray="5 5"/>
+        <text x="1032" y="56" fill="#6f96ff" font-family="IBM Plex Mono, monospace" font-size="10" letter-spacing="2">HARNESS</text>
+
+        <!-- ===== Chips: Agentensystem (4 Chips, Big-Wave-Band ember hervorgehoben) ===== -->
+        <rect x="1032" y="535" width="196" height="50" rx="9" fill="#202329" stroke="#34383f"/>
+        <text x="1130" y="565" text-anchor="middle" fill="#ece9e2" font-family="IBM Plex Mono, monospace" font-size="12.5">Human-in-the-Loop</text>
+
+        <rect x="1032" y="405" width="196" height="50" rx="9" fill="rgba(255,106,43,.08)" stroke="#ff6a2b" stroke-width="1.5"/>
+        <text x="1130" y="426" text-anchor="middle" fill="#ece9e2" font-family="IBM Plex Mono, monospace" font-size="13">Freigaben an</text>
+        <text x="1130" y="445" text-anchor="middle" fill="#ece9e2" font-family="IBM Plex Mono, monospace" font-size="13">Prüfpunkten</text>
+
+        <rect x="1032" y="275" width="196" height="50" rx="9" fill="rgba(255,106,43,.08)" stroke="#ff6a2b" stroke-width="1.5"/>
+        <text x="1130" y="305" text-anchor="middle" fill="#ece9e2" font-family="IBM Plex Mono, monospace" font-size="13">Mensch überwacht</text>
+
+        <rect x="1032" y="145" width="196" height="50" rx="9" fill="rgba(255,106,43,.14)" stroke="#ff6a2b" stroke-width="2" filter="url(#glow)"/>
+        <text x="1130" y="166" text-anchor="middle" fill="#ece9e2" font-family="IBM Plex Mono, monospace" font-size="13">Agententeam</text>
+        <text x="1130" y="185" text-anchor="middle" fill="#ece9e2" font-family="IBM Plex Mono, monospace" font-size="13">arbeitet autonom</text>
+
+        <!-- Big-Wave-Akzentlinie (Band über L4–L2) -->
+        <line x1="1026" y1="130" x2="1026" y2="460" stroke="#ff6a2b" stroke-width="2" stroke-dasharray="4 4" opacity=".6"/>
+        <circle cx="1026" cy="170" r="3" fill="#ff6a2b"/>
+        <circle cx="1026" cy="300" r="3" fill="#ff6a2b"/>
+        <circle cx="1026" cy="430" r="3" fill="#ff6a2b"/>
+
+        <!-- Hermes-Big-Wave-Badge -->
+        <rect x="1042" y="96" width="176" height="34" rx="17" fill="url(#badgeGrad)" filter="url(#glow)"/>
+        <text x="1130" y="119" text-anchor="middle" fill="#1a1c20" font-family="Space Grotesk, sans-serif" font-size="13" font-weight="800">HERMES BIG WAVE</text>
+        <line x1="1130" y1="130" x2="1130" y2="143" stroke="#ff6a2b" stroke-width="2"/>
+
+        <!-- Thinking-Hinweis (unter Chatbot) -->
+        <rect x="168" y="645" width="196" height="150" rx="9" fill="#262a31" stroke="#34383f"/>
+        <text x="182" y="672" fill="#f5a524" font-family="IBM Plex Mono, monospace" font-size="11" font-weight="600" letter-spacing="1">THINKING</text>
+        <text x="182" y="697" fill="#a9a49a" font-family="IBM Plex Mono, monospace" font-size="11.5">erhöht die Denktiefe,</text>
+        <text x="182" y="719" fill="#a9a49a" font-family="IBM Plex Mono, monospace" font-size="11.5">nicht automatisch</text>
+        <text x="182" y="741" fill="#a9a49a" font-family="IBM Plex Mono, monospace" font-size="11.5">die Autonomie.</text>
+
+        <!-- Harness-Inhalte (unter Agentensystem) -->
+        <rect x="1022" y="645" width="216" height="96" rx="9" fill="#262a31" stroke="#4d7cff" stroke-width="1" stroke-dasharray="4 4"/>
+        <text x="1036" y="672" fill="#6f96ff" font-family="IBM Plex Mono, monospace" font-size="11" font-weight="600" letter-spacing="1">HARNESS</text>
+        <text x="1036" y="696" fill="#a9a49a" font-family="IBM Plex Mono, monospace" font-size="11.5">Werkzeuge · Gedächtnis</text>
+        <text x="1036" y="718" fill="#a9a49a" font-family="IBM Plex Mono, monospace" font-size="11.5">Berechtigungen · Kontrolle</text>
+      </svg>
+    </div>
+  </section>
+
+  <!-- ==================== FOLIE 3: Masterplan & echte Waves ==================== -->
+  <section class="slide" id="s2">
+    <p class="label"><span class="idx">02</span> Masterplan · Die echten Waves</p>
+    <h1>Vier Waves, <span class="glow">ehrlicher Status.</span></h1>
+    <p class="sub" style="margin-bottom:1.2rem">Der Masterplan: Richtung + Leitplanken setzen, dann schrittweise automatisieren.</p>
+    <div class="wave-grid">
+      <article class="wave w1">
+        <div class="wh"><span class="wtag">Welle 1</span><span class="status st-ok">Freigegeben</span></div>
+        <h3>Governance</h3>
+        <span class="orig">Alignment Welle 1</span>
+        <p class="ziel"><strong>Ziel:</strong> Freigabestufen Grün/Gelb/Rot, Aktionsklassen, Governance-Grenzen in Routing-Matrix + Personalakten.</p>
+        <p><strong>Ergebnis:</strong> 6/7 Prüfkriterien, geringfügige Auflagen. Nachtrag: Coinbase-Spot-Autonomie als ausdrückliche Nutzerregel.</p>
+      </article>
+
+      <article class="wave w2">
+        <div class="wh"><span class="wtag">Welle 2</span><span class="status st-ok">Abgeschlossen</span></div>
+        <h3>Dokumenten-Pipeline &amp; Rollen</h3>
+        <span class="orig">Alignment Welle 2</span>
+        <p class="ziel"><strong>Ziel:</strong> Beleg-Pipeline abgrenzen (postassistent→paperless→bueroassistent→supabase, Transport n8n); writer/translator, familienplaner, elektriker/netzwerkadministrator.</p>
+        <p><strong>Ergebnis:</strong> Freigabe mit Auflagen — Auflagen A1/A2 erledigt.</p>
+      </article>
+
+      <article class="wave w3">
+        <div class="wh"><span class="wtag">Welle 3</span><span class="status st-warn">B offen</span></div>
+        <h3>Finance &amp; Business</h3>
+        <span class="orig">Wave 3</span>
+        <p class="ziel"><strong>Ziel:</strong> 4 Domänen — Private Finanzen/Steuern/Versicherungen/Verträge, TW Innovation, Vermietung, PV.</p>
+        <p><strong>Ergebnis:</strong> Umsetzung A (dokumentarisch) erledigt, QA PASS 9/9. Umsetzung B (technisch) <strong style="color:var(--ember)">offen, unter Freigabe</strong>.</p>
+      </article>
+
+      <article class="wave w4">
+        <div class="wh"><span class="wtag">Rückkehr-MVP</span><span class="status st-open">Go-Live offen</span></div>
+        <h3>Finanzautomation (C1–C6)</h3>
+        <span class="orig">Finanzautomation Rückkehr-MVP</span>
+        <p class="ziel"><strong>Ziel:</strong> Beleg → Klassifikation (5 Bereiche) → Zahlungsabgleich → Telegram-Arbeitskorb „offene Rechnungen“.</p>
+        <p><strong>Ergebnis:</strong> Beleg-Pipeline produktiv; Rest Entwurf. Go-Live wartet auf Nutzer-Freigaben (PayPal/Banking/PV-Portal) + Red-Team-Auflage A2 (kritisch).</p>
+      </article>
+    </div>
+    <p class="wave-note"><b>Offen markiert</b> = nicht verifizierbar. Der Stufenplan hat 5 <b>Phasen</b> — das sind keine Waves.</p>
+  </section>
+
+  <!-- ==================== FOLIE 4: Digitale Crew ==================== -->
+  <section class="slide" id="s3">
+    <p class="label"><span class="idx">03</span> Die digitale Crew</p>
+    <h1>Das <span class="cold">Agenten-Team.</span></h1>
+    <p class="sub" style="margin-bottom:1.2rem">Das Original-Teamfoto — unverändert, Billy der Fisch + Vector bleiben vorne.</p>
+    <div class="split">
+      <figure class="photo" style="margin:0">
+        <div class="photo-ph">
+          <span class="ph-label">Die digitale Crew</span>
+          <span class="ph-sub">Teamfoto</span>
+        </div>
+        <img src="teamfoto.jpg" alt="Die digitale Crew" loading="lazy" onerror="this.classList.add('noimg')">
+      </figure>
+      <div class="crew-facts">
+        <div class="crew-stats">
+          <div class="cstat"><span class="v green" style="font-size:1.15rem">spezialisiert</span><span class="k">ein Bot · ein Auftrag</span></div>
+          <div class="cstat"><span class="v cold">DeepSeek</span><span class="k">basiert</span></div>
+          <div class="cstat"><span class="v hot">Kanban</span><span class="k">Rückgrat</span></div>
+        </div>
+        <p class="crew-line">Spezialisierte Bots, <strong>DeepSeek-basiert</strong> — der <strong>projektleiter</strong> orchestriert, das <strong>Kanban-Board</strong> ist das Rückgrat der Zusammenarbeit.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== FOLIE 5: Rechnungskette ==================== -->
+  <section class="slide" id="s4">
+    <p class="label"><span class="idx">04</span> Rechnungskette</p>
+    <h1>Vom Portal bis zur <span class="glow">TAN-Freigabe.</span></h1>
+    <p class="sub" style="margin-bottom:1.4rem">Der Weg einer Rechnung — mit ehrlichem Status je Stufe.</p>
+    <div class="chain">
+      <div class="node ok">
+        <span class="step">01</span><span class="nm">Portal</span>
+        <span class="g g-ok">✓</span><span class="ds">produktiv</span>
+      </div>
+      <span class="chain-arrow" aria-hidden="true">→</span>
+      <div class="node ok">
+        <span class="step">02</span><span class="nm">Paperless</span>
+        <span class="g g-ok">✓</span><span class="ds">produktiv</span>
+      </div>
+      <span class="chain-arrow" aria-hidden="true">→</span>
+      <div class="node warn">
+        <span class="step">03</span><span class="nm">Prüfung (bueroassistent)</span>
+        <span class="g g-warn">◐</span><span class="ds">Entwurf — Red-Team-Auflage A2 kritisch offen</span>
+      </div>
+      <span class="chain-arrow" aria-hidden="true">→</span>
+      <div class="node warn">
+        <span class="step">04</span><span class="nm">Zahlung vorbereiten</span>
+        <span class="g g-warn">◐</span><span class="ds">Entwurf — Banking-API fehlt, bueroassistent bereitet nur vor</span>
+      </div>
+      <span class="chain-arrow" aria-hidden="true">→</span>
+      <div class="node lock">
+        <span class="step">05</span><span class="nm">TAN-Freigabe (pushTAN)</span>
+        <span class="g g-lock">⚿</span><span class="ds">bleibt immer bei Thomas — keine automatische Zahlung</span>
+      </div>
+    </div>
+    <p class="legend">
+      <span><b class="lg-ok">✓</b> produktiv</span>
+      <span><b class="lg-warn">◐</b> Entwurf</span>
+      <span><b class="lg-open">✗</b> offen / blockiert</span>
+    </p>
+  </section>
+
+  <!-- ==================== FOLIE 6: Stand & Learnings ==================== -->
+  <section class="slide" id="s5">
+    <p class="label"><span class="idx">05</span> Aktueller Stand &amp; Learnings</p>
+    <h1>Was läuft, <span class="green">was wir gelernt haben.</span></h1>
+    <div class="stat-grid">
+      <div class="stat"><span class="v green">199 / 200</span><span class="k">Kanban · done</span></div>
+      <div class="stat"><span class="v hot">1</span><span class="k">blocked · Billy Bridge Neustart</span></div>
+      <div class="stat"><span class="v cold">live</span><span class="k">Systeme im Betrieb</span></div>
+    </div>
+    <div class="running">
+      <p class="kicker">Läuft gerade</p>
+      <div class="services">
+        <span class="service"><span class="dot" aria-hidden="true"></span>Beleg-Pipeline → Paperless → Supabase → Telegram</span>
+        <span class="service"><span class="dot" aria-hidden="true"></span>Control Center</span>
+        <span class="service"><span class="dot" aria-hidden="true"></span>Vector</span>
+        <span class="service"><span class="dot" aria-hidden="true"></span>Hermes-MCP</span>
+      </div>
+    </div>
+    <div class="learnings">
+      <div class="learning">
+        <span class="n">01 · Delegation</span>
+        <p>Restriktions-/Governance-Änderungen <strong>exakt</strong> delegieren, nicht interpretativ — Welle-1-Zwischenfall, vollständig zurückgerollt.</p>
+      </div>
+      <div class="learning">
+        <span class="n">02 · Trennung</span>
+        <p><strong>Ersteller ≠ Prüfer.</strong> Freigaben bleiben bei Thomas, Autonomie nur im Regelrahmen.</p>
+      </div>
+      <div class="learning">
+        <span class="n">03 · Verifikation</span>
+        <p><strong>Erst verifizieren, dann live schalten.</strong> Kein Schritt geht ohne Prüfung in Produktion.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== FOLIE 7: Nächste Wave ==================== -->
+  <section class="slide" id="s6">
+    <p class="label"><span class="idx">06</span> Nächste Wave</p>
+    <h1>Der nächste Schritt.</h1>
+    <div class="next-hero">
+      <p class="kicker">Rückkehr-MVP</p>
+      <h2>Finanzautomation Go-Live</h2>
+      <p>Nach <strong>Nutzer-Freigaben</strong> (PayPal / Banking / PV-Portal) + Schließung der <strong>Red-Team-Auflage A2</strong>.</p>
+    </div>
+    <div class="decisions">
+      <p class="kicker">Offene Entscheidungen · Thomas</p>
+      <div class="chips">
+        <span class="chip">Steuer-/Finanz-Owner</span>
+        <span class="chip">Geschäfts-CRM TW</span>
+        <span class="chip">Banking-Umfang</span>
+        <span class="chip">Versicherungs-Portal W&amp;W</span>
+        <span class="chip">thermi</span>
+        <span class="chip">coach↔vibe-coach</span>
+        <span class="chip">coder↔designer</span>
+        <span class="chip">Modell-Reliabilität</span>
+      </div>
+    </div>
+    <div class="outlook">
+      <div class="phase p4">
+        <span class="tag">Phase 4</span>
+        <h3>Engineering / KNX / Alltag</h3>
+        <p>Ausweitung vom Büro auf Technik, Haus und tägliche Abläufe.</p>
+      </div>
+      <div class="phase p5">
+        <span class="tag">Phase 5</span>
+        <h3>Selbstverbessern · STAGING</h3>
+        <p>Kontrolliertes Selbstverbessern des Systems — zuerst in STAGING.</p>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<nav class="controls">
+  <button class="arrow" id="prev" aria-label="Zurück">‹</button>
+  <div class="dots" id="dots"></div>
+  <span class="counter" id="counter">01 / 07</span>
+  <button class="arrow" id="next" aria-label="Weiter">›</button>
+</nav>
+
+<script>
+(function(){
+  var slides = Array.prototype.slice.call(document.querySelectorAll('.slide'));
+  var dots = document.getElementById('dots');
+  var counter = document.getElementById('counter');
+  var prev = document.getElementById('prev');
+  var next = document.getElementById('next');
+  var cur = 0;
+
+  slides.forEach(function(_, i){
+    var d = document.createElement('button');
+    d.className = 'dot' + (i === 0 ? ' active' : '');
+    d.setAttribute('aria-label', 'Folie ' + (i+1));
+    d.addEventListener('click', function(){ go(i); });
+    dots.appendChild(d);
+  });
+
+  function go(i){
+    cur = (i + slides.length) % slides.length;
+    slides.forEach(function(s, k){ s.classList.toggle('active', k === cur); });
+    Array.prototype.forEach.call(dots.children, function(d, k){ d.classList.toggle('active', k === cur); });
+    counter.textContent = ('0' + (cur+1)).slice(-2) + ' / ' + ('0' + slides.length).slice(-2);
+    prev.disabled = (cur === 0);
+    next.disabled = (cur === slides.length - 1);
+  }
+
+  prev.addEventListener('click', function(){ go(cur - 1); });
+  next.addEventListener('click', function(){ go(cur + 1); });
+
+  document.addEventListener('keydown', function(e){
+    if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') { e.preventDefault(); go(cur + 1); }
+    else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); go(cur - 1); }
+    else if (e.key === 'Home') { go(0); }
+    else if (e.key === 'End') { go(slides.length - 1); }
+  });
+
+  go(0);
+})();
+</script>
+</body>
+</html>
