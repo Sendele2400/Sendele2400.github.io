@@ -111,6 +111,7 @@ h1 .green{color:var(--verdigris);text-shadow:0 0 22px rgba(55,194,160,.4)}
 /* ===== Slide 2: Autonomie-SVG ===== */
 .chart-wrap{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:1.2rem 1.2rem .6rem;overflow-x:auto}
 .chart-wrap svg{width:100%;height:auto;display:block;min-width:900px}
+.chart-note{font-family:var(--mono);font-size:.72rem;letter-spacing:.08em;color:var(--ink-faint);text-align:right;margin:.7rem .15rem 0}
 
 /* ===== Slide 3: Waves ===== */
 .wave-grid{display:grid;gap:1rem;grid-template-columns:repeat(2,1fr);flex:1;align-content:start}
@@ -302,21 +303,11 @@ h1 .green{color:var(--verdigris);text-shadow:0 0 22px rgba(55,194,160,.4)}
   <section class="slide" id="s1">
     <p class="label"><span class="idx">01</span> KI-Systeme &amp; Autonomie</p>
     <h1>Mehr Autonomie, <span class="cold">mehr Verantwortung.</span></h1>
-    <p class="sub" style="margin-bottom:1rem">Fünf Systemtypen — und wo <strong>Hermes Big Wave</strong> einzuordnen ist.</p>
+    <p class="sub" style="margin-bottom:1rem">Fünf Systemtypen — von der Frage-Antwort bis zum <strong>Agentensystem mit Harness</strong>.</p>
     <div class="chart-wrap">
-      <svg viewBox="0 0 1240 820" role="img" aria-label="Matrix: Systemtyp gegen Autonomiegrad. Chatbot, Werkzeug-Assistent, Workflow, Einzelagent, Agentensystem. Big Wave sitzt im Agentensystem auf höchster Autonomiestufe, mit Freigaben an Prüfpunkten und Mensch überwacht.">
-        <defs>
-          <filter id="glow" x="-60%" y="-60%" width="220%" height="220%">
-            <feGaussianBlur stdDeviation="6" result="b"/>
-            <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
-          </filter>
-          <linearGradient id="badgeGrad" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0" stop-color="#ff8a3d"/>
-            <stop offset="1" stop-color="#ff6a2b"/>
-          </linearGradient>
-        </defs>
+      <svg viewBox="0 0 1240 820" role="img" aria-label="Matrix: Systemtyp gegen Autonomiegrad. Chatbot, Werkzeug-Assistent, Workflow, Einzelagent, Agentensystem mit Harness. Autonomiegrad von Mensch steuert bis Selbstständig im Regelrahmen.">
 
-        <!-- Achsen-Titel -->
+              <!-- Achsen-Titel -->
         <text x="14" y="36" fill="#7d7970" font-family="IBM Plex Mono, monospace" font-size="12">AUTONOMIE ▲</text>
         <text x="1228" y="36" text-anchor="end" fill="#7d7970" font-family="IBM Plex Mono, monospace" font-size="12">SYSTEMTYP →</text>
 
@@ -389,31 +380,20 @@ h1 .green{color:var(--verdigris);text-shadow:0 0 22px rgba(55,194,160,.4)}
         <rect x="1022" y="42" width="216" height="554" rx="12" fill="rgba(77,124,255,.03)" stroke="#4d7cff" stroke-width="1.5" stroke-dasharray="5 5"/>
         <text x="1032" y="56" fill="#6f96ff" font-family="IBM Plex Mono, monospace" font-size="10" letter-spacing="2">HARNESS</text>
 
-        <!-- ===== Chips: Agentensystem (4 Chips, Big-Wave-Band ember hervorgehoben) ===== -->
+        <!-- ===== Chips: Agentensystem (4 Chips) ===== -->
         <rect x="1032" y="535" width="196" height="50" rx="9" fill="#202329" stroke="#34383f"/>
         <text x="1130" y="565" text-anchor="middle" fill="#ece9e2" font-family="IBM Plex Mono, monospace" font-size="12.5">Human-in-the-Loop</text>
 
-        <rect x="1032" y="405" width="196" height="50" rx="9" fill="rgba(255,106,43,.08)" stroke="#ff6a2b" stroke-width="1.5"/>
+        <rect x="1032" y="405" width="196" height="50" rx="9" fill="#202329" stroke="#34383f"/>
         <text x="1130" y="426" text-anchor="middle" fill="#ece9e2" font-family="IBM Plex Mono, monospace" font-size="13">Freigaben an</text>
         <text x="1130" y="445" text-anchor="middle" fill="#ece9e2" font-family="IBM Plex Mono, monospace" font-size="13">Prüfpunkten</text>
 
-        <rect x="1032" y="275" width="196" height="50" rx="9" fill="rgba(255,106,43,.08)" stroke="#ff6a2b" stroke-width="1.5"/>
+        <rect x="1032" y="275" width="196" height="50" rx="9" fill="#202329" stroke="#34383f"/>
         <text x="1130" y="305" text-anchor="middle" fill="#ece9e2" font-family="IBM Plex Mono, monospace" font-size="13">Mensch überwacht</text>
 
-        <rect x="1032" y="145" width="196" height="50" rx="9" fill="rgba(255,106,43,.14)" stroke="#ff6a2b" stroke-width="2" filter="url(#glow)"/>
+        <rect x="1032" y="145" width="196" height="50" rx="9" fill="#202329" stroke="#34383f"/>
         <text x="1130" y="166" text-anchor="middle" fill="#ece9e2" font-family="IBM Plex Mono, monospace" font-size="13">Agententeam</text>
         <text x="1130" y="185" text-anchor="middle" fill="#ece9e2" font-family="IBM Plex Mono, monospace" font-size="13">arbeitet autonom</text>
-
-        <!-- Big-Wave-Akzentlinie (Band über L4–L2) -->
-        <line x1="1026" y1="130" x2="1026" y2="460" stroke="#ff6a2b" stroke-width="2" stroke-dasharray="4 4" opacity=".6"/>
-        <circle cx="1026" cy="170" r="3" fill="#ff6a2b"/>
-        <circle cx="1026" cy="300" r="3" fill="#ff6a2b"/>
-        <circle cx="1026" cy="430" r="3" fill="#ff6a2b"/>
-
-        <!-- Hermes-Big-Wave-Badge -->
-        <rect x="1042" y="96" width="176" height="34" rx="17" fill="url(#badgeGrad)" filter="url(#glow)"/>
-        <text x="1130" y="119" text-anchor="middle" fill="#1a1c20" font-family="Space Grotesk, sans-serif" font-size="13" font-weight="800">HERMES BIG WAVE</text>
-        <line x1="1130" y1="130" x2="1130" y2="143" stroke="#ff6a2b" stroke-width="2"/>
 
         <!-- Thinking-Hinweis (unter Chatbot) -->
         <rect x="168" y="645" width="196" height="150" rx="9" fill="#262a31" stroke="#34383f"/>
@@ -429,6 +409,7 @@ h1 .green{color:var(--verdigris);text-shadow:0 0 22px rgba(55,194,160,.4)}
         <text x="1036" y="718" fill="#a9a49a" font-family="IBM Plex Mono, monospace" font-size="11.5">Berechtigungen · Kontrolle</text>
       </svg>
     </div>
+    <p class="chart-note">Schematische Einordnung</p>
   </section>
 
   <!-- ==================== FOLIE 3: Masterplan & echte Waves ==================== -->
@@ -469,7 +450,7 @@ h1 .green{color:var(--verdigris);text-shadow:0 0 22px rgba(55,194,160,.4)}
         <p><strong>Ergebnis:</strong> Beleg-Pipeline produktiv; Rest Entwurf. Go-Live wartet auf Nutzer-Freigaben (PayPal/Banking/PV-Portal) + Red-Team-Auflage A2 (kritisch).</p>
       </article>
     </div>
-    <p class="wave-note"><b>Offen markiert</b> = nicht verifizierbar. Der Stufenplan hat 5 <b>Phasen</b> — das sind keine Waves.</p>
+    <p class="wave-note"><b>Offen / nicht belegt</b> = ausdrücklich als offen markiert. Status und Ziele je Wave sind aus dem Obsidian-Vault („02 Projekte“) belegt — nichts erfunden.</p>
   </section>
 
   <!-- ==================== FOLIE 4: Digitale Crew ==================== -->
@@ -487,11 +468,11 @@ h1 .green{color:var(--verdigris);text-shadow:0 0 22px rgba(55,194,160,.4)}
       </figure>
       <div class="crew-facts">
         <div class="crew-stats">
-          <div class="cstat"><span class="v green" style="font-size:1.15rem">spezialisiert</span><span class="k">ein Bot · ein Auftrag</span></div>
-          <div class="cstat"><span class="v cold">DeepSeek</span><span class="k">basiert</span></div>
-          <div class="cstat"><span class="v hot">Kanban</span><span class="k">Rückgrat</span></div>
+          <div class="cstat"><span class="v green">35</span><span class="k">Crew-Bots</span></div>
+          <div class="cstat"><span class="v cold">9</span><span class="k">Bot-Sektionen</span></div>
+          <div class="cstat"><span class="v hot">projektleiter</span><span class="k">orchestriert</span></div>
         </div>
-        <p class="crew-line">Spezialisierte Bots, <strong>DeepSeek-basiert</strong> — der <strong>projektleiter</strong> orchestriert, das <strong>Kanban-Board</strong> ist das Rückgrat der Zusammenarbeit.</p>
+        <p class="crew-line">Spezialisierte Bots — der <strong>projektleiter</strong> orchestriert, das <strong>Kanban-Board</strong> ist das Rückgrat der Zusammenarbeit. Billy der Fisch + Vector bleiben vorne.</p>
       </div>
     </div>
   </section>
@@ -504,22 +485,22 @@ h1 .green{color:var(--verdigris);text-shadow:0 0 22px rgba(55,194,160,.4)}
     <div class="chain">
       <div class="node ok">
         <span class="step">01</span><span class="nm">Portal</span>
-        <span class="g g-ok">✓</span><span class="ds">produktiv</span>
+        <span class="g g-ok">✓</span><span class="ds">läuft — Beleg-Eingang produktiv</span>
       </div>
       <span class="chain-arrow" aria-hidden="true">→</span>
       <div class="node ok">
         <span class="step">02</span><span class="nm">Paperless</span>
-        <span class="g g-ok">✓</span><span class="ds">produktiv</span>
+        <span class="g g-ok">✓</span><span class="ds">läuft — Ablage produktiv</span>
       </div>
       <span class="chain-arrow" aria-hidden="true">→</span>
       <div class="node warn">
         <span class="step">03</span><span class="nm">Prüfung (bueroassistent)</span>
-        <span class="g g-warn">◐</span><span class="ds">Entwurf — Red-Team-Auflage A2 kritisch offen</span>
+        <span class="g g-warn">◐</span><span class="ds">Entwurf — Klassifikation C1 als Spec, nichts live</span>
       </div>
       <span class="chain-arrow" aria-hidden="true">→</span>
       <div class="node warn">
         <span class="step">04</span><span class="nm">Zahlung vorbereiten</span>
-        <span class="g g-warn">◐</span><span class="ds">Entwurf — Banking-API fehlt, bueroassistent bereitet nur vor</span>
+        <span class="g g-warn">◐</span><span class="ds">Entwurf — Bank/PayPal nicht angebunden; Red-Team-Auflage A2 kritisch offen</span>
       </div>
       <span class="chain-arrow" aria-hidden="true">→</span>
       <div class="node lock">
@@ -528,10 +509,11 @@ h1 .green{color:var(--verdigris);text-shadow:0 0 22px rgba(55,194,160,.4)}
       </div>
     </div>
     <p class="legend">
-      <span><b class="lg-ok">✓</b> produktiv</span>
-      <span><b class="lg-warn">◐</b> Entwurf</span>
+      <span><b class="lg-ok">✓</b> läuft / produktiv</span>
+      <span><b class="lg-warn">◐</b> Entwurf / Spec</span>
       <span><b class="lg-open">✗</b> offen / blockiert</span>
     </p>
+    <p class="wave-note">Offen markiert: <b>Papierkram-API</b> (B2) blockiert — kein gültiges Credential, Kundenportal-Schreibzugriff noch nicht möglich.</p>
   </section>
 
   <!-- ==================== FOLIE 6: Stand & Learnings ==================== -->
@@ -539,31 +521,22 @@ h1 .green{color:var(--verdigris);text-shadow:0 0 22px rgba(55,194,160,.4)}
     <p class="label"><span class="idx">05</span> Aktueller Stand &amp; Learnings</p>
     <h1>Was läuft, <span class="green">was wir gelernt haben.</span></h1>
     <div class="stat-grid">
-      <div class="stat"><span class="v green">199 / 200</span><span class="k">Kanban · done</span></div>
-      <div class="stat"><span class="v hot">1</span><span class="k">blocked · Billy Bridge Neustart</span></div>
-      <div class="stat"><span class="v cold">live</span><span class="k">Systeme im Betrieb</span></div>
-    </div>
-    <div class="running">
-      <p class="kicker">Läuft gerade</p>
-      <div class="services">
-        <span class="service"><span class="dot" aria-hidden="true"></span>Beleg-Pipeline → Paperless → Supabase → Telegram</span>
-        <span class="service"><span class="dot" aria-hidden="true"></span>Control Center</span>
-        <span class="service"><span class="dot" aria-hidden="true"></span>Vector</span>
-        <span class="service"><span class="dot" aria-hidden="true"></span>Hermes-MCP</span>
-      </div>
+      <div class="stat"><span class="v green">199 / 200</span><span class="k">Kanban · Tasks done</span></div>
+      <div class="stat"><span class="v hot">1</span><span class="k">blocked · Billy-Bridge-Neustart</span></div>
+      <div class="stat"><span class="v cold">in Arbeit</span><span class="k">Zahlungen Go-Live</span></div>
     </div>
     <div class="learnings">
       <div class="learning">
-        <span class="n">01 · Delegation</span>
-        <p>Restriktions-/Governance-Änderungen <strong>exakt</strong> delegieren, nicht interpretativ — Welle-1-Zwischenfall, vollständig zurückgerollt.</p>
-      </div>
-      <div class="learning">
-        <span class="n">02 · Trennung</span>
+        <span class="n">01 · Trennung</span>
         <p><strong>Ersteller ≠ Prüfer.</strong> Freigaben bleiben bei Thomas, Autonomie nur im Regelrahmen.</p>
       </div>
       <div class="learning">
-        <span class="n">03 · Verifikation</span>
-        <p><strong>Erst verifizieren, dann live schalten.</strong> Kein Schritt geht ohne Prüfung in Produktion.</p>
+        <span class="n">02 · Verifikation</span>
+        <p><strong>Erst Spec + Prüfung, dann live.</strong> Alles startet als Entwurf (DDL, Workflow deaktiviert) — Red-Team vor Go-Live.</p>
+      </div>
+      <div class="learning">
+        <span class="n">03 · Ehrliche Blocker</span>
+        <p><strong>Fehlende Credentials blockieren.</strong> Papierkram-API (B2) ohne gültiges Credential → Workflow deaktiviert.</p>
       </div>
     </div>
   </section>
@@ -575,31 +548,30 @@ h1 .green{color:var(--verdigris);text-shadow:0 0 22px rgba(55,194,160,.4)}
     <div class="next-hero">
       <p class="kicker">Rückkehr-MVP</p>
       <h2>Finanzautomation Go-Live</h2>
-      <p>Nach <strong>Nutzer-Freigaben</strong> (PayPal / Banking / PV-Portal) + Schließung der <strong>Red-Team-Auflage A2</strong>.</p>
+      <p>Nach <strong>Nutzer-Freigaben</strong> (PayPal-Developer-App, Banking/Open-Banking, PV-Portal) + Schließung der <strong>Red-Team-Auflage A2</strong> (kritisch).</p>
     </div>
     <div class="decisions">
       <p class="kicker">Offene Entscheidungen · Thomas</p>
       <div class="chips">
         <span class="chip">Steuer-/Finanz-Owner</span>
-        <span class="chip">Geschäfts-CRM TW</span>
-        <span class="chip">Banking-Umfang</span>
-        <span class="chip">Versicherungs-Portal W&amp;W</span>
-        <span class="chip">thermi</span>
-        <span class="chip">coach↔vibe-coach</span>
-        <span class="chip">coder↔designer</span>
-        <span class="chip">Modell-Reliabilität</span>
+        <span class="chip">Geschäfts-CRM/Kalender</span>
+        <span class="chip">PayPal-Developer-App</span>
+        <span class="chip">Banking / Open-Banking</span>
+        <span class="chip">PV-Portal</span>
+        <span class="chip">Supabase-DDL-Freigabe</span>
+        <span class="chip">Workflow-Aktivierung</span>
       </div>
     </div>
     <div class="outlook">
       <div class="phase p4">
-        <span class="tag">Phase 4</span>
-        <h3>Engineering / KNX / Alltag</h3>
-        <p>Ausweitung vom Büro auf Technik, Haus und tägliche Abläufe.</p>
+        <span class="tag">Offen · nicht belegt</span>
+        <h3>Weitere Ausbaustufen</h3>
+        <p>Weitere Wellen/Phasen sind im Vault nicht definiert — nächster belegter Schritt ist der Rückkehr-MVP Go-Live.</p>
       </div>
       <div class="phase p5">
-        <span class="tag">Phase 5</span>
-        <h3>Selbstverbessern · STAGING</h3>
-        <p>Kontrolliertes Selbstverbessern des Systems — zuerst in STAGING.</p>
+        <span class="tag">Belegt · Kontext</span>
+        <h3>Big-Wave-Programm</h3>
+        <p>Crew Organization, Gruppenstruktur (35 Bots), One-Tap Command Bridge u.&nbsp;a. sind erledigt — kein eigener Wave-Status.</p>
       </div>
     </div>
   </section>
