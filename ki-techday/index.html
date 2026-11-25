@@ -184,7 +184,7 @@ const A=[
    d:"Zieht den Sensor im Stromlaufplan der Waschküche nach (Position, phys. Adresse, Beschriftung)."},
   {id:"smarthome",t:"Smart-Home-Assistent",ki:"KI-021",sec:"Infrastruktur & Smart Home",c:"#3b82f6",
    d:"Home Assistant: binary_sensor.ug_waschkueche_leckage (DPT 1.005), Automation „Leckage → Benachrichtigung“, Dashboard-Karte, Allowlist."},
-  {id:"doku",t:"Dokumentation",ki:"—",sec:"Obsidian",c:"#a78bfa",
+  {id:"doku",t:"Dokumentation",ki:"Obsidian",sec:"Obsidian",c:"#a78bfa",
    d:"Schreibt zurück nach Obsidian: Geraete.md, Gruppenadressen.md, Kommunikationsobjekte.md, Parameter.md."},
 ];
 const ZU=[
@@ -221,10 +221,10 @@ function layout(){
   const bx=1700, bw=380, bh=56, by=540;
   B.forEach((b,i)=>box(b.id,bx,by+i*gap,bw,bh));
   // Zuarbeiter
-  box("netz",1300,660,220,44);
-  box("dba",1300,712,220,44);
-  box("steuer",1300,892,220,44);
-  box("vers",1300,944,220,44);
+  box("netz",2140,660,220,48);
+  box("dba",2140,720,220,48);
+  box("steuer",2140,892,220,48);
+  box("vers",2140,952,220,48);
   // Externe Systeme
   const sy=1280, sw=250, sh=64, sg=26;
   const sxx=(W-(SYS.length*sw+(SYS.length-1)*sg))/2;
@@ -253,7 +253,7 @@ function drawEdges(){
   for(let i=0;i<A.length-1;i++){const p=POS[A[i].id],q=POS[A[i+1].id];edge(p.cx,p.y+p.h,q.cx,q.y,"#3b82f6",{op:0.8});}
   edge(POS.strom.cx,POS.strom.y+POS.strom.h,POS["s-strom"].cx,POS["s-strom"].y,"#fbbf24",{op:0.5,dash:"4,4"});
   edge(POS.smarthome.cx,POS.smarthome.y+POS.smarthome.h,POS["s-ha"].cx,POS["s-ha"].y,"#fbbf24",{op:0.5,dash:"4,4"});
-  edge(POS.doku.cx,POS.doku.y+POS.doku.h,POS["s-obsidian"].cx,POS["s-obsidian"].y,"#fbbf24",{op:0.5,dash:"4,4"});
+  el("path",{d:`M ${POS.doku.cx} ${POS.doku.y+POS.doku.h} L ${POS.doku.cx} 1000 L ${POS["s-obsidian"].cx} 1000 L ${POS["s-obsidian"].cx} ${POS["s-obsidian"].y}`,fill:"none",stroke:"#fbbf24","stroke-width":1.4,"stroke-dasharray":"4,4",opacity:0.5,"marker-end":"url(#arr)",class:"edge"},gEdges);
 
   // Schritt 5: Strang B Kette (Rechnung)
   S(5);
@@ -262,18 +262,18 @@ function drawEdges(){
   edge(POS.banker.cx,POS.banker.y+POS.banker.h,POS["s-bank"].cx,POS["s-bank"].y,"#fbbf24",{op:0.5,dash:"4,4"});
   edge(POS.netz.cx,POS.netz.y,POS.n8n.cx,POS.n8n.y+POS.n8n.h/2,"#64748b",{op:0.4,dash:"4,3"});
   edge(POS.dba.cx,POS.dba.y,POS.n8n.cx,POS.n8n.y+POS.n8n.h/2,"#64748b",{op:0.4,dash:"4,3"});
-  edge(POS.beleg.cx+POS.beleg.w,POS.beleg.cy,POS.steuer.cx,POS.steuer.cy,"#64748b",{op:0.4,dash:"4,3"});
-  edge(POS.beleg.cx+POS.beleg.w,POS.beleg.cy,POS.vers.cx,POS.vers.cy,"#64748b",{op:0.4,dash:"4,3"});
+  edge(POS.beleg.x+POS.beleg.w,POS.beleg.cy,POS.steuer.cx,POS.steuer.cy,"#64748b",{op:0.4,dash:"4,3"});
+  edge(POS.beleg.x+POS.beleg.w,POS.beleg.cy,POS.vers.cx,POS.vers.cy,"#64748b",{op:0.4,dash:"4,3"});
 
   // Schritt 4: Abzweig KNX-Techniker → Paperless-Administrator → Paperless-NGX
   S(4);
-  edge(POS.knx.cx,POS.knx.y+POS.knx.h,POS.pa.cx,POS.pa.y,"#f59e0b",{op:0.9,w:2.2});
-  edge(POS.pa.cx,POS.pa.y+POS.pa.h,POS["s-paperless"].cx,POS["s-paperless"].y,"#fbbf24",{op:0.5,dash:"4,4"});
+  el("path",{d:`M ${POS.knx.cx} ${POS.knx.y+POS.knx.h} L ${POS.pa.cx} ${POS.pa.y}`,fill:"none",stroke:"#f59e0b","stroke-width":2.2,opacity:0.9,"marker-end":"url(#arr)",class:"edge"},gEdges);
+  el("path",{d:`M ${POS.pa.cx} ${POS.pa.y+POS.pa.h} L ${POS["s-paperless"].cx} ${POS["s-paperless"].y}`,fill:"none",stroke:"#fbbf24","stroke-width":1.4,"stroke-dasharray":"4,4",opacity:0.5,"marker-end":"url(#arr)",class:"edge"},gEdges);
 
-  // Schritt 6: Einrichtung ETS + Lern-Effekt
+  // Schritt 6: Einrichtung ETS
   S(6);
   edge(POS.knx.cx,POS.knx.y+POS.knx.h,POS["s-ets"].cx,POS["s-ets"].y,"#fbbf24",{op:0.5,dash:"4,4"});
-  edge(POS["s-obsidian"].cx,POS["s-obsidian"].y,POS.knx.cx,POS.knx.y+POS.knx.h/2,"#a78bfa",{op:0.7,dash:"5,4",w:1.6});
+
 }
 
 /* ---------- Knoten ---------- */
@@ -327,7 +327,6 @@ function drawNodes(){
   el("rect",{x:210,y:150,width:1900,height:40,rx:8,fill:"#D4A72C",opacity:0.06},gNodes);
   label(1160,176,"ÜBERGEORDNETE GOVERNANCE — auditiert alle Agenten","#D4A72C",12.5);
   el("rect",{x:50,y:190,width:W-100,height:900,rx:14,fill:"none",stroke:"#D4A72C","stroke-width":1,"stroke-dasharray":"6,5",opacity:0.3},gNodes);
-  label(W/2,442,"ALLE BOTS — werden von der übergeordneten Governance auditiert","#D4A72C",10.5);
   GOV.forEach(g=>node(g.id,g.t,g.ki+" · "+g.sec,g.c,"#0b1220",{star:true,fs:11.5}));
 
   // Schritt 2: Projektleiter (Orchestrator)
@@ -337,7 +336,7 @@ function drawNodes(){
 
   // Schritt 3: Strang A (KNX)
   S(3);
-  label(350,500,"⚡ STRANG A · KNX-Einrichtung — jetzt","#3b82f6",13);
+  label(350,470,"⚡ STRANG A · KNX-Einrichtung — jetzt","#3b82f6",13);
   A.forEach(a=>node(a.id,a.t,a.ki,a.c));
   SYS.filter(s=>["s-ets","s-ha","s-obsidian","s-strom"].includes(s.id)).forEach(s=>node(s.id,s.t,s.sub,"#fbbf24","#0b1220",{fs:11}));
 
@@ -352,21 +351,20 @@ function drawNodes(){
   S(4);
   node("pa","Paperless-Administrator","KI-013 · Dokumente & Backoffice","#2A9D8F");
   const sp=POS["s-paperless"];
-  label(1120,660,"Gerätebezeichnung fehlt → er fragt den Paperless-Administrator","#f59e0b",12);
-  valuePanel(sp.x,sp.y-108,430,92,"FUND in Paperless (Voltus-Rechnung)",[
+  label(1120,655,"Gerätebezeichnung fehlt → er fragt den Paperless-Administrator","#f59e0b",12);
+  valuePanel(100,1150,350,92,"FUND in Paperless (Voltus-Rechnung)",[
     {k:"Gerät",v:"MDT SCN-LSEN1.01 — KNX Leckagesensor"},
   ],"#f59e0b");
 
   // Schritt 6: Einrichtung (Badges + ANGELEGT)
   S(6);
   const knx=POS.knx;
-  badge(knx.x,knx.y-34,"📚","Präzedenzfall Küche (1.1.53)","#a78bfa");
-  badge(knx.x+knx.w+14,knx.y,"🔒","verschlüsseltes Projekt → Passwort Thomas","#fb7185");
-  badge(knx.x+knx.w+14,knx.y+36,"🧲","Programmiertaste → Thomas drückt","#fb7185");
-  valuePanel(1380,1128,540,148,"ANGELEGT in ETS / Home Assistant",[
+  badge(knx.x,knx.y-46,"📚","Präzedenzfall Küche (1.1.53)","#a78bfa");
+  badge(knx.x+knx.w+14,knx.y+160,"🔒","verschlüsseltes Projekt → Passwort Thomas","#fb7185");
+  badge(knx.x+knx.w+14,knx.y+218,"🧲","Programmiertaste → Thomas drückt","#fb7185");
+  valuePanel(560,1078,540,190,"ANGELEGT in ETS / Home Assistant",[
     {k:"phys. Adresse",v:"1.1.56"},
-    {k:"Gruppenadresse",v:"10/4/8"},
-    {k:"DPT",v:"1.005"},
+    {k:"Gruppenadresse · DPT",v:"10/4/8 · 1.005"},
     {k:"Name",v:"UG_Waschküche_Leckagesensor (SCN-LSEN1.01)"},
     {k:"Home Assistant",v:"binary_sensor.ug_waschkueche_leckage"},
   ],"#3b82f6");
