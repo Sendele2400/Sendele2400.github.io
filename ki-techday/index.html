@@ -329,8 +329,8 @@ function drawNodes(){
   el("rect",{x:210,y:150,width:1900,height:40,rx:8,fill:"#0b1220",stroke:"#D4A72C","stroke-width":1,opacity:0.9},gNodes);
   el("rect",{x:210,y:150,width:1900,height:40,rx:8,fill:"#D4A72C",opacity:0.06},gNodes);
   label(1160,176,"ÜBERGEORDNETE GOVERNANCE — auditiert alle Agenten","#D4A72C",12.5);
-  el("rect",{x:50,y:420,width:W-100,height:760,rx:14,fill:"none",stroke:"#D4A72C","stroke-width":1,"stroke-dasharray":"6,5",opacity:0.3},gNodes);
-  label(W/2,442,"OPERATIVE ZONE — wird von der übergeordneten Governance auditiert","#D4A72C",10.5);
+  el("rect",{x:50,y:190,width:W-100,height:900,rx:14,fill:"none",stroke:"#D4A72C","stroke-width":1,"stroke-dasharray":"6,5",opacity:0.3},gNodes);
+  label(W/2,442,"ALLE BOTS — werden von der übergeordneten Governance auditiert","#D4A72C",10.5);
   GOV.forEach(g=>node(g.id,g.t,g.ki+" · "+g.sec,g.c,"#0b1220",{star:true,fs:11.5}));
 
   // Schritt 2: Projektleiter (Orchestrator)
@@ -382,8 +382,8 @@ const STEPS=[
   {label:"Der Abzweig",desc:"Der KNX-Techniker kennt die Gerätebezeichnung nicht — er holt sie aus Paperless-NGX."},
   {label:"Strang B · Vergangenheit",desc:"Die Rechnungskette lief schon vor Tagen unbemerkt im Hintergrund."},
   {label:"Die Einrichtung",desc:"Mit der gefundenen Bezeichnung legt er den Sensor in ETS und Home Assistant an."},
-  {label:"Die Frage",desc:"Warum hat er diesen Weg gewählt?"},
   {label:"Governance",desc:"Über allem steht die übergeordnete Governance — sie auditiert jeden Agenten."},
+  {label:"Die Frage",desc:"Warum hat er diesen Weg gewählt?"},
 ];
 const TOTAL=STEPS.length;
 let current=0;
@@ -406,7 +406,7 @@ function goto(n){
   current=Math.max(0,Math.min(TOTAL,n));
   showUpTo(current);
   updateControls();
-  if(current===7){showQuestion();stopAuto();}else{closeQuestion();}
+  if(current===8){showQuestion();stopAuto();}else{closeQuestion();}
 }
 function toggleAuto(){
   if(auto){stopAuto();return;}
