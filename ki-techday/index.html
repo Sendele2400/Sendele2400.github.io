@@ -241,11 +241,14 @@ function edge(x1,y1,x2,y2,color,o={}){
   return p;
 }
 function drawEdges(){
-  // Schritt 2: Governance → operative Zone + Thomas → Projektleiter → Stränge
+  // Schritt 2: Thomas → Projektleiter → Strang B
   S(2);
-  GOV.forEach(g=>{const p=POS[g.id];edge(p.cx,p.y+p.h,p.cx,320,"#D4A72C",{op:0.55,dash:"3,3",w:1.4});});
   edge(POS.thomas.cx,POS.thomas.y+POS.thomas.h,POS.projektleiter.cx,POS.projektleiter.y,"#f8fafc",{op:0.85});
   edge(POS.projektleiter.cx,POS.projektleiter.y+POS.projektleiter.h,POS.knx.cx,POS.knx.y,"#f8fafc",{op:0.7});
+
+  // Schritt 7: Governance-Audit (übergeordnete Ebene, erst am Schluss)
+  S(7);
+  GOV.forEach(g=>{const p=POS[g.id];edge(p.cx,p.y+p.h,p.cx,320,"#D4A72C",{op:0.55,dash:"3,3",w:1.4});});
 
   // Schritt 3: Strang A Kette
   S(3);
@@ -318,14 +321,17 @@ function drawNodes(){
   label(1200,52,"DER PROMPT — der Auftakt","#2a7de1",13);
   node("thomas","Thomas","Prompt · Waschküche · KNX-Feuchtigkeitssensor","#f8fafc","#0b1220",{star:true,fs:12});
 
-  // Schritt 2: Governance
-  S(2);
+  // Governance: früh gezeichnet (Z-Order hinter Knoten), aber erst Schritt 7 sichtbar
+  S(7);
   el("rect",{x:210,y:150,width:1900,height:40,rx:8,fill:"#0b1220",stroke:"#D4A72C","stroke-width":1,opacity:0.9},gNodes);
   el("rect",{x:210,y:150,width:1900,height:40,rx:8,fill:"#D4A72C",opacity:0.06},gNodes);
   label(1160,176,"ÜBERGEORDNETE GOVERNANCE — auditiert alle Agenten","#D4A72C",12.5);
   el("rect",{x:50,y:420,width:W-100,height:760,rx:14,fill:"none",stroke:"#D4A72C","stroke-width":1,"stroke-dasharray":"6,5",opacity:0.3},gNodes);
   label(W/2,442,"OPERATIVE ZONE — wird von der übergeordneten Governance auditiert","#D4A72C",10.5);
   GOV.forEach(g=>node(g.id,g.t,g.ki+" · "+g.sec,g.c,"#0b1220",{star:true,fs:11.5}));
+
+  // Schritt 2: Projektleiter (Orchestrator)
+  S(2);
   node("projektleiter","Projektleiter","KI-002 · Orchestrator","#f8fafc","#0b1220",{fs:11});
 
   // Schritt 3: Strang A
@@ -363,11 +369,12 @@ function drawNodes(){
 /* ---------- Step-Einblendung ---------- */
 const STEPS=[
   {label:"Der Prompt",desc:"Thomas steht in der Waschküche — ein einziger Prompt stößt den ganzen Prozess an."},
-  {label:"Governance",desc:"Die übergeordnete Governance auditiert jeden Agenten, der Orchestrator koordiniert."},
+  {label:"Projektleiter",desc:"Der Orchestrator zerlegt den Auftrag und stößt die KNX-Einrichtung an."},
   {label:"Strang A · Vergangenheit",desc:"Die Rechnungskette lief schon vor Tagen unbemerkt im Hintergrund."},
   {label:"Strang B · Jetzt",desc:"Die KNX-Einrichtung des Leckagesensors passiert genau jetzt."},
   {label:"Der Abzweig",desc:"Der KNX-Techniker kennt die Gerätebezeichnung nicht — er holt sie aus Paperless."},
   {label:"Die Frage",desc:"Warum hat er diesen Weg gewählt?"},
+  {label:"Governance",desc:"Über allem steht die übergeordnete Governance — sie auditiert jeden Agenten."},
 ];
 const TOTAL=STEPS.length;
 let current=0;
@@ -384,13 +391,13 @@ function updateControls(){
   document.getElementById("cProg").textContent = "Schritt "+current+"/"+TOTAL;
   document.getElementById("btnBack").disabled = current<=0;
   document.getElementById("btnNext").disabled = current>=TOTAL;
-  document.getElementById("btnNext").textContent = current>=TOTAL-1 ? "Fertig ›" : "Weiter ›";
+  document.getElementById("btnNext").textContent = current>=TOTAL ? "Fertig ›" : "Weiter ›";
 }
 function goto(n){
   current=Math.max(0,Math.min(TOTAL,n));
   showUpTo(current);
   updateControls();
-  if(current===TOTAL){showQuestion();stopAuto();}else{closeQuestion();}
+  if(current===6){showQuestion();stopAuto();}else{closeQuestion();}
 }
 function toggleAuto(){
   if(auto){stopAuto();return;}
