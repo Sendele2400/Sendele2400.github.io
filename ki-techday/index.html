@@ -258,8 +258,8 @@ function drawEdges(){
   edge(POS.doku.cx,POS.doku.y+POS.doku.h,POS["s-obsidian"].cx,POS["s-obsidian"].y,"#fbbf24",{op:0.5,dash:"4,4"});
   edge(POS.haadmin.cx,POS.haadmin.y,POS.smarthome.cx,POS.smarthome.y+POS.smarthome.h/2,"#64748b",{op:0.4,dash:"4,3"});
 
-  // Schritt 4: Strang B Kette (Rechnung)
-  S(4);
+  // Schritt 5: Strang B Kette (Rechnung)
+  S(5);
   for(let i=0;i<B.length-1;i++){const p=POS[B[i].id],q=POS[B[i+1].id];edge(p.cx,p.y+p.h,q.cx,q.y,"#2A9D8F",{op:0.8});}
   edge(POS.n8n.cx,POS.n8n.y+POS.n8n.h,POS["s-n8n"].cx,POS["s-n8n"].y,"#fbbf24",{op:0.5,dash:"4,4"});
   edge(POS.pa.cx,POS.pa.y+POS.pa.h,POS["s-paperless"].cx,POS["s-paperless"].y,"#fbbf24",{op:0.5,dash:"4,4"});
@@ -344,8 +344,8 @@ function drawNodes(){
   SYS.filter(s=>["s-ets","s-ha","s-obsidian","s-strom"].includes(s.id)).forEach(s=>node(s.id,s.t,s.sub,"#fbbf24","#0b1220",{fs:11}));
   ZU.filter(z=>["haadmin"].includes(z.id)).forEach(z=>node(z.id,z.t,z.ki,"#64748b","#0b1220",{fs:9.5}));
 
-  // Schritt 4: Strang B (Rechnung)
-  S(4);
+  // Schritt 5: Strang B (Rechnung)
+  S(5);
   label(1890,500,"⏱️ STRANG B · Rechnung — vor Tagen (12.11.2026)","#2A9D8F",13);
   B.forEach(b=>node(b.id,b.t,b.ki,b.c));
   SYS.filter(s=>["s-n8n","s-paperless","s-bank"].includes(s.id)).forEach(s=>node(s.id,s.t,s.sub,"#fbbf24","#0b1220",{fs:11}));
