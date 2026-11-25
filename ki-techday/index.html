@@ -269,9 +269,12 @@ function drawEdges(){
   edge(POS.beleg.cx+POS.beleg.w,POS.beleg.cy,POS.steuer.cx,POS.steuer.cy,"#64748b",{op:0.4,dash:"4,3"});
   edge(POS.beleg.cx+POS.beleg.w,POS.beleg.cy,POS.vers.cx,POS.vers.cy,"#64748b",{op:0.4,dash:"4,3"});
 
-  // Schritt 5: Abzweig KNX → Paperless + ETS + Lern-Effekt
-  S(5);
+  // Schritt 4: Abzweig KNX-Techniker → Paperless-NGX (gut erkennbar)
+  S(4);
   edge(POS.knx.cx,POS.knx.y+POS.knx.h,POS["s-paperless"].cx,POS["s-paperless"].y,"#f59e0b",{op:0.9,w:2.2});
+
+  // Schritt 6: Einrichtung ETS + Lern-Effekt
+  S(6);
   edge(POS.knx.cx,POS.knx.y+POS.knx.h,POS["s-ets"].cx,POS["s-ets"].y,"#fbbf24",{op:0.5,dash:"4,4"});
   edge(POS["s-obsidian"].cx,POS["s-obsidian"].y,POS.knx.cx,POS.knx.y+POS.knx.h/2,"#a78bfa",{op:0.7,dash:"5,4",w:1.6});
 }
@@ -348,15 +351,20 @@ function drawNodes(){
   SYS.filter(s=>["s-n8n","s-paperless","s-bank"].includes(s.id)).forEach(s=>node(s.id,s.t,s.sub,"#fbbf24","#0b1220",{fs:11}));
   ZU.filter(z=>["netz","dba","steuer","vers"].includes(z.id)).forEach(z=>node(z.id,z.t,z.ki,"#64748b","#0b1220",{fs:9.5}));
 
-  // Schritt 5: Abzweig
-  S(5);
-  const knx=POS.knx, pa=POS["s-paperless"];
-  badge(knx.x,knx.y-34,"📚","Präzedenzfall Küche (1.1.53)","#a78bfa");
-  badge(knx.x+knx.w+14,knx.y,"🔒","verschlüsseltes Projekt → Passwort Thomas","#fb7185");
-  badge(knx.x+knx.w+14,knx.y+36,"🧲","Programmiertaste → Thomas drückt","#fb7185");
+  // Schritt 4: Abzweig KNX-Techniker → Paperless-NGX (gut erkennbar)
+  S(4);
+  const pa=POS["s-paperless"];
+  label(560,905,"Gerätebezeichnung fehlt → Paperless-NGX","#f59e0b",12);
   valuePanel(pa.x,pa.y-108,430,92,"FUND in Paperless (Voltus-Rechnung)",[
     {k:"Gerät",v:"MDT SCN-LSEN1.01 — KNX Leckagesensor"},
   ],"#f59e0b");
+
+  // Schritt 6: Einrichtung (Badges + ANGELEGT)
+  S(6);
+  const knx=POS.knx;
+  badge(knx.x,knx.y-34,"📚","Präzedenzfall Küche (1.1.53)","#a78bfa");
+  badge(knx.x+knx.w+14,knx.y,"🔒","verschlüsseltes Projekt → Passwort Thomas","#fb7185");
+  badge(knx.x+knx.w+14,knx.y+36,"🧲","Programmiertaste → Thomas drückt","#fb7185");
   valuePanel(1380,1128,540,148,"ANGELEGT in ETS / Home Assistant",[
     {k:"phys. Adresse",v:"1.1.56"},
     {k:"Gruppenadresse",v:"10/4/8"},
@@ -371,8 +379,9 @@ const STEPS=[
   {label:"Der Prompt",desc:"Thomas steht in der Waschküche — ein einziger Prompt stößt den ganzen Prozess an."},
   {label:"Projektleiter",desc:"Der Orchestrator zerlegt den Auftrag und stößt die KNX-Einrichtung an."},
   {label:"Strang A · Jetzt",desc:"Die KNX-Einrichtung des Leckagesensors passiert genau jetzt."},
+  {label:"Der Abzweig",desc:"Der KNX-Techniker kennt die Gerätebezeichnung nicht — er holt sie aus Paperless-NGX."},
   {label:"Strang B · Vergangenheit",desc:"Die Rechnungskette lief schon vor Tagen unbemerkt im Hintergrund."},
-  {label:"Der Abzweig",desc:"Der KNX-Techniker kennt die Gerätebezeichnung nicht — er holt sie aus Paperless."},
+  {label:"Die Einrichtung",desc:"Mit der gefundenen Bezeichnung legt er den Sensor in ETS und Home Assistant an."},
   {label:"Die Frage",desc:"Warum hat er diesen Weg gewählt?"},
   {label:"Governance",desc:"Über allem steht die übergeordnete Governance — sie auditiert jeden Agenten."},
 ];
@@ -397,7 +406,7 @@ function goto(n){
   current=Math.max(0,Math.min(TOTAL,n));
   showUpTo(current);
   updateControls();
-  if(current===6){showQuestion();stopAuto();}else{closeQuestion();}
+  if(current===7){showQuestion();stopAuto();}else{closeQuestion();}
 }
 function toggleAuto(){
   if(auto){stopAuto();return;}
