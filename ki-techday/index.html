@@ -103,8 +103,8 @@
   <div style="font-weight:700;color:var(--fg);margin-bottom:5px">Legende</div>
   <div class="li"><span class="sw" style="background:#D4A72C"></span> Governance / Audit</div>
   <div class="li"><span class="sw" style="background:#f8fafc"></span> Mensch / Orchestrator</div>
-  <div class="li"><span class="sw" style="background:#2A9D8F"></span> Strang A · Dokumente</div>
-  <div class="li"><span class="sw" style="background:#3b82f6"></span> Strang B · KNX / Smart Home</div>
+  <div class="li"><span class="sw" style="background:#3b82f6"></span> Strang A · KNX / Smart Home</div>
+  <div class="li"><span class="sw" style="background:#2A9D8F"></span> Strang B · Dokumente</div>
   <div class="li"><span class="sw" style="background:#fbbf24"></span> Externes System</div>
   <div class="li"><span class="sw" style="background:#fb7185"></span> Mensch-Maschine-Grenze</div>
 </div>
@@ -192,7 +192,6 @@ const ZU=[
   {id:"dba",t:"Datenbankadministrator",ki:"KI-005",for:["n8n"],d:"Supabase auf der NAS (falls der Flow DB-seitig ablegt)."},
   {id:"steuer",t:"Steuerassistent",ki:"KI-008",uses:"beleg",d:"Nutzt den klassifizierten Beleg später für die Steuer."},
   {id:"vers",t:"Versicherungsmanager",ki:"KI-011",uses:"beleg",d:"Nutzt Originalunterlagen aus Paperless."},
-  {id:"haadmin",t:"HA-Administrator",ki:"KI-024",for:["smarthome"],d:"YAML-Validierung, check config, Neustart, Monitoring."},
 ];
 const SYS=[
   {id:"s-n8n",t:"n8n",sub:"Automation · Synology"},
@@ -226,7 +225,6 @@ function layout(){
   box("dba",1300,712,220,44);
   box("steuer",1300,892,220,44);
   box("vers",1300,944,220,44);
-  box("haadmin",560,772,220,44);
   // Externe Systeme
   const sy=1280, sw=250, sh=64, sg=26;
   const sxx=(W-(SYS.length*sw+(SYS.length-1)*sg))/2;
@@ -256,22 +254,21 @@ function drawEdges(){
   edge(POS.strom.cx,POS.strom.y+POS.strom.h,POS["s-strom"].cx,POS["s-strom"].y,"#fbbf24",{op:0.5,dash:"4,4"});
   edge(POS.smarthome.cx,POS.smarthome.y+POS.smarthome.h,POS["s-ha"].cx,POS["s-ha"].y,"#fbbf24",{op:0.5,dash:"4,4"});
   edge(POS.doku.cx,POS.doku.y+POS.doku.h,POS["s-obsidian"].cx,POS["s-obsidian"].y,"#fbbf24",{op:0.5,dash:"4,4"});
-  edge(POS.haadmin.cx,POS.haadmin.y,POS.smarthome.cx,POS.smarthome.y+POS.smarthome.h/2,"#64748b",{op:0.4,dash:"4,3"});
 
   // Schritt 5: Strang B Kette (Rechnung)
   S(5);
   for(let i=0;i<B.length-1;i++){const p=POS[B[i].id],q=POS[B[i+1].id];edge(p.cx,p.y+p.h,q.cx,q.y,"#2A9D8F",{op:0.8});}
   edge(POS.n8n.cx,POS.n8n.y+POS.n8n.h,POS["s-n8n"].cx,POS["s-n8n"].y,"#fbbf24",{op:0.5,dash:"4,4"});
-  edge(POS.pa.cx,POS.pa.y+POS.pa.h,POS["s-paperless"].cx,POS["s-paperless"].y,"#fbbf24",{op:0.5,dash:"4,4"});
   edge(POS.banker.cx,POS.banker.y+POS.banker.h,POS["s-bank"].cx,POS["s-bank"].y,"#fbbf24",{op:0.5,dash:"4,4"});
   edge(POS.netz.cx,POS.netz.y,POS.n8n.cx,POS.n8n.y+POS.n8n.h/2,"#64748b",{op:0.4,dash:"4,3"});
   edge(POS.dba.cx,POS.dba.y,POS.n8n.cx,POS.n8n.y+POS.n8n.h/2,"#64748b",{op:0.4,dash:"4,3"});
   edge(POS.beleg.cx+POS.beleg.w,POS.beleg.cy,POS.steuer.cx,POS.steuer.cy,"#64748b",{op:0.4,dash:"4,3"});
   edge(POS.beleg.cx+POS.beleg.w,POS.beleg.cy,POS.vers.cx,POS.vers.cy,"#64748b",{op:0.4,dash:"4,3"});
 
-  // Schritt 4: Abzweig KNX-Techniker → Paperless-NGX (gut erkennbar)
+  // Schritt 4: Abzweig KNX-Techniker → Paperless-Administrator → Paperless-NGX
   S(4);
-  edge(POS.knx.cx,POS.knx.y+POS.knx.h,POS["s-paperless"].cx,POS["s-paperless"].y,"#f59e0b",{op:0.9,w:2.2});
+  edge(POS.knx.cx,POS.knx.y+POS.knx.h,POS.pa.cx,POS.pa.y,"#f59e0b",{op:0.9,w:2.2});
+  edge(POS.pa.cx,POS.pa.y+POS.pa.h,POS["s-paperless"].cx,POS["s-paperless"].y,"#fbbf24",{op:0.5,dash:"4,4"});
 
   // Schritt 6: Einrichtung ETS + Lern-Effekt
   S(6);
@@ -342,20 +339,20 @@ function drawNodes(){
   label(350,500,"⚡ STRANG A · KNX-Einrichtung — jetzt","#3b82f6",13);
   A.forEach(a=>node(a.id,a.t,a.ki,a.c));
   SYS.filter(s=>["s-ets","s-ha","s-obsidian","s-strom"].includes(s.id)).forEach(s=>node(s.id,s.t,s.sub,"#fbbf24","#0b1220",{fs:11}));
-  ZU.filter(z=>["haadmin"].includes(z.id)).forEach(z=>node(z.id,z.t,z.ki,"#64748b","#0b1220",{fs:9.5}));
 
   // Schritt 5: Strang B (Rechnung)
   S(5);
   label(1890,500,"⏱️ STRANG B · Rechnung — vor Tagen (12.11.2026)","#2A9D8F",13);
-  B.forEach(b=>node(b.id,b.t,b.ki,b.c));
+  B.filter(b=>b.id!=="pa").forEach(b=>node(b.id,b.t,b.ki,b.c));
   SYS.filter(s=>["s-n8n","s-paperless","s-bank"].includes(s.id)).forEach(s=>node(s.id,s.t,s.sub,"#fbbf24","#0b1220",{fs:11}));
   ZU.filter(z=>["netz","dba","steuer","vers"].includes(z.id)).forEach(z=>node(z.id,z.t,z.ki,"#64748b","#0b1220",{fs:9.5}));
 
-  // Schritt 4: Abzweig KNX-Techniker → Paperless-NGX (gut erkennbar)
+  // Schritt 4: Abzweig KNX-Techniker → Paperless-Administrator → Paperless-NGX
   S(4);
-  const pa=POS["s-paperless"];
-  label(560,905,"Gerätebezeichnung fehlt → Paperless-NGX","#f59e0b",12);
-  valuePanel(pa.x,pa.y-108,430,92,"FUND in Paperless (Voltus-Rechnung)",[
+  node("pa","Paperless-Administrator","KI-013 · Dokumente & Backoffice","#2A9D8F");
+  const sp=POS["s-paperless"];
+  label(1120,660,"Gerätebezeichnung fehlt → er fragt den Paperless-Administrator","#f59e0b",12);
+  valuePanel(sp.x,sp.y-108,430,92,"FUND in Paperless (Voltus-Rechnung)",[
     {k:"Gerät",v:"MDT SCN-LSEN1.01 — KNX Leckagesensor"},
   ],"#f59e0b");
 
