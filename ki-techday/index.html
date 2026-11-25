@@ -245,7 +245,6 @@ function drawEdges(){
   S(2);
   GOV.forEach(g=>{const p=POS[g.id];edge(p.cx,p.y+p.h,p.cx,320,"#D4A72C",{op:0.55,dash:"3,3",w:1.4});});
   edge(POS.thomas.cx,POS.thomas.y+POS.thomas.h,POS.projektleiter.cx,POS.projektleiter.y,"#f8fafc",{op:0.85});
-  edge(POS.projektleiter.cx,POS.projektleiter.y+POS.projektleiter.h,POS.email.cx,POS.email.y,"#f8fafc",{op:0.7});
   edge(POS.projektleiter.cx,POS.projektleiter.y+POS.projektleiter.h,POS.knx.cx,POS.knx.y,"#f8fafc",{op:0.7});
 
   // Schritt 3: Strang A Kette
