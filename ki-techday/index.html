@@ -3,86 +3,120 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>KI Tech Day — Prompt → Multi-Agenten-Workflow (SHW)</title>
-<link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<title>KI Tech Day — Multi-Agenten-Workflow</title>
+<link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-  :root{
-    --bg:#020617; --bg2:#0b1220; --panel:#0f172a; --border:#1e293b;
-    --fg:#e2e8f0; --muted:#94a3b8; --dim:#64748b;
-    --accent:#004695; --accent-hi:#2a7de1;
-  }
-  *{margin:0;padding:0;box-sizing:border-box}
-  html,body{height:100%}
-  body{font-family:'Roboto Condensed',sans-serif;background:var(--bg);color:var(--fg);overflow:hidden}
+/* VOICE: Bühnen-Präsentation, ruhig, technisch, gut lesbar aus 5 m Entfernung
+   IDEA: Leitstand-Schaubild, das sich Schritt für Schritt aufbaut
+   PICTURE: das Agenten-Netz selbst, Kamera fährt auf den aktiven Schritt
+   COLOUR and TYPE: Original-SHW-Look — Nachtblau, SHW-Blau #004695, Roboto Condensed
+   LAYOUT: Kopfzeile, Bühne füllt den Rest, Steuerleiste unten mittig */
+:root{
+  color-scheme:dark;
+  --bg:#020617;--bg2:#0b1220;--panel:#0f172a;--border:#22304a;
+  --fg:#e2e8f0;--muted:#a3b3c9;--dim:#8193ab;
+  --accent:#004695;--accent-hi:#3b8cf0;
+}
+*{margin:0;padding:0;box-sizing:border-box;min-width:0}
+html,body{height:100%}
+body{font-family:'Roboto Condensed',system-ui,sans-serif;background:var(--bg);color:var(--fg);overflow:hidden;display:flex;flex-direction:column;font-size:16px}
+button{font-family:inherit}
+:focus-visible{outline:2px solid var(--accent-hi);outline-offset:2px}
 
-  /* ---------- Topbar ---------- */
-  #topbar{display:flex;align-items:center;gap:1rem;padding:12px 20px;border-bottom:1px solid var(--border);background:rgba(2,6,23,0.94);z-index:20;position:relative;flex-wrap:wrap}
-  .logo{display:flex;align-items:center;gap:9px;flex:0 0 auto}
-  .logo .sq{width:28px;height:28px;border-radius:6px;background:var(--accent);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;color:#fff;box-shadow:0 0 14px rgba(0,70,149,0.7)}
-  .logo b{font-size:1rem;letter-spacing:.02em;font-weight:700}
-  .logo b span{color:var(--accent-hi)}
-  .sep{width:1px;height:22px;background:var(--border)}
-  .prompt{font-size:.92rem;color:var(--fg);font-weight:500}
-  .prompt .hl{color:var(--accent-hi)}
-  .spacer{flex:1}
-  .chip{font-size:.66rem;padding:4px 11px;border-radius:999px;border:1px solid rgba(0,70,149,0.55);color:var(--muted);background:rgba(0,70,149,0.08)}
+/* Topbar */
+#topbar{display:flex;align-items:center;gap:16px;padding:12px 20px;border-bottom:1px solid var(--border);background:rgba(2,6,23,.96);z-index:20;flex-wrap:wrap}
+.logo{display:flex;align-items:center;gap:10px;flex:none}
+.logo .sq{width:34px;height:34px;border-radius:7px;background:var(--accent);display:grid;place-items:center;font-weight:700;font-size:18px;color:#fff;box-shadow:0 0 16px rgba(0,70,149,.7)}
+.logo b{font-size:1.15rem;font-weight:700;white-space:nowrap}
+.logo b span{color:var(--accent-hi)}
+.sep{width:1px;height:26px;background:var(--border)}
+.prompt{font-size:1.15rem;font-weight:500;flex:1 1 380px;line-height:1.3}
+.prompt .hl{color:var(--accent-hi);font-weight:700}
+.chip{font-size:.85rem;padding:6px 14px;border-radius:999px;border:1px solid rgba(59,140,240,.5);color:var(--muted);background:rgba(0,70,149,.12);white-space:nowrap}
 
-  /* ---------- Stage ---------- */
-  #stage{position:absolute;inset:0;top:64px;bottom:0;overflow:hidden;cursor:grab}
-  #stage.panning{cursor:grabbing}
-  svg{display:block}
-  .node{cursor:pointer}
-  .node text{pointer-events:none;user-select:none}
-  .edge{pointer-events:none}
-  [data-step]{transition:opacity .5s ease}
+/* Stage */
+#stage{position:relative;flex:1;overflow:hidden;cursor:grab;touch-action:none}
+#stage.panning{cursor:grabbing}
+#stage>svg{position:absolute;left:0;top:0;transform-origin:0 0}
+#stage>svg.ease{transition:transform .8s cubic-bezier(.4,.1,.2,1)}
+.node{cursor:pointer}
+.node text{pointer-events:none;user-select:none}
+.edge{pointer-events:none}
+[data-step]{transition:opacity .5s ease}
+.enter{animation:enter .7s ease}
+@keyframes enter{from{opacity:0}}
+.now .glow{animation:pulse 1.8s ease-in-out 2}
+@keyframes pulse{50%{opacity:.35}}
 
-  /* ---------- Control Bar ---------- */
-  #controls{position:absolute;left:50%;bottom:16px;transform:translateX(-50%);display:flex;align-items:center;gap:14px;background:rgba(11,18,32,0.92);border:1px solid var(--border);border-radius:14px;padding:12px 18px;z-index:40;backdrop-filter:blur(8px);box-shadow:0 8px 30px rgba(0,0,0,0.5)}
-  .cbtn{font-family:'Roboto Condensed',sans-serif;font-size:.82rem;font-weight:600;padding:9px 18px;border-radius:9px;border:1px solid var(--border);background:#0f172a;color:var(--fg);cursor:pointer;transition:all .15s}
-  .cbtn:hover:not(:disabled){border-color:var(--accent-hi);color:#fff}
-  .cbtn:disabled{opacity:.35;cursor:default}
-  .cbtn.primary{background:var(--accent);border-color:var(--accent);color:#fff;box-shadow:0 0 16px rgba(0,70,149,0.5)}
-  .cbtn.primary:hover:not(:disabled){background:var(--accent-hi);border-color:var(--accent-hi)}
-  .cbtn.ghost{background:transparent}
-  .cmeta{display:flex;flex-direction:column;gap:2px;min-width:220px}
-  .cmeta .lbl{font-size:.72rem;font-weight:700;color:var(--accent-hi);letter-spacing:.05em;text-transform:uppercase}
-  .cmeta .dsc{font-size:.78rem;color:var(--muted);line-height:1.2}
-  .cprog{font-size:.72rem;color:var(--dim);white-space:nowrap;font-family:'JetBrains Mono',monospace}
+/* Overlays auf der Bühne */
+#hint{position:absolute;left:16px;top:12px;font-size:.85rem;color:var(--dim);z-index:10;pointer-events:none}
+.tools{position:absolute;right:16px;top:12px;display:flex;gap:8px;z-index:30}
+.tbtn{font-size:.9rem;font-weight:600;padding:8px 14px;min-height:40px;border-radius:9px;border:1px solid var(--border);background:rgba(15,23,42,.92);color:var(--fg);cursor:pointer}
+.tbtn:hover,.tbtn[aria-pressed=true]{border-color:var(--accent-hi)}
+#legend{position:absolute;right:16px;top:62px;font-size:.92rem;color:var(--muted);background:rgba(11,18,32,.95);border:1px solid var(--border);border-radius:12px;padding:14px 16px;z-index:30;display:none}
+#legend.open{display:block}
+#legend .li{display:flex;align-items:center;gap:10px;margin:6px 0}
+#legend .sw{width:14px;height:14px;border-radius:4px;flex:none}
 
-  /* ---------- Hint + Legend ---------- */
-  #hint{position:absolute;left:16px;top:10px;font-size:.62rem;color:var(--dim);z-index:10}
-  #legend{position:absolute;left:16px;bottom:16px;font-size:.62rem;color:var(--muted);background:rgba(11,18,32,0.88);border:1px solid var(--border);border-radius:10px;padding:10px 12px;z-index:30}
-  #legend .li{display:flex;align-items:center;gap:7px;margin:3px 0}
-  #legend .sw{width:10px;height:10px;border-radius:3px;flex:0 0 auto}
+/* Steuerleiste */
+#controls{position:absolute;left:50%;bottom:16px;transform:translateX(-50%);width:min(980px,calc(100% - 24px));display:grid;grid-template-columns:auto 1fr auto auto;align-items:center;gap:16px;background:rgba(11,18,32,.95);border:1px solid var(--border);border-radius:16px;padding:14px 18px;z-index:40;backdrop-filter:blur(8px);box-shadow:0 10px 34px rgba(0,0,0,.55)}
+.cbtn{font-size:1rem;font-weight:600;padding:11px 20px;min-height:46px;border-radius:10px;border:1px solid var(--border);background:var(--panel);color:var(--fg);cursor:pointer;transition:all .15s;white-space:nowrap}
+.cbtn:hover:not(:disabled){border-color:var(--accent-hi);color:#fff}
+.cbtn:disabled{opacity:.35;cursor:default}
+.cbtn.primary{background:var(--accent);border-color:var(--accent);color:#fff;box-shadow:0 0 18px rgba(0,70,149,.55)}
+.cbtn.primary:hover:not(:disabled){background:var(--accent-hi);border-color:var(--accent-hi)}
+.cbtn.ghost{background:transparent}
+.cmeta{display:flex;flex-direction:column;gap:4px}
+.cmeta .lbl{font-size:1.05rem;font-weight:700;color:var(--accent-hi)}
+.cmeta .dsc{font-size:1.02rem;color:var(--fg);line-height:1.35}
+.dots{display:flex;gap:6px;margin-top:6px}
+.dot{width:22px;height:8px;border-radius:4px;border:0;background:#1e2a40;cursor:pointer;padding:0}
+.dot.done{background:#2b4a75}.dot.cur{background:var(--accent-hi)}
+.right{display:flex;gap:10px}
 
-  /* ---------- Detail Panel ---------- */
-  #panel{position:absolute;right:16px;bottom:16px;width:360px;max-height:calc(100% - 120px);background:rgba(15,23,42,0.96);border:1px solid var(--border);border-radius:12px;padding:16px;overflow-y:auto;transform:translateX(120%);transition:transform .25s;z-index:50;backdrop-filter:blur(6px)}
-  #panel.open{transform:translateX(0)}
-  #panel .pt{font-size:.86rem;font-weight:700;margin-bottom:2px}
-  #panel .pc{font-size:.68rem;color:var(--muted);margin-bottom:10px}
-  #panel .row{display:flex;justify-content:space-between;gap:10px;font-size:.7rem;padding:5px 0;border-top:1px solid rgba(30,41,59,.6)}
-  #panel .row b{color:var(--muted);font-weight:600;flex:0 0 auto}
-  #panel .row span{text-align:right}
-  #panel .close{position:absolute;top:10px;right:12px;background:none;border:none;color:var(--muted);font-size:1rem;cursor:pointer}
+/* Detail-Panel */
+#panel{position:absolute;right:16px;top:62px;width:400px;max-width:calc(100% - 32px);max-height:calc(100% - 200px);background:rgba(15,23,42,.97);border:1px solid var(--border);border-radius:14px;padding:20px;overflow-y:auto;transform:translateX(120%);transition:transform .25s;z-index:50}
+#panel.open{transform:none}
+#panel.wide{width:600px}
+.mock{display:block;width:100%;height:auto;border-radius:10px;margin:6px 0 10px;border:1px solid var(--border)}
+.mnote{font-size:.85rem;color:var(--dim);margin-bottom:6px}
+.golink{display:inline-flex;align-items:center;gap:8px;margin-top:12px;text-decoration:none}
+#panel .pt{font-size:1.3rem;font-weight:700;margin-bottom:2px;padding-right:30px}
+#panel .pc{font-size:.95rem;color:var(--muted);margin-bottom:12px}
+#panel .row{display:grid;grid-template-columns:auto 1fr;gap:14px;font-size:1rem;line-height:1.45;padding:9px 0;border-top:1px solid rgba(34,48,74,.8)}
+#panel .row b{color:var(--muted);font-weight:600}
+#panel .close,.qclose{position:absolute;top:10px;right:10px;width:40px;height:40px;background:none;border:none;color:var(--muted);font-size:1.2rem;cursor:pointer;border-radius:8px}
 
-  /* ---------- Question Modal ---------- */
-  #qmodal{position:absolute;inset:0;display:none;align-items:center;justify-content:center;z-index:60;background:rgba(2,6,23,0.72);backdrop-filter:blur(4px)}
-  #qmodal.open{display:flex}
-  .qcard{width:min(620px,92vw);background:#0b1220;border:1px solid rgba(0,70,149,0.55);border-radius:16px;padding:26px 28px;box-shadow:0 0 50px rgba(0,70,149,0.28)}
-  .qtag{display:inline-block;font-size:.66rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent-hi);border:1px solid rgba(0,70,149,0.55);border-radius:999px;padding:3px 10px;margin-bottom:14px}
-  .qcard h2{font-size:1.5rem;font-weight:700;margin-bottom:16px;letter-spacing:-.01em}
-  .qanswer{display:none;margin-top:6px}
-  .qanswer.open{display:block;animation:fade .4s ease}
-  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
-  .qanswer p{font-size:.94rem;color:var(--fg);line-height:1.55;margin-bottom:14px}
-  .qsrc{margin-top:6px;padding:12px 14px;border-left:2px solid var(--accent);background:rgba(0,70,149,0.07);border-radius:0 8px 8px 0}
-  .qsrc .st{font-size:.7rem;font-weight:700;color:var(--accent-hi);margin-bottom:6px;font-family:'JetBrains Mono',monospace}
-  .qsrc ul{list-style:none}
-  .qsrc li{font-size:.78rem;color:var(--muted);line-height:1.5;padding:2px 0}
-  .qsrc li::before{content:"— ";color:var(--accent-hi)}
-  .qbtn{font-family:'Roboto Condensed',sans-serif;font-size:.86rem;font-weight:600;padding:10px 20px;border-radius:9px;border:none;background:var(--accent);color:#fff;cursor:pointer;box-shadow:0 0 16px rgba(0,70,149,0.45);margin-top:14px}
-  .qbtn:hover{background:var(--accent-hi)}
-  .qclose{position:absolute;top:18px;right:20px;background:none;border:none;color:var(--muted);font-size:1.1rem;cursor:pointer}
+/* Frage & Antwort im Schaubild */
+path.blink{stroke-dasharray:16 10;animation:flow .9s linear infinite,blink 1.1s ease-in-out infinite}
+@keyframes flow{to{stroke-dashoffset:-26}}
+@keyframes blink{50%{opacity:.2}}
+.qmark{paint-order:stroke;stroke:#020617;stroke-linejoin:round}
+.acard{background:#0b1220;border:2px solid rgba(59,140,240,.7);border-radius:18px;padding:26px 30px;box-shadow:0 0 60px rgba(0,70,149,.45);color:var(--fg);font-family:'Roboto Condensed',system-ui,sans-serif}
+.acard .qtag{display:inline-block;font-size:17px;font-weight:700;color:var(--accent-hi);border:1px solid rgba(59,140,240,.5);border-radius:999px;padding:4px 14px;margin-bottom:12px}
+.acard h3{font-size:34px;line-height:1.1;margin-bottom:14px}
+.acard p{font-size:22px;line-height:1.45;margin-bottom:18px}
+.acard p b{color:#fff}
+.qsrc{padding:14px 18px;border-left:4px solid var(--accent-hi);background:rgba(0,70,149,.14);border-radius:0 10px 10px 0}
+.qsrc .st{font-size:16px;font-weight:600;color:var(--accent-hi);margin-bottom:8px;font-family:'JetBrains Mono',monospace}
+.qsrc ul{list-style:none}
+.qsrc li{font-size:19px;line-height:1.4;padding:4px 0 4px 20px;position:relative}
+.qsrc li::before{content:"—";position:absolute;left:0;color:var(--accent-hi)}
+.qsrc li i{color:var(--muted);font-style:normal}
+@media(max-width:760px){
+  #topbar{padding:10px 14px;gap:10px}
+  .sep,.chip{display:none}
+  .prompt{font-size:1rem;flex-basis:100%}
+  #hint{display:none}
+  #controls{grid-template-columns:1fr auto 1fr;gap:10px;padding:12px;bottom:10px}
+  .cmeta{grid-column:1/-1;grid-row:1}
+  #btnBack{grid-row:2}
+  .right{display:contents}
+  #btnAuto,#btnNext{grid-row:2;padding-inline:14px}
+  .cbtn{font-size:.95rem}
+  #panel,#panel.wide{left:16px;width:auto}
+}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
@@ -91,384 +125,480 @@
   <div class="logo"><div class="sq">S</div><b>SHW <span>·</span> KI Tech Day</b></div>
   <div class="sep"></div>
   <div class="prompt">„Ich stehe in der Waschküche und habe einen KNX-Feuchtigkeitssensor angeschlossen, <span class="hl">richte ihn ein</span>.“</div>
-  <div class="spacer"></div>
   <span class="chip">Governance auditiert alle Agenten</span>
 </div>
 
-<div id="stage"></div>
-
-<div id="hint">Mausrad = Zoom · Ziehen = Verschieben · Klick auf Agent = Details</div>
-
-<div id="legend">
-  <div style="font-weight:700;color:var(--fg);margin-bottom:5px">Legende</div>
-  <div class="li"><span class="sw" style="background:#D4A72C"></span> Governance / Audit</div>
-  <div class="li"><span class="sw" style="background:#f8fafc"></span> Mensch / Orchestrator</div>
-  <div class="li"><span class="sw" style="background:#3b82f6"></span> Strang A · KNX / Smart Home</div>
-  <div class="li"><span class="sw" style="background:#2A9D8F"></span> Strang B · Dokumente</div>
-  <div class="li"><span class="sw" style="background:#fbbf24"></span> Externes System</div>
-  <div class="li"><span class="sw" style="background:#fb7185"></span> Mensch-Maschine-Grenze</div>
-</div>
-
-<div id="controls">
-  <button class="cbtn ghost" id="btnBack" onclick="goto(current-1)">‹ Zurück</button>
-  <div class="cmeta">
-    <div class="lbl" id="cLabel"></div>
-    <div class="dsc" id="cDesc"></div>
+<div id="stage">
+  <div id="hint">Mausrad = Zoom · Ziehen = Verschieben · Klick auf Agent = Details</div>
+  <div class="tools">
+    <button class="tbtn" id="btnFit" title="Ganzes Schaubild zeigen">Übersicht</button>
+    <button class="tbtn" id="btnLegend" aria-pressed="false">Legende</button>
   </div>
-  <span class="cprog" id="cProg"></span>
-  <button class="cbtn" id="btnAuto" onclick="toggleAuto()">▶ Autoplay</button>
-  <button class="cbtn primary" id="btnNext" onclick="goto(current+1)">Weiter ›</button>
-</div>
+  <div id="legend">
+    <div style="font-weight:700;color:var(--fg);margin-bottom:6px">Legende</div>
+    <div class="li"><span class="sw" style="background:#D4A72C"></span>Governance / Audit</div>
+    <div class="li"><span class="sw" style="background:#f8fafc"></span>Mensch / Orchestrator</div>
+    <div class="li"><span class="sw" style="background:#3b82f6"></span>Strang A · KNX / Smart Home</div>
+    <div class="li"><span class="sw" style="background:#2A9D8F"></span>Strang B · Dokumente</div>
+    <div class="li"><span class="sw" style="background:#fbbf24"></span>Externes System</div>
+    <div class="li"><span class="sw" style="background:#fb7185"></span>Mensch-Maschine-Grenze</div>
+  </div>
 
-<div id="qmodal">
-  <button class="qclose" onclick="closeQuestion()">✕</button>
-  <div class="qcard">
-    <span class="qtag">Abzweig-Pointe</span>
-    <h2>Warum hat er diesen Weg gewählt?</h2>
-    <div class="qanswer" id="qanswer">
-      <p>Weil der Masterplan es so vorschreibt — die KI soll <b>„Aufgaben möglichst selbstständig bis zum Ergebnis führen“</b> und <b>„Informationen aus verschiedenen Systemen selbst finden und zusammenführen“</b>, statt Thomas mit Rückfragen zu belasten. Der Techniker nutzt das bereits dokumentierte System (Paperless) statt zu raten oder den Menschen zu fragen.</p>
-      <div class="qsrc">
-        <div class="st">Quelle · 02 Ziele/01 Ziele und Leitplanken.md</div>
-        <ul>
-          <li>Abschnitt 1 „Oberstes Ziel“: „Aufgaben möglichst selbstständig bis zum Ergebnis führen.“</li>
-          <li>Abschnitt 2 „Grundprinzipien“: „Informationen aus verschiedenen Systemen selbst finden und zusammenführen.“</li>
-          <li>Abschnitt 2 „Grundprinzipien“: „Thomas nur dann einbeziehen, wenn wirklich eine Entscheidung, Freigabe oder persönliche Einschätzung nötig ist.“</li>
-          <li>Abschnitt 2 „Grundprinzipien“: „bestehende funktionierende Systeme möglichst orchestrieren statt unnötig ersetzen.“</li>
-          <li>Leit-KPI: „Zurückgewonnene Stunden pro Woche.“</li>
-        </ul>
-      </div>
+  <div id="controls">
+    <button class="cbtn ghost" id="btnBack">‹ Zurück</button>
+    <div class="cmeta">
+      <div class="lbl" id="cLabel"></div>
+      <div class="dsc" id="cDesc"></div>
+      <div class="dots" id="dots"></div>
     </div>
-    <button class="qbtn" id="qreveal" onclick="revealAnswer()">Antwort anzeigen</button>
+    <div class="right">
+      <button class="cbtn" id="btnAuto">▶ Autoplay</button>
+      <button class="cbtn primary" id="btnNext">Weiter ›</button>
+    </div>
   </div>
-</div>
 
-<div id="panel">
-  <button class="close" onclick="closePanel()">✕</button>
-  <div id="panelBody"></div>
+  <div id="panel">
+    <button class="close" id="panelClose" aria-label="Schließen">✕</button>
+    <div id="panelBody"></div>
+  </div>
+
 </div>
 
 <script>
-const SVGNS="http://www.w3.org/2000/svg";
-let svg, gMain, gEdges, gNodes;
-const W=2400, H=1650;
-let STEP=0;                 // aktuelle Einblend-Phase; 0 = immer sichtbar (Raster/Defs)
-function S(s){STEP=s;}
-
-function el(tag,attrs,parent){const e=document.createElementNS(SVGNS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);e.setAttribute("data-step",STEP);(parent||gMain).appendChild(e);return e;}
+{
+const NS="http://www.w3.org/2000/svg";
+const W=1600,H=1400;
+let STEP=0,svg,gEdges,gNodes;
+const S=s=>{STEP=s};
+function el(tag,attrs,parent){const e=document.createElementNS(NS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);e.setAttribute("data-step",STEP);parent.appendChild(e);return e}
 
 /* ---------- Daten ---------- */
 const GOV=[
-  {id:"itsec",t:"IT-Sicherheitsbeauftragter",ki:"KI-009",sec:"Leitung & Governance",c:"#D4A72C",
-   d:"Auditiert alle Agenten: Sicherheit, Qualität/Prüfung, Zugänge & Secrets. Hat pruefer + Qualifizierung übernommen."},
-  {id:"kicontroller",t:"KI-Controller",ki:"KI-010",sec:"Leitung & Governance",c:"#D4A72C",
-   d:"Auditiert alle Agenten: Token-Verbrauch, Kosten, Status/Compliance. Hat controller + usage-analyst übernommen."},
-  {id:"kipersonal",t:"KI-Personalreferent",ki:"KI-001",sec:"Leitung & Governance",c:"#D4A72C",
-   d:"Auditiert alle Agenten: Personalbestand, Probezeit, Einstellung/Ausscheiden. Hat personalleiter + onboarding übernommen."},
-];
+ {id:"itsec",t:"IT-Sicherheitsbeauftragter",ki:"KI-009",sec:"Leitung & Governance",c:"#D4A72C",d:"Auditiert alle Agenten: Sicherheit, Qualität/Prüfung, Zugänge & Secrets. Hat Prüfer + Qualifizierung übernommen."},
+ {id:"kicontroller",t:"KI-Controller",ki:"KI-010",sec:"Leitung & Governance",c:"#D4A72C",d:"Auditiert alle Agenten: Token-Verbrauch, Kosten, Status/Compliance. Hat Controller + Usage-Analyst übernommen."},
+ {id:"kipersonal",t:"KI-Personalreferent",ki:"KI-001",sec:"Leitung & Governance",c:"#D4A72C",d:"Auditiert alle Agenten: Personalbestand, Probezeit, Einstellung/Ausscheiden. Hat Personalleiter + Onboarding übernommen."}];
 const B=[
-  {id:"email",t:"E-Mail-Assistent",ki:"KI-015",sec:"Dokumente & Backoffice",c:"#2A9D8F",
-   d:"Arbeitet den Posteingang ab: erkennt die Voltus-Rechnung, zieht das PDF, übergibt an n8n."},
-  {id:"n8n",t:"n8n-Workflow-Entwickler",ki:"KI-003",sec:"Software & Automation",c:"#5865D8",
-   d:"n8n-Flow (Synology, REST): Transport, Header-Auth, Feld-Validierung, Dedupe. Liefert strukturierte Felder per Webhook."},
-  {id:"pa",t:"Paperless-Administrator",ki:"KI-013",sec:"Dokumente & Backoffice",c:"#2A9D8F",
-   d:"OCR + Ablage in Paperless-NGX: Korrespondent „Voltus GmbH“, Dokumenttyp, Volltext durchsuchbar."},
-  {id:"beleg",t:"Belegsachbearbeiter",ki:"KI-012",sec:"Dokumente & Backoffice",c:"#2A9D8F",
-   d:"Klassifikation privat/geschäftlich, Bereich, Kostenbereich. Füllt Custom Fields: Rechnungsnr., Datum, Betrag, IBAN, Artikel."},
-  {id:"banker",t:"Bankkaufmann",ki:"KI-007",sec:"Finanzen & Controlling",c:"#29945D",
-   d:"Prüft gegen Bankumsätze, ob die Rechnung schon bezahlt ist → Zahlungsstatus zurück an den Beleg."},
-];
+ {id:"email",t:"E-Mail-Assistent",ki:"KI-015",sec:"Dokumente & Backoffice",c:"#2A9D8F",d:"Arbeitet den Posteingang ab: erkennt die Voltus-Rechnung, zieht das PDF, übergibt an n8n."},
+ {id:"n8n",t:"n8n-Workflow-Entwickler",ki:"KI-003",sec:"Software & Automation",c:"#5865D8",d:"n8n-Flow (Synology, REST): Transport, Header-Auth, Feld-Validierung, Dedupe. Liefert strukturierte Felder per Webhook."},
+ {id:"pa",t:"Paperless-Administrator",ki:"KI-013",sec:"Dokumente & Backoffice",c:"#2A9D8F",d:"OCR + Ablage in Paperless-NGX: Korrespondent „Voltus GmbH“, Dokumenttyp, Volltext durchsuchbar."},
+ {id:"beleg",t:"Belegsachbearbeiter",ki:"KI-012",sec:"Dokumente & Backoffice",c:"#2A9D8F",d:"Klassifikation privat/geschäftlich, Bereich, Kostenbereich. Füllt Custom Fields: Rechnungsnr., Datum, Betrag, IBAN, Artikel."},
+ {id:"banker",t:"Bankkaufmann",ki:"KI-007",sec:"Finanzen & Controlling",c:"#29945D",d:"Prüft gegen Bankumsätze, ob die Rechnung schon bezahlt ist → Zahlungsstatus zurück an den Beleg."}];
 const A=[
-  {id:"knx",t:"KNX-Techniker",ki:"KI-022",sec:"Infrastruktur & Smart Home",c:"#3b82f6",
-   d:"Holt die Gerätebezeichnung aus Paperless (→ MDT SCN-LSEN1.01), legt in ETS an: phys. 1.1.56, GA 10/4/8, DPT 1.005, Name nach Konvention."},
-  {id:"strom",t:"Stromlaufplaner",ki:"KI-025",sec:"Infrastruktur & Smart Home",c:"#3b82f6",
-   d:"Zieht den Sensor im Stromlaufplan der Waschküche nach (Position, phys. Adresse, Beschriftung)."},
-  {id:"smarthome",t:"Smart-Home-Assistent",ki:"KI-021",sec:"Infrastruktur & Smart Home",c:"#3b82f6",
-   d:"Home Assistant: binary_sensor.ug_waschkueche_leckage (DPT 1.005), Automation „Leckage → Benachrichtigung“, Dashboard-Karte, Allowlist."},
-  {id:"doku",t:"Dokumentation",ki:"Obsidian",sec:"Obsidian",c:"#a78bfa",
-   d:"Schreibt zurück nach Obsidian: Geraete.md, Gruppenadressen.md, Kommunikationsobjekte.md, Parameter.md."},
-];
+ {id:"knx",t:"KNX-Techniker",ki:"KI-022",sec:"Infrastruktur & Smart Home",c:"#3b82f6",d:"Holt die Gerätebezeichnung aus Paperless (→ MDT SCN-LSEN1.01), legt in ETS an: phys. 1.1.56, GA 10/4/8, DPT 1.005, Name nach Konvention."},
+ {id:"strom",t:"Stromlaufplaner",ki:"KI-025",sec:"Infrastruktur & Smart Home",c:"#3b82f6",d:"Zieht den Sensor im Stromlaufplan der Waschküche nach (Position, phys. Adresse, Beschriftung)."},
+ {id:"smarthome",t:"Smart-Home-Assistent",ki:"KI-021",sec:"Infrastruktur & Smart Home",c:"#3b82f6",d:"Home Assistant: binary_sensor.ug_waschkueche_leckage (DPT 1.005), Automation „Leckage → Benachrichtigung“, Dashboard-Karte, Allowlist."},
+ {id:"doku",t:"Dokumentation",ki:"—",sec:"Obsidian",c:"#a78bfa",d:"Schreibt zurück nach Obsidian: Geraete.md, Gruppenadressen.md, Kommunikationsobjekte.md, Parameter.md."}];
 const ZU=[
-  {id:"netz",t:"Netzwerkadministrator",ki:"KI-023",for:["n8n","pa"],d:"Betreut Synology-Dienste (n8n, Paperless), Hosts/Ports."},
-  {id:"dba",t:"Datenbankadministrator",ki:"KI-005",for:["n8n"],d:"Supabase auf der NAS (falls der Flow DB-seitig ablegt)."},
-  {id:"steuer",t:"Steuerassistent",ki:"KI-008",uses:"beleg",d:"Nutzt den klassifizierten Beleg später für die Steuer."},
-  {id:"vers",t:"Versicherungsmanager",ki:"KI-011",uses:"beleg",d:"Nutzt Originalunterlagen aus Paperless."},
-];
+ {id:"netz",t:"Netzwerkadministrator",ki:"KI-023",sec:"Zuarbeit",c:"#94a3b8",for:["n8n","Paperless"],d:"Betreut Synology-Dienste (n8n, Paperless), Hosts/Ports."},
+ {id:"dba",t:"Datenbankadministrator",ki:"KI-005",sec:"Zuarbeit",c:"#94a3b8",for:["n8n"],d:"Supabase auf der NAS (falls der Flow DB-seitig ablegt)."},
+ {id:"steuer",t:"Steuerassistent",ki:"KI-008",sec:"Zuarbeit",c:"#94a3b8",uses:"Belegsachbearbeiter",d:"Nutzt den klassifizierten Beleg später für die Steuer."},
+ {id:"vers",t:"Versicherungsmanager",ki:"KI-011",sec:"Zuarbeit",c:"#94a3b8",uses:"Belegsachbearbeiter",d:"Nutzt Originalunterlagen aus Paperless."}];
+const ZIEL_URL="obsidian://open?vault=Senty&file=02%20Ziele%2F01%20Ziele%20und%20Leitplanken";
+const SYSD={
+ "s-ets":"KNX-Projekt „Holunderweg“: Der KNX-Techniker legt hier den Leckagesensor an – phys. Adresse 1.1.56, Gruppenadresse 10/4/8, DPT 1.005.",
+ "s-strom":"Stromlaufplan der Verteilung: Der Stromlaufplaner trägt den Sensor in der Waschküche nach.",
+ "s-ha":"Home Assistant: binary_sensor.ug_waschkueche_leckage, Automation „Leckage → Benachrichtigung“ und Dashboard-Karte.",
+ "s-obsidian":"Wissensbasis: Die Dokumentation schreibt Geraete.md, Gruppenadressen.md, Kommunikationsobjekte.md und Parameter.md fort.",
+ "s-paperless":"Dokumentenarchiv: Hier liegt die Voltus-Rechnung – samt Gerätebezeichnung MDT SCN-LSEN1.01.",
+ "s-n8n":"Automation auf der Synology: Der Flow transportiert die Rechnung vom Posteingang nach Paperless.",
+ "s-bank":"Bankumsätze per HBCI: Der Bankkaufmann prüft, ob die Rechnung bereits bezahlt ist."};
 const SYS=[
-  {id:"s-n8n",t:"n8n",sub:"Automation · Synology"},
-  {id:"s-paperless",t:"Paperless-NGX",sub:"Dokumentenarchiv"},
-  {id:"s-bank",t:"Bank (HBCI)",sub:"Umsätze"},
-  {id:"s-ets",t:"ETS6",sub:"KNX-Projekt"},
-  {id:"s-ha",t:"Home Assistant",sub:"Smart Home"},
-  {id:"s-obsidian",t:"Obsidian",sub:"Wissensbasis"},
-  {id:"s-strom",t:"stromlaufplan.de",sub:"Pläne"},
-];
+ {id:"s-ets",t:"ETS6",sub:"KNX-Projekt"},
+ {id:"s-strom",t:"stromlaufplan.de",sub:"Pläne · Link ↗",url:"https://app.stromlaufplan.de/project/793068/edit/result/pdf"},
+ {id:"s-ha",t:"Home Assistant",sub:"Smart Home · Link ↗",url:"http://192.168.20.20:8123/home/areas-waschraum",lan:1},
+ {id:"s-obsidian",t:"Obsidian",sub:"Wissensbasis · Link ↗",url:"https://192.168.20.10:3011/",lan:1},
+ {id:"s-paperless",t:"Paperless-NGX",sub:"Dokumentenarchiv · Link ↗",url:"http://192.168.20.10:8010/documents/1436/details",lan:1},
+ {id:"s-n8n",t:"n8n",sub:"Automation · Link ↗",url:"http://192.168.20.10:5678/workflow/GMsITM5ItxJBuBxn",lan:1},
+ {id:"s-bank",t:"Bank (HBCI)",sub:"Umsätze"}];
 
-const POS={};
-function box(id,x,y,w,h){POS[id]={x,y,w,h,cx:x+w/2,cy:y+h/2};}
+const STEPS=[
+ {label:"Der Prompt",desc:"Thomas steht in der Waschküche – ein einziger Prompt stößt den ganzen Prozess an.",f:[380,-130,1270,200]},
+ {label:"Projektleiter",desc:"Der Orchestrator zerlegt den Auftrag und stößt die KNX-Einrichtung an.",f:[300,-110,1000,710]},
+ {label:"Strang A · Jetzt",desc:"Die KNX-Einrichtung des Leckagesensors passiert genau jetzt.",f:[0,430,960,760]},
+ {label:"Der Abzweig",desc:"Der KNX-Techniker kennt die Gerätebezeichnung nicht – er fragt den Belegsachbearbeiter und findet sie in Paperless-NGX.",f:[0,430,1600,760]},
+ {label:"Strang B · Vergangenheit",desc:"Die Rechnungskette lief schon vor Tagen unbemerkt im Hintergrund.",f:[640,430,960,760]},
+ {label:"Die Einrichtung",desc:"Mit der gefundenen Bezeichnung legt er den Sensor in ETS und Home Assistant an.",f:[0,430,1600,970]},
+ {label:"Governance",desc:"Über allem steht die übergeordnete Governance – sie auditiert jeden Agenten.",f:[0,-110,1600,710]},
+ {label:"Die Frage",desc:"Warum ist der KNX-Techniker zum Belegsachbearbeiter gegangen – statt zu raten oder Thomas zu fragen?",f:[0,430,1600,600]},
+ {label:"Die Antwort",desc:"Weil der Masterplan es so vorschreibt.",f:[380,430,840,720]},
+ {label:"Das große Bild",desc:"Ein Prompt, zwei Stränge, viele Agenten – alles ausgerichtet auf ein Ziel.",f:[0,-130,2290,1530]}];
+const TOTAL=STEPS.length;
 
 /* ---------- Layout ---------- */
-function layout(){
-  // Prompt (Thomas)
-  box("thomas",900,90,600,76);
-  // Governance
-  box("itsec",250,210,340,64); box("kicontroller",880,210,340,64); box("kipersonal",1510,210,340,64);
-  // Orchestrator
-  box("projektleiter",950,340,300,64);
-  // Strang A (links, vertikal)
-  const ax=180, aw=340, ah=56, gap=116, ay=540;
-  A.forEach((a,i)=>box(a.id,ax,ay+i*gap,aw,ah));
-  // Strang B (rechts, vertikal)
-  const bx=1700, bw=380, bh=56, by=540;
-  B.forEach((b,i)=>box(b.id,bx,by+i*gap,bw,bh));
-  // Zuarbeiter
-  box("netz",2140,660,220,48);
-  box("dba",2140,720,220,48);
-  box("steuer",2140,892,220,48);
-  box("vers",2140,952,220,48);
-  // Externe Systeme
-  const sy=1280, sw=250, sh=64, sg=26;
-  const sxx=(W-(SYS.length*sw+(SYS.length-1)*sg))/2;
-  SYS.forEach((s,i)=>box(s.id,sxx+i*(sw+sg),sy,sw,sh));
-}
+const P={};
+const box=(id,x,y,w,h)=>{P[id]={x,y,w,h,cx:x+w/2,cy:y+h/2}};
+box("thomas",500,-50,600,86);
+box("itsec",60,180,380,70);box("kicontroller",610,180,380,70);box("kipersonal",1160,180,380,70);
+box("projektleiter",630,320,340,72);
+A.forEach((a,i)=>box(a.id,40,500+i*115,400,66));
+B.forEach((b,i)=>box(b.id,1160,500+i*115,400,66));
+box("netz",880,595,240,52);box("dba",880,657,240,52);
+box("steuer",880,825,240,52);box("vers",880,887,240,52);
+SYS.forEach((s,i)=>box(s.id,58+i*214,1100,200,74));
 
-/* ---------- Kanten ---------- */
+/* ---------- Zeichen-Helfer ---------- */
 function edge(x1,y1,x2,y2,color,o={}){
-  const p=el("path",{d:`M ${x1} ${y1} C ${x1} ${(y1+y2)/2}, ${x2} ${(y1+y2)/2}, ${x2} ${y2}`,
-    fill:"none",stroke:color||"#64748b","stroke-width":o.w||1.4,"stroke-dasharray":o.dash||"",
-    opacity:o.op!=null?o.op:0.5,"marker-end":"url(#arr)",class:"edge"},gEdges);
-  return p;
-}
-function drawEdges(){
-  // Schritt 2: Thomas → Projektleiter → Strang B
-  S(2);
-  edge(POS.thomas.cx,POS.thomas.y+POS.thomas.h,POS.projektleiter.cx,POS.projektleiter.y,"#f8fafc",{op:0.85});
-  edge(POS.projektleiter.cx,POS.projektleiter.y+POS.projektleiter.h,POS.knx.cx,POS.knx.y,"#f8fafc",{op:0.7});
-
-  // Schritt 7: Governance-Audit (übergeordnete Ebene, erst am Schluss)
-  S(7);
-  GOV.forEach(g=>{const p=POS[g.id];edge(p.cx,p.y+p.h,p.cx,320,"#D4A72C",{op:0.55,dash:"3,3",w:1.4});});
-
-  // Schritt 3: Strang A Kette (KNX)
-  S(3);
-  for(let i=0;i<A.length-1;i++){const p=POS[A[i].id],q=POS[A[i+1].id];edge(p.cx,p.y+p.h,q.cx,q.y,"#3b82f6",{op:0.8});}
-  edge(POS.strom.cx,POS.strom.y+POS.strom.h,POS["s-strom"].cx,POS["s-strom"].y,"#fbbf24",{op:0.5,dash:"4,4"});
-  edge(POS.smarthome.cx,POS.smarthome.y+POS.smarthome.h,POS["s-ha"].cx,POS["s-ha"].y,"#fbbf24",{op:0.5,dash:"4,4"});
-  el("path",{d:`M ${POS.doku.cx} ${POS.doku.y+POS.doku.h} L ${POS.doku.cx} 1000 L ${POS["s-obsidian"].cx} 1000 L ${POS["s-obsidian"].cx} ${POS["s-obsidian"].y}`,fill:"none",stroke:"#fbbf24","stroke-width":1.4,"stroke-dasharray":"4,4",opacity:0.5,"marker-end":"url(#arr)",class:"edge"},gEdges);
-
-  // Schritt 5: Strang B Kette (Rechnung)
-  S(5);
-  for(let i=0;i<B.length-1;i++){const p=POS[B[i].id],q=POS[B[i+1].id];edge(p.cx,p.y+p.h,q.cx,q.y,"#2A9D8F",{op:0.8});}
-  edge(POS.n8n.cx,POS.n8n.y+POS.n8n.h,POS["s-n8n"].cx,POS["s-n8n"].y,"#fbbf24",{op:0.5,dash:"4,4"});
-  edge(POS.banker.cx,POS.banker.y+POS.banker.h,POS["s-bank"].cx,POS["s-bank"].y,"#fbbf24",{op:0.5,dash:"4,4"});
-  edge(POS.netz.cx,POS.netz.y,POS.n8n.cx,POS.n8n.y+POS.n8n.h/2,"#64748b",{op:0.4,dash:"4,3"});
-  edge(POS.dba.cx,POS.dba.y,POS.n8n.cx,POS.n8n.y+POS.n8n.h/2,"#64748b",{op:0.4,dash:"4,3"});
-  edge(POS.beleg.x+POS.beleg.w,POS.beleg.cy,POS.steuer.cx,POS.steuer.cy,"#64748b",{op:0.4,dash:"4,3"});
-  edge(POS.beleg.x+POS.beleg.w,POS.beleg.cy,POS.vers.cx,POS.vers.cy,"#64748b",{op:0.4,dash:"4,3"});
-
-  // Schritt 4: Abzweig KNX-Techniker → Paperless-Administrator → Paperless-NGX
-  S(4);
-  el("path",{d:`M ${POS.knx.cx} ${POS.knx.y+POS.knx.h} L ${POS.pa.cx} ${POS.pa.y}`,fill:"none",stroke:"#f59e0b","stroke-width":2.2,opacity:0.9,"marker-end":"url(#arr)",class:"edge"},gEdges);
-  el("path",{d:`M ${POS.pa.cx} ${POS.pa.y+POS.pa.h} L ${POS["s-paperless"].cx} ${POS["s-paperless"].y}`,fill:"none",stroke:"#fbbf24","stroke-width":1.4,"stroke-dasharray":"4,4",opacity:0.5,"marker-end":"url(#arr)",class:"edge"},gEdges);
-
-  // Schritt 6: Einrichtung ETS
-  S(6);
-  edge(POS.knx.cx,POS.knx.y+POS.knx.h,POS["s-ets"].cx,POS["s-ets"].y,"#fbbf24",{op:0.5,dash:"4,4"});
-
-}
-
-/* ---------- Knoten ---------- */
-function node(id,t,sub,stroke,fill,opts={}){
-  const p=POS[id];
-  const g=el("g",{class:"node","data-id":id,transform:`translate(${p.x},${p.y})`},gNodes);
-  el("rect",{x:0,y:0,width:p.w,height:p.h,rx:8,fill:fill||"#0f172a",stroke:stroke,"stroke-width":1.5},g);
-  el("rect",{x:0,y:0,width:p.w,height:p.h,rx:8,fill:stroke,opacity:0.13},g);
-  if(opts.star) el("rect",{x:0,y:0,width:p.w,height:p.h,rx:8,fill:"none",stroke:stroke,"stroke-width":2.2,opacity:0.9},g);
-  const n=el("text",{x:p.w/2,y:p.h/2-(sub?4:0),fill:"#f1f5f9","font-size":opts.fs||11.5,"font-weight":"600","text-anchor":"middle"},g);
-  n.textContent=t;
-  if(sub){const s=el("text",{x:p.w/2,y:p.h/2+13,fill:"#94a3b8","font-size":8.5,"text-anchor":"middle"},g);s.textContent=sub;}
-  g.addEventListener("click",()=>openPanel(id));
-  return g;
+  const m=(y1+y2)/2;
+  return el("path",{d:o.d||`M ${x1} ${y1} C ${x1} ${m}, ${x2} ${m}, ${x2} ${y2}`,fill:"none",stroke:color,"stroke-width":o.w||2,"stroke-dasharray":o.dash||"",opacity:o.op??.6,"marker-end":"url(#arr)",class:"edge"},gEdges);
 }
 function label(x,y,txt,color,size,anchor){
-  const t=el("text",{x,y,fill:color||"#64748b","font-size":size||11,"font-weight":"700","text-anchor":anchor||"middle"},gNodes);
-  t.textContent=txt;
+  el("text",{x,y,fill:color,"font-size":size||16,"font-weight":"700","text-anchor":anchor||"middle"},gNodes).textContent=txt;
 }
-function badge(x,y,emoji,txt,color){
-  const w=txt.length*6.0+40;
-  const g=el("g",{class:"node",transform:`translate(${x},${y})`},gNodes);
-  el("rect",{x:0,y:0,width:w,height:26,rx:13,fill:"#1a0f1f",stroke:color,"stroke-width":1},g);
-  el("rect",{x:0,y:0,width:w,height:26,rx:13,fill:color,opacity:0.12},g);
-  const t=el("text",{x:w/2,y:17,fill:color,"font-size":9.5,"font-weight":"600","text-anchor":"middle"},g);
-  t.textContent=emoji+" "+txt;
-}
-function valuePanel(x,y,w,h,title,rows,color){
-  const g=el("g",{transform:`translate(${x},${y})`},gNodes);
-  el("rect",{x:0,y:0,width:w,height:h,rx:10,fill:"#0b1220",stroke:color,"stroke-width":1.2},g);
-  el("rect",{x:0,y:0,width:w,height:h,rx:10,fill:color,opacity:0.07},g);
-  el("text",{x:13,y:22,fill:color,"font-size":11,"font-weight":"700"},g).textContent=title;
-  let yy=46;
-  rows.forEach(r=>{
-    el("text",{x:13,y:yy,fill:"#64748b","font-size":9},g).textContent=r.k;
-    el("text",{x:13,y:yy+14,fill:"#e2e8f0","font-size":10.5,"font-family":"'JetBrains Mono',monospace"},g).textContent=r.v;
-    yy+=34;
-  });
+function node(id,t,sub,stroke,o={}){
+  const p=P[id];
+  const g=el("g",{class:"node","data-id":id,transform:`translate(${p.x},${p.y})`,tabindex:"0",role:"button","aria-label":t},gNodes);
+  el("rect",{width:p.w,height:p.h,rx:10,fill:"#0b1220",stroke,"stroke-width":o.star?2.6:1.8},g);
+  el("rect",{width:p.w,height:p.h,rx:10,fill:stroke,opacity:.14},g);
+  el("rect",{class:"glow",x:-4,y:-4,width:p.w+8,height:p.h+8,rx:13,fill:"none",stroke,"stroke-width":2,opacity:0},g);
+  const fs=o.fs||19;
+  el("text",{x:p.w/2,y:p.h/2+(sub?-5:6),fill:"#f8fafc","font-size":fs,"font-weight":"700","text-anchor":"middle"},g).textContent=t;
+  if(sub)el("text",{x:p.w/2,y:p.h/2+(o.fs&&o.fs<17?14:18),fill:"#a3b3c9","font-size":o.subfs||14,"text-anchor":"middle"},g).textContent=sub;
   return g;
 }
-
-function drawNodes(){
-  // Schritt 1: Prompt
-  S(1);
-  label(1200,52,"DER PROMPT — der Auftakt","#2a7de1",13);
-  node("thomas","Thomas","Prompt · Waschküche · KNX-Feuchtigkeitssensor","#f8fafc","#0b1220",{star:true,fs:12});
-
-  // Governance: früh gezeichnet (Z-Order hinter Knoten), aber erst Schritt 7 sichtbar
-  S(7);
-  el("rect",{x:210,y:150,width:1900,height:40,rx:8,fill:"#0b1220",stroke:"#D4A72C","stroke-width":1,opacity:0.9},gNodes);
-  el("rect",{x:210,y:150,width:1900,height:40,rx:8,fill:"#D4A72C",opacity:0.06},gNodes);
-  label(1160,176,"ÜBERGEORDNETE GOVERNANCE — auditiert alle Agenten","#D4A72C",12.5);
-  el("rect",{x:50,y:190,width:W-100,height:900,rx:14,fill:"none",stroke:"#D4A72C","stroke-width":1,"stroke-dasharray":"6,5",opacity:0.3},gNodes);
-  GOV.forEach(g=>node(g.id,g.t,g.ki+" · "+g.sec,g.c,"#0b1220",{star:true,fs:11.5}));
-
-  // Schritt 2: Projektleiter (Orchestrator)
-  S(2);
-  node("projektleiter","Projektleiter","KI-002 · Orchestrator","#f8fafc","#0b1220",{fs:11});
-  label(1260,253,"ChatGPT-Anbindung über Tunnel","#94a3b8",10.5,"start");
-
-  // Schritt 3: Strang A (KNX)
-  S(3);
-  label(350,470,"⚡ STRANG A · KNX-Einrichtung — jetzt","#3b82f6",13);
-  A.forEach(a=>node(a.id,a.t,a.ki,a.c));
-  SYS.filter(s=>["s-ets","s-ha","s-obsidian","s-strom"].includes(s.id)).forEach(s=>node(s.id,s.t,s.sub,"#fbbf24","#0b1220",{fs:11}));
-
-  // Schritt 5: Strang B (Rechnung)
-  S(5);
-  label(1890,500,"⏱️ STRANG B · Rechnung — vor Tagen (12.11.2026)","#2A9D8F",13);
-  B.filter(b=>b.id!=="pa").forEach(b=>node(b.id,b.t,b.ki,b.c));
-  SYS.filter(s=>["s-n8n","s-paperless","s-bank"].includes(s.id)).forEach(s=>node(s.id,s.t,s.sub,"#fbbf24","#0b1220",{fs:11}));
-  ZU.filter(z=>["netz","dba","steuer","vers"].includes(z.id)).forEach(z=>node(z.id,z.t,z.ki,"#64748b","#0b1220",{fs:9.5}));
-
-  // Schritt 4: Abzweig KNX-Techniker → Paperless-Administrator → Paperless-NGX
-  S(4);
-  node("pa","Paperless-Administrator","KI-013 · Dokumente & Backoffice","#2A9D8F");
-  const sp=POS["s-paperless"];
-  label(1120,655,"Gerätebezeichnung fehlt → er fragt den Paperless-Administrator","#f59e0b",12);
-  valuePanel(100,1150,350,92,"FUND in Paperless (Voltus-Rechnung)",[
-    {k:"Gerät",v:"MDT SCN-LSEN1.01 — KNX Leckagesensor"},
-  ],"#f59e0b");
-
-  // Schritt 6: Einrichtung (Badges + ANGELEGT)
-  S(6);
-  const knx=POS.knx;
-  badge(knx.x,knx.y-46,"📚","Präzedenzfall Küche (1.1.53)","#a78bfa");
-  badge(knx.x+knx.w+14,knx.y+160,"🔒","verschlüsseltes Projekt → Passwort Thomas","#fb7185");
-  badge(knx.x+knx.w+14,knx.y+218,"🧲","Programmiertaste → Thomas drückt","#fb7185");
-  valuePanel(560,1078,540,190,"ANGELEGT in ETS / Home Assistant",[
-    {k:"phys. Adresse",v:"1.1.56"},
-    {k:"Gruppenadresse · DPT",v:"10/4/8 · 1.005"},
-    {k:"Name",v:"UG_Waschküche_Leckagesensor (SCN-LSEN1.01)"},
-    {k:"Home Assistant",v:"binary_sensor.ug_waschkueche_leckage"},
-  ],"#3b82f6");
+function badge(x,y,txt,color){
+  const w=txt.length*7.4+30;
+  const g=el("g",{transform:`translate(${x},${y})`},gNodes);
+  el("rect",{width:w,height:30,rx:15,fill:"#140d1c",stroke:color,"stroke-width":1.4},g);
+  el("circle",{cx:15,cy:15,r:4,fill:color},g);
+  el("text",{x:26,y:20,fill:color,"font-size":14,"font-weight":"600"},g).textContent=txt;
+}
+function valuePanel(x,y,w,title,rows,color,cols){
+  cols=cols||1;
+  const rh=44,h=52+Math.ceil(rows.length/cols)*rh;
+  const g=el("g",{transform:`translate(${x},${y})`},gNodes);
+  el("rect",{width:w,height:h,rx:12,fill:"#0b1220",stroke:color,"stroke-width":1.6},g);
+  el("rect",{width:w,height:h,rx:12,fill:color,opacity:.08},g);
+  el("text",{x:16,y:30,fill:color,"font-size":16,"font-weight":"700"},g).textContent=title;
+  const cw=(w-16)/cols;
+  rows.forEach((r,i)=>{
+    const cx=16+(i%cols)*cw, cy=56+Math.floor(i/cols)*rh;
+    el("text",{x:cx,y:cy,fill:"#8193ab","font-size":13},g).textContent=r.k;
+    el("text",{x:cx,y:cy+19,fill:"#f1f5f9","font-size":r.small?13.5:15.5,"font-family":"'JetBrains Mono',monospace"},g).textContent=r.v;
+  });
 }
 
-/* ---------- Step-Einblendung ---------- */
-const STEPS=[
-  {label:"Der Prompt",desc:"Thomas steht in der Waschküche — ein einziger Prompt stößt den ganzen Prozess an."},
-  {label:"Projektleiter",desc:"Der Orchestrator zerlegt den Auftrag und stößt die KNX-Einrichtung an."},
-  {label:"Strang A · Jetzt",desc:"Die KNX-Einrichtung des Leckagesensors passiert genau jetzt."},
-  {label:"Der Abzweig",desc:"Der KNX-Techniker kennt die Gerätebezeichnung nicht — er holt sie aus Paperless-NGX."},
-  {label:"Strang B · Vergangenheit",desc:"Die Rechnungskette lief schon vor Tagen unbemerkt im Hintergrund."},
-  {label:"Die Einrichtung",desc:"Mit der gefundenen Bezeichnung legt er den Sensor in ETS und Home Assistant an."},
-  {label:"Governance",desc:"Über allem steht die übergeordnete Governance — sie auditiert jeden Agenten."},
-  {label:"Die Frage",desc:"Warum hat er diesen Weg gewählt?"},
-];
-const TOTAL=STEPS.length;
-let current=0;
+/* ---------- Aufbau ---------- */
+const stage=document.getElementById("stage");
+svg=document.createElementNS(NS,"svg");
+svg.setAttribute("viewBox",`0 0 2290 ${H}`);svg.setAttribute("width",2290);svg.style.overflow="visible";svg.setAttribute("height",H);
+stage.prepend(svg);
+const defs=el("defs",{},svg);
+el("pattern",{id:"grid",width:40,height:40,patternUnits:"userSpaceOnUse"},defs).innerHTML='<path d="M 40 0 L 0 0 0 40" fill="none" stroke="#12213a" stroke-width="0.6"/>';
+el("marker",{id:"arr",markerWidth:10,markerHeight:8,refX:8,refY:4,orient:"auto"},defs).innerHTML='<polygon points="0 0, 10 4, 0 8" fill="#8193ab"/>';
+el("rect",{x:-2000,y:-2000,width:W+4000,height:H+4000,fill:"url(#grid)"},svg);
+gEdges=el("g",{},svg);gNodes=el("g",{},svg);
 
-function showUpTo(n){
-  document.querySelectorAll("[data-step]").forEach(e=>{
-    const s=+e.getAttribute("data-step");
-    e.style.display = (s<=n) ? "" : "none";
+/* Kanten */
+S(2);
+edge(P.thomas.cx,P.thomas.y+P.thomas.h,P.projektleiter.cx,P.projektleiter.y,"#f8fafc",{op:.85});
+edge(P.projektleiter.cx,P.projektleiter.y+P.projektleiter.h,P.knx.cx,P.knx.y,"#f8fafc",{op:.75});
+S(7);
+GOV.forEach(g=>{const p=P[g.id];edge(p.cx,p.y+p.h,p.cx,p.y+p.h+40,"#D4A72C",{op:.6,dash:"4,4"})});
+S(3);
+for(let i=0;i<A.length-1;i++){const p=P[A[i].id],q=P[A[i+1].id];edge(p.cx,p.y+p.h,q.cx,q.y,"#3b82f6",{op:.85})}
+[["strom","s-strom"],["smarthome","s-ha"],["doku","s-obsidian"]].forEach(([a,s])=>edge(P[a].cx,P[a].y+P[a].h,P[s].cx,P[s].y,"#fbbf24",{op:.5,dash:"5,5"}));
+S(5);
+for(let i=0;i<B.length-1;i++){const p=P[B[i].id],q=P[B[i+1].id];edge(p.cx,p.y+p.h,q.cx,q.y,"#2A9D8F",{op:.85})}
+edge(P.n8n.x+60,P.n8n.y+P.n8n.h,P["s-n8n"].cx,P["s-n8n"].y,"#fbbf24",{op:.5,dash:"5,5"});
+edge(P.banker.cx,P.banker.y+P.banker.h,P["s-bank"].cx,P["s-bank"].y,"#fbbf24",{op:.5,dash:"5,5"});
+edge(P.pa.x+P.pa.w-20,P.pa.cy,P["s-paperless"].x+P["s-paperless"].w-30,P["s-paperless"].y,"#fbbf24",{op:.4,dash:"5,5"});
+edge(P.netz.x+P.netz.w,P.netz.cy,P.n8n.x,P.n8n.cy,"#8193ab",{op:.5,dash:"4,3"});
+edge(P.dba.x+P.dba.w,P.dba.cy,P.n8n.x,P.n8n.cy,"#8193ab",{op:.5,dash:"4,3"});
+edge(P.beleg.x,P.beleg.cy,P.steuer.x+P.steuer.w,P.steuer.cy,"#8193ab",{op:.5,dash:"4,3"});
+edge(P.beleg.x,P.beleg.cy,P.vers.x+P.vers.w,P.vers.cy,"#8193ab",{op:.5,dash:"4,3"});
+S(4);
+const ABZ=`M ${P.knx.x+P.knx.w} ${P.knx.cy+14} C 800 ${P.knx.cy+14}, 800 ${P.beleg.cy}, ${P.beleg.x} ${P.beleg.cy}`;
+edge(0,0,0,0,"#f59e0b",{op:.95,w:3.2,d:ABZ}).dataset.keep=1;
+edge(P.beleg.cx-80,P.beleg.y+P.beleg.h,P["s-paperless"].cx,P["s-paperless"].y,"#fbbf24",{op:.6,dash:"5,5"});
+S(8);
+const bl=edge(0,0,0,0,"#fbbf24",{op:1,w:6,d:ABZ});bl.classList.add("blink");bl.dataset.keep=1;bl.dataset.upto=9;
+S(6);
+edge(P.knx.x+30,P.knx.y+P.knx.h,P["s-ets"].cx,P["s-ets"].y,"#fbbf24",{op:.6,dash:"5,5"});
+edge(P["s-obsidian"].cx+40,P["s-obsidian"].y,P.knx.x+P.knx.w-30,P.knx.y+P.knx.h,"#a78bfa",{op:.75,dash:"6,4",w:2.2});
+
+/* Knoten */
+S(1);
+label(800,-68,"DER PROMPT – der Auftakt","#3b8cf0",18);
+{ // Sprechblase
+  const x=1150,y=-110,w=480,h=128,r=14,ty=P.thomas.cy,c="#f8fafc";
+  const d=`M ${x+r} ${y} H ${x+w-r} Q ${x+w} ${y} ${x+w} ${y+r} V ${y+h-r} Q ${x+w} ${y+h} ${x+w-r} ${y+h} H ${x+r} Q ${x} ${y+h} ${x} ${y+h-r} V ${ty+14} L ${x-42} ${ty} L ${x} ${ty-14} V ${y+r} Q ${x} ${y} ${x+r} ${y} Z`;
+  const g=el("g",{},gNodes);
+  el("path",{d,fill:"#0b1220",stroke:c,"stroke-width":2},g);
+  el("path",{d,fill:c,opacity:.07},g);
+  const lines=[["„Ich stehe in der Waschküche und habe"],["einen KNX-Feuchtigkeitssensor"],["angeschlossen, ","richte ihn ein","."+"“"]];
+  lines.forEach((l,i)=>{
+    const t=el("text",{x:x+22,y:y+42+i*32,fill:c,"font-size":22,"font-weight":"500"},g);
+    l.forEach((part,k)=>{const sp=document.createElementNS(NS,"tspan");sp.textContent=part;if(k===1){sp.setAttribute("fill","#3b8cf0");sp.setAttribute("font-weight","700")}t.appendChild(sp)});
+  });
+}
+node("thomas","Thomas","Prompt · Waschküche · KNX-Feuchtigkeitssensor","#f8fafc",{star:true,fs:21});
+S(7);
+el("rect",{x:40,y:96,width:1520,height:46,rx:10,fill:"#0b1220",stroke:"#D4A72C","stroke-width":1.4},gNodes);
+el("rect",{x:40,y:96,width:1520,height:46,rx:10,fill:"#D4A72C",opacity:.07},gNodes);
+label(800,126,"ÜBERGEORDNETE GOVERNANCE – auditiert alle Agenten","#D4A72C",18);
+el("rect",{x:20,y:158,width:1560,height:1234,rx:16,fill:"none",stroke:"#D4A72C","stroke-width":1.4,"stroke-dasharray":"8,6",opacity:.4},gNodes);
+label(800,428,"ALLE BOTS – werden von der übergeordneten Governance auditiert","#D4A72C",15);
+GOV.forEach(g=>node(g.id,g.t,g.ki+" · "+g.sec,g.c,{star:true,fs:18}));
+S(2);
+node("projektleiter","Projektleiter","KI-002 · Orchestrator","#f8fafc",{fs:19});
+label(990,362,"ChatGPT-Anbindung über Tunnel","#a3b3c9",15,"start");
+S(3);
+label(40,476,"STRANG A · KNX-Einrichtung – jetzt","#3b82f6",18,"start");
+A.forEach(a=>{const g=node(a.id,a.t,a.ki+" · "+a.sec,a.c);if(a.id==="knx")g.dataset.keep=1});
+SYS.slice(0,4).forEach(s=>node(s.id,s.t,s.sub,"#fbbf24",{fs:17,subfs:13}));
+S(5);
+label(1560,476,"STRANG B · Rechnung – vor Tagen (12.11.2026)","#2A9D8F",18,"end");
+B.filter(b=>b.id!=="beleg").forEach(b=>node(b.id,b.t,b.ki+" · "+b.sec,b.c));
+SYS.slice(5).forEach(s=>node(s.id,s.t,s.sub,"#fbbf24",{fs:17,subfs:13}));
+ZU.forEach(z=>node(z.id,z.t,z.ki,"#8193ab",{fs:15.5,subfs:12.5}));
+S(4);
+node("beleg","Belegsachbearbeiter","KI-012 · Dokumente & Backoffice","#2A9D8F").dataset.keep=1;
+SYS.slice(4,5).forEach(s=>node(s.id,s.t,s.sub,"#fbbf24",{fs:17,subfs:13}));
+label(590,708,"Gerätebezeichnung fehlt →","#f59e0b",18);
+label(590,732,"er fragt den Belegsachbearbeiter","#f59e0b",18);
+valuePanel(560,980,560,"FUND in Paperless (Voltus-Rechnung)",[{k:"Gerät",v:"MDT SCN-LSEN1.01 – KNX-Leckagesensor"}],"#f59e0b");
+S(6);
+badge(455,468,"Präzedenzfall Küche (1.1.53)","#a78bfa");
+badge(455,503,"Verschlüsseltes Projekt → Passwort von Thomas","#fb7185");
+badge(455,538,"Programmiertaste → Thomas drückt","#fb7185");
+valuePanel(200,1200,1200,"ANGELEGT in ETS / Home Assistant",[
+  {k:"Physikalische Adresse",v:"1.1.56"},{k:"Gruppenadresse",v:"10/4/8"},{k:"DPT",v:"1.005"},
+  {k:"Name",v:"UG_Waschküche_Leckagesensor (SCN-LSEN1.01)",small:1},{k:"Home Assistant",v:"binary_sensor.ug_waschkueche_leckage",small:1}],"#3b82f6",3);
+
+S(8);
+const qm=el("text",{x:800,y:812,fill:"#3b8cf0","font-size":300,"font-weight":"700","text-anchor":"middle",class:"qmark","stroke-width":14},gNodes);qm.textContent="?";qm.dataset.only=8;
+const qt=el("text",{x:800,y:985,fill:"#f8fafc","font-size":44,"font-weight":"700","text-anchor":"middle",class:"qmark","stroke-width":12},gNodes);qt.textContent="Warum hat er diesen Weg gewählt?";qt.dataset.only=8;
+S(9);
+const fo=el("foreignObject",{x:420,y:450,width:760,height:700},gNodes);fo.dataset.only=9;
+fo.innerHTML=`<div xmlns="http://www.w3.org/1999/xhtml" class="acard">
+<span class="qtag">Die Antwort</span><h3>Warum hat er diesen Weg gewählt?</h3>
+<p>Weil der Masterplan es so vorschreibt: Die KI soll <b>„Aufgaben möglichst selbstständig bis zum Ergebnis führen“</b> und <b>„Informationen aus verschiedenen Systemen selbst finden und zusammenführen“</b>, statt Thomas mit Rückfragen zu belasten. Der Techniker nutzt das bereits dokumentierte System (Paperless), statt zu raten oder den Menschen zu fragen.</p>
+<div class="qsrc"><a class="st" style="display:block;text-decoration:none" href="${ZIEL_URL}" target="_blank" rel="noopener">Quelle · 02 Ziele/01 Ziele und Leitplanken.md ↗</a><ul>
+<li><i>Oberstes Ziel:</i> „Aufgaben möglichst selbstständig bis zum Ergebnis führen.“</li>
+<li><i>Grundprinzip:</i> „Informationen aus verschiedenen Systemen selbst finden und zusammenführen.“</li>
+<li><i>Grundprinzip:</i> „Thomas nur dann einbeziehen, wenn wirklich eine Entscheidung, Freigabe oder persönliche Einschätzung nötig ist.“</li>
+<li><i>Grundprinzip:</i> „bestehende funktionierende Systeme möglichst orchestrieren statt unnötig ersetzen.“</li>
+<li><i>Leit-KPI:</i> „Zurückgewonnene Stunden pro Woche.“</li></ul></div></div>`;
+S(10);
+{
+  const x=1690,y=-110,w=580,c="#3b8cf0";
+  const g=el("g",{transform:`translate(${x},${y})`},gNodes);
+  const rows=[];let yy=44;
+  const t=(tx,ty,txt,fill,size,weight,extra)=>{const e=el("text",Object.assign({x:tx,y:ty,fill,"font-size":size,"font-weight":weight||"400"},extra||{}),g);e.textContent=txt;return e};
+  const bg=el("rect",{width:w,rx:12,fill:"#0b1220",stroke:c,"stroke-width":1.6},g);
+  const tint=el("rect",{width:w,rx:12,fill:c,opacity:.08},g);
+  t(20,yy,"ÜBERGEORDNETES ZIEL",c,20,"700");yy+=40;
+  t(20,yy,"Oberstes Ziel","#8193ab",15);yy+=34;
+  t(20,yy,"Aufgaben selbstständig","#f8fafc",30,"700");yy+=36;
+  t(20,yy,"bis zum Ergebnis führen","#f8fafc",30,"700");yy+=40;
+  el("line",{x1:20,x2:w-20,y1:yy,y2:yy,stroke:"#22304a"},g);yy+=30;
+  t(20,yy,"Grundprinzipien","#8193ab",15);yy+=30;
+  ["Informationen selbst finden und zusammenführen","Thomas nur für Entscheidung oder Freigabe","Bestehende Systeme orchestrieren statt ersetzen"].forEach(l=>{
+    t(20,yy,"—",c,20,"700");t(44,yy,l,"#e2e8f0",20);yy+=30});
+  yy+=6;el("line",{x1:20,x2:w-20,y1:yy,y2:yy,stroke:"#22304a"},g);yy+=30;
+  t(20,yy,"Leit-KPI","#8193ab",15);yy+=32;
+  t(20,yy,"Zurückgewonnene Stunden pro Woche","#f8fafc",24,"700");yy+=20;
+  el("line",{x1:20,x2:w-20,y1:yy,y2:yy,stroke:"#22304a"},g);yy+=30;
+  const a=el("a",{href:ZIEL_URL,target:"_blank",style:"cursor:pointer"},g);
+  el("text",{x:20,y:yy,fill:c,"font-size":17,"font-weight":"700"},a).textContent="Quelle öffnen ↗  02 Ziele / 01 Ziele und Leitplanken";yy+=22;
+  bg.setAttribute("height",yy);tint.setAttribute("height",yy);
+}
+{
+  const x=1690,y=-110+500+24,w=580,c="#3b8cf0";
+  const g=el("g",{transform:`translate(${x},${y})`},gNodes);
+  const t=(tx,ty,txt,fill,size,weight)=>{el("text",{x:tx,y:ty,fill,"font-size":size,"font-weight":weight||"400"},g).textContent=txt};
+  const bg=el("rect",{width:w,rx:12,fill:"#0b1220",stroke:c,"stroke-width":1.6},g);
+  const tint=el("rect",{width:w,rx:12,fill:c,opacity:.08},g);
+  let yy=44;
+  t(20,yy,"DIESER PROZESS IN ZAHLEN",c,20,"700");yy+=24;
+  [["1","Prompt","Ein Satz in der Waschküche stößt alles an","#f8fafc"],
+   ["6","Agenten aktiv","Projektleiter · KNX · Stromlauf · Smart Home · Doku · Beleg","#3b82f6"],
+   ["9","Agenten im Hintergrund","Strang B · Infrastruktur · Governance","#a3b3c9"],
+   ["2×","Thomas muss ran","Passwort + Programmiertaste","#fb7185"]].forEach(([n,l,sub],i,arr)=>{
+    const col=arr[i][3];
+    yy+=14;el("line",{x1:20,x2:w-20,y1:yy,y2:yy,stroke:"#22304a"},g);yy+=50;
+    t(20,yy,n,col,44,"700");
+    t(100,yy-16,l,"#f8fafc",24,"700");
+    t(100,yy+8,sub,"#8193ab",16);
+  });
+  yy+=26;
+  bg.setAttribute("height",yy);tint.setAttribute("height",yy);
+}
+
+/* ---------- Kamera ---------- */
+let scale=1,tx=0,ty=0,follow=true;
+function apply(){svg.style.transform=`translate(${tx}px,${ty}px) scale(${scale})`}
+function reserved(){const c=document.getElementById("controls");return c.offsetHeight+28}
+function fitTo(r,ease){
+  const sw=stage.clientWidth,sh=stage.clientHeight-reserved(),pad=Math.min(40,sw*.04),top=48;
+  const [x,y,w,h]=r;
+  scale=Math.min((sw-2*pad)/w,(sh-top-pad)/h,1.5);
+  tx=(sw-w*scale)/2-x*scale;
+  ty=top+((sh-top-pad)-h*scale)/2-y*scale;
+  svg.classList.toggle("ease",!!ease);apply();
+}
+function focusCurrent(ease){fitTo(current>0?STEPS[current-1].f:STEPS[0].f,ease)}
+new ResizeObserver(()=>focusCurrent(false)).observe(stage);
+
+let drag=false,moved=0,sx=0,sy=0,ox=0,oy=0;
+stage.addEventListener("wheel",e=>{
+  if(e.target.closest("#controls,#panel,#legend,.tools"))return;
+  e.preventDefault();svg.classList.remove("ease");follow=false;
+  const f=e.deltaY<0?1.12:1/1.12,ns=Math.min(4,Math.max(.15,scale*f));
+  const r=stage.getBoundingClientRect(),mx=e.clientX-r.left,my=e.clientY-r.top;
+  tx=mx-(mx-tx)/scale*ns;ty=my-(my-ty)/scale*ns;scale=ns;apply();
+},{passive:false});
+stage.addEventListener("pointerdown",e=>{
+  if(e.target.closest("#controls,#panel,#legend,.tools"))return;
+  drag=true;moved=0;sx=e.clientX;sy=e.clientY;ox=tx;oy=ty;svg.classList.remove("ease");stage.classList.add("panning");
+});
+addEventListener("pointermove",e=>{if(!drag)return;const dx=e.clientX-sx,dy=e.clientY-sy;moved=Math.max(moved,Math.abs(dx)+Math.abs(dy));if(moved>4)follow=false;tx=ox+dx;ty=oy+dy;apply()});
+addEventListener("pointerup",e=>{
+  if(drag&&moved<5){const n=e.target.closest&&e.target.closest(".node");if(n&&n.dataset.id)openPanel(n.dataset.id)}
+  drag=false;stage.classList.remove("panning");
+});
+stage.addEventListener("dblclick",()=>{follow=true;focusCurrent(true)});
+document.getElementById("btnFit").onclick=()=>{follow=false;fitTo([0,-130,W,H+130],true)};
+
+/* ---------- Schritte ---------- */
+let current=0,auto=null;
+const all=[...gEdges.children,...gNodes.children].filter(e=>+e.dataset.step>0);
+const dotsEl=document.getElementById("dots");
+dotsEl.innerHTML=STEPS.map((s,i)=>`<button class="dot" aria-label="Schritt ${i+1}: ${s.label}" data-i="${i+1}"></button>`).join("");
+dotsEl.onclick=e=>{const b=e.target.closest(".dot");if(b)goto(+b.dataset.i)};
+
+function show(n,prev){
+  const full=n===7||n===10,focus=n===8||n===9;
+  all.forEach(e=>{
+    const s=+e.dataset.step;
+    if(s>n||(e.dataset.only&&+e.dataset.only!==n)||(e.dataset.upto&&n>+e.dataset.upto)){e.style.display="none";e.classList.remove("enter","now");return}
+    e.style.display="";
+    const isNew=s===n&&s>prev;
+    e.classList.toggle("enter",isNew);
+    e.classList.toggle("now",isNew);
+    e.style.opacity=focus?((e.dataset.keep||s>=8)?"":".16"):(full||s===n)?"":".5";
   });
 }
 function updateControls(){
-  document.getElementById("cLabel").textContent = current>0 ? ("Schritt "+current+" · "+STEPS[current-1].label) : "Start";
-  document.getElementById("cDesc").textContent = current>0 ? STEPS[current-1].desc : "Klicke „Weiter“, um den Prozess Schritt für Schritt aufzubauen.";
-  document.getElementById("cProg").textContent = "Schritt "+current+"/"+TOTAL;
-  document.getElementById("btnBack").disabled = current<=0;
-  document.getElementById("btnNext").disabled = current>=TOTAL;
-  document.getElementById("btnNext").textContent = current>=TOTAL ? "Fertig ›" : "Weiter ›";
+  const s=STEPS[current-1];
+  document.getElementById("cLabel").textContent=current>0?`Schritt ${current} von ${TOTAL} · ${s.label}`:`Start · ${TOTAL} Schritte`;
+  document.getElementById("cDesc").textContent=current>0?s.desc:"Klicke „Weiter“ (oder → / Leertaste), um den Prozess Schritt für Schritt aufzubauen.";
+  document.getElementById("btnBack").disabled=current<=0;
+  const nx=document.getElementById("btnNext");nx.disabled=current>=TOTAL;nx.textContent=current>=TOTAL?"Fertig":"Weiter ›";
+  dotsEl.querySelectorAll(".dot").forEach((d,i)=>{d.className="dot"+(i+1<current?" done":i+1===current?" cur":"")});
 }
 function goto(n){
+  const prev=current;
   current=Math.max(0,Math.min(TOTAL,n));
-  showUpTo(current);
-  updateControls();
-  if(current===8){showQuestion();stopAuto();}else{closeQuestion();}
+  show(current,prev);updateControls();follow=true;focusCurrent(true);
+  if(current===TOTAL)stopAuto();
 }
-function toggleAuto(){
-  if(auto){stopAuto();return;}
-  auto=setInterval(()=>{if(current<TOTAL)goto(current+1);else stopAuto();},2800);
-  document.getElementById("btnAuto").textContent="⏸ Pause";
-  document.getElementById("btnAuto").classList.add("primary");
-}
-function stopAuto(){if(auto){clearInterval(auto);auto=null;}document.getElementById("btnAuto").textContent="▶ Autoplay";document.getElementById("btnAuto").classList.remove("primary");}
-let auto=null;
+function stopAuto(){clearInterval(auto);auto=null;const b=document.getElementById("btnAuto");b.textContent="▶ Autoplay";b.classList.remove("primary")}
+document.getElementById("btnAuto").onclick=()=>{
+  if(auto){stopAuto();return}
+  if(current>=TOTAL)goto(0);
+  goto(current+1);
+  auto=setInterval(()=>{current<TOTAL?goto(current+1):stopAuto()},4500);
+  const b=document.getElementById("btnAuto");b.textContent="⏸ Pause";b.classList.add("primary");
+};
+document.getElementById("btnBack").onclick=()=>{stopAuto();goto(current-1)};
+document.getElementById("btnNext").onclick=()=>goto(current+1);
 
-/* ---------- Frage / Antwort ---------- */
-function showQuestion(){document.getElementById("qmodal").classList.add("open");document.getElementById("qanswer").classList.remove("open");document.getElementById("qreveal").style.display="";}
-function closeQuestion(){document.getElementById("qmodal").classList.remove("open");}
-function revealAnswer(){document.getElementById("qanswer").classList.add("open");document.getElementById("qreveal").style.display="none";}
-
-/* ---------- Detail-Panel ---------- */
+/* ---------- Details ---------- */
 const DETAIL={};
-[...GOV,...A,...B].forEach(x=>DETAIL[x.id]=x);
-ZU.forEach(z=>DETAIL[z.id]=z);
-DETAIL["thomas"]={t:"Thomas",ki:"—",sec:"Mensch",c:"#f8fafc",d:"Stellt den Prompt in der Waschküche — bleibt an der Mensch-Maschine-Grenze (Passwort + Programmiertaste)."};
-DETAIL["projektleiter"]={t:"Projektleiter",ki:"KI-002",sec:"Leitung & Governance",c:"#f8fafc",d:"Orchestrator: zerlegt den Prompt und verteilt die Stränge auf die Agenten."};
+[...GOV,...A,...B,...ZU].forEach(x=>DETAIL[x.id]=x);
+DETAIL.thomas={t:"Thomas",ki:"—",sec:"Mensch",c:"#f8fafc",d:"Stellt den Prompt in der Waschküche – bleibt an der Mensch-Maschine-Grenze (Passwort + Programmiertaste)."};
+DETAIL.projektleiter={t:"Projektleiter",ki:"KI-002",sec:"Leitung & Governance",c:"#f8fafc",d:"Orchestrator: zerlegt den Prompt und verteilt die Stränge auf die Agenten."};
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+/* Illustrationen der externen Systeme (keine echten Screenshots) */
+function mock(id){
+  const W2=560,H2=300;
+  const frame=(title,bar,body)=>`<svg class="mock" viewBox="0 0 ${W2} ${H2}" xmlns="http://www.w3.org/2000/svg" font-family="Roboto Condensed,system-ui,sans-serif">
+<rect width="${W2}" height="${H2}" fill="#0b1220"/><rect width="${W2}" height="34" fill="#16213a"/>
+<circle cx="18" cy="17" r="5" fill="#fb7185"/><circle cx="34" cy="17" r="5" fill="#fbbf24"/><circle cx="50" cy="17" r="5" fill="#2A9D8F"/>
+<text x="70" y="22" fill="#a3b3c9" font-size="14">${title}</text><rect y="34" width="${W2}" height="4" fill="${bar}"/>${body}</svg>`;
+  const row=(y,a,b,c)=>`<rect x="20" y="${y}" width="520" height="30" rx="6" fill="${c||'#0f172a'}" stroke="#22304a"/><text x="32" y="${y+20}" fill="#f1f5f9" font-size="14">${a}</text><text x="528" y="${y+20}" fill="#a3b3c9" font-size="13" text-anchor="end" font-family="JetBrains Mono,monospace">${b}</text>`;
+  const box=(x,y,w,h,t,c)=>`<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="8" fill="#0f172a" stroke="${c}" stroke-width="1.6"/><text x="${x+w/2}" y="${y+h/2+5}" fill="#f1f5f9" font-size="14" font-weight="700" text-anchor="middle">${t}</text>`;
+  switch(id){
+   case "s-ets":return frame("ETS6 · Projekt Holunderweg","#3b82f6",
+    `<text x="20" y="66" fill="#8193ab" font-size="13">Topologie › Bereich 1 › Linie 1</text>`+
+    row(78,"1.1.53 · Küche_Leckagesensor","SCN-LSEN1.01")+row(114,"1.1.55 · …","")+
+    row(150,"1.1.56 · UG_Waschküche_Leckagesensor","SCN-LSEN1.01","#13254a")+
+    `<text x="20" y="214" fill="#8193ab" font-size="13">Gruppenadressen</text>`+row(226,"10/4/8 · UG Waschküche Leckage","DPT 1.005","#13254a"));
+   case "s-ha":return frame("Home Assistant · Übersicht UG","#3b8cf0",
+    `<rect x="20" y="58" width="250" height="110" rx="12" fill="#0f172a" stroke="#22304a"/><circle cx="56" cy="96" r="18" fill="#2A9D8F" opacity=".3"/><circle cx="56" cy="96" r="8" fill="#2A9D8F"/>
+<text x="86" y="92" fill="#f1f5f9" font-size="16" font-weight="700">Leckage Waschküche</text><text x="86" y="114" fill="#2A9D8F" font-size="15">Trocken</text>
+<text x="36" y="150" fill="#8193ab" font-size="12" font-family="JetBrains Mono,monospace">binary_sensor.ug_waschkueche_leckage</text>
+<rect x="290" y="58" width="250" height="110" rx="12" fill="#0f172a" stroke="#22304a"/><text x="306" y="88" fill="#f1f5f9" font-size="16" font-weight="700">Automation</text>
+<text x="306" y="112" fill="#a3b3c9" font-size="14">Leckage → Benachrichtigung</text><rect x="306" y="128" width="44" height="22" rx="11" fill="#3b8cf0"/><circle cx="338" cy="139" r="8" fill="#fff"/><text x="360" y="144" fill="#a3b3c9" font-size="13">aktiv</text>`+
+    row(190,"Gerät","MDT SCN-LSEN1.01")+row(226,"Gruppenadresse","10/4/8"));
+   case "s-obsidian":return frame("Obsidian · Vault Senty","#a78bfa",
+    `<rect x="20" y="50" width="150" height="230" rx="8" fill="#0f172a"/>`+
+    ["Geraete.md","Gruppenadressen.md","Kommunikations-","objekte.md","Parameter.md"].map((t,i)=>`<text x="32" y="${76+i*24}" fill="${i===0?'#a78bfa':'#a3b3c9'}" font-size="13">${t}</text>`).join("")+
+    `<text x="190" y="82" fill="#f1f5f9" font-size="22" font-weight="700">Geräte</text>
+<text x="190" y="116" fill="#a3b3c9" font-size="14">## UG Waschküche</text>
+<text x="190" y="144" fill="#f1f5f9" font-size="14">- Leckagesensor MDT SCN-LSEN1.01</text>
+<text x="190" y="168" fill="#f1f5f9" font-size="14">- phys. Adresse: 1.1.56</text>
+<text x="190" y="192" fill="#f1f5f9" font-size="14">- GA: 10/4/8 (DPT 1.005)</text>
+<text x="190" y="216" fill="#a78bfa" font-size="14">- Präzedenzfall: [[Küche 1.1.53]]</text>`);
+   case "s-paperless":return frame("Paperless-NGX · Dokumente","#2A9D8F",
+    `<rect x="20" y="52" width="120" height="160" rx="6" fill="#e2e8f0"/>`+[0,1,2,3,4,5].map(i=>`<rect x="32" y="${70+i*20}" width="${i%2?70:96}" height="6" rx="3" fill="#94a3b8"/>`).join("")+
+    `<text x="160" y="76" fill="#f1f5f9" font-size="18" font-weight="700">Rechnung Voltus GmbH</text>
+<text x="160" y="98" fill="#a3b3c9" font-size="14">Korrespondent: Voltus GmbH · 12.11.2026</text>
+<rect x="160" y="110" width="74" height="22" rx="11" fill="#2A9D8F" opacity=".35"/><text x="197" y="126" fill="#f1f5f9" font-size="12" text-anchor="middle">Rechnung</text>
+<rect x="242" y="110" width="74" height="22" rx="11" fill="#3b82f6" opacity=".35"/><text x="279" y="126" fill="#f1f5f9" font-size="12" text-anchor="middle">privat</text>`+
+    row(150,"Artikel","MDT SCN-LSEN1.01","#13254a").replace('x="20"','x="160"').replace('width="520"','width="380"').replace('x="32"','x="172"')+
+    `<text x="20" y="246" fill="#8193ab" font-size="13">Volltext: „… MDT SCN-LSEN1.01 KNX Leckagesensor …“</text>`);
+   case "s-n8n":return frame("n8n · Workflow Rechnungseingang","#5865D8",
+    box(20,110,110,56,"E-Mail","#2A9D8F")+box(160,110,110,56,"PDF holen","#5865D8")+box(300,110,110,56,"Validieren","#5865D8")+box(440,110,100,56,"Paperless","#2A9D8F")+
+    [130,270,410].map(x=>`<path d="M ${x} 138 H ${x+30}" stroke="#8193ab" stroke-width="2"/>`).join("")+
+    `<text x="20" y="216" fill="#8193ab" font-size="13">Header-Auth · Feld-Validierung · Dedupe · Webhook</text><text x="20" y="246" fill="#2A9D8F" font-size="14">Letzte Ausführung: erfolgreich</text>`);
+   case "s-bank":return frame("Bank · Umsätze (HBCI)","#29945D",
+    `<text x="20" y="66" fill="#8193ab" font-size="13">Abgleich mit Belegen</text>`+
+    row(78,"Voltus GmbH · Rechnung","bezahlt ✓","#12301f")+row(114,"…","")+row(150,"…",""));
+  }
+  return "";
+}
 function openPanel(id){
-  const d=DETAIL[id];
-  if(!d){closePanel();return;}
-  const color=d.c;
-  let html=`<div class="pt" style="color:${color}">${d.t}</div><div class="pc">${d.ki} · ${d.sec}</div>`;
-  if(d.ki!=="—"){html+=`<div class="row"><b>Modell</b><span>deepseek-v4-pro</span></div>`;}
-  html+=`<div class="row"><b>Rolle</b><span style="text-align:right">${d.d}</span></div>`;
-  if(d.for) html+=`<div class="row"><b>Arbeitet zu</b><span>${d.for.join(", ")}</span></div>`;
-  if(d.uses) html+=`<div class="row"><b>Nutzt Ergebnis von</b><span>${d.uses}</span></div>`;
-  document.getElementById("panelBody").innerHTML=html;
+  const pn=document.getElementById("panel");
+  if(id.startsWith("s-")){
+    const s=SYS.find(x=>x.id===id);if(!s){closePanel();return}
+    let h=`<div class="pt" style="color:#fbbf24">${esc(s.t)}</div><div class="pc">Externes System · ${esc(s.sub.replace(" · Link ↗",""))}</div>`;
+    h+=`<div class="row"><b>Rolle</b><span>${esc(SYSD[id]||"")}</span></div>`;
+    if(s.lan)h+=`<div class="mnote" style="margin-top:10px">Nur im Heimnetz erreichbar.</div>`;
+    if(s.url)h+=`<a class="cbtn primary golink" href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.t)} öffnen ↗</a>`;
+    else h+=mock(id)+`<div class="mnote">Illustration – kein Live-Zugriff von außen.</div>`;
+    document.getElementById("panelBody").innerHTML=h;
+    pn.classList.toggle("wide",!s.url);pn.classList.add("open");return;
+  }
+  pn.classList.remove("wide");
+  const d=DETAIL[id];if(!d){closePanel();return}
+  let h=`<div class="pt" style="color:${d.c}">${esc(d.t)}</div><div class="pc">${esc(d.ki)} · ${esc(d.sec)}</div>`;
+  if(d.ki!=="—")h+=`<div class="row"><b>Modell</b><span>deepseek-v4-pro</span></div>`;
+  h+=`<div class="row"><b>Rolle</b><span>${esc(d.d)}</span></div>`;
+  if(d.for)h+=`<div class="row"><b>Arbeitet zu</b><span>${esc(d.for.join(", "))}</span></div>`;
+  if(d.uses)h+=`<div class="row"><b>Nutzt Ergebnis von</b><span>${esc(d.uses)}</span></div>`;
+  document.getElementById("panelBody").innerHTML=h;
   document.getElementById("panel").classList.add("open");
 }
-function closePanel(){document.getElementById("panel").classList.remove("open");}
+function closePanel(){document.getElementById("panel").classList.remove("open")}
+document.getElementById("panelClose").onclick=closePanel;
+gNodes.addEventListener("keydown",e=>{if(e.key==="Enter"){const n=e.target.closest(".node");if(n&&n.dataset.id)openPanel(n.dataset.id)}});
 
-/* ---------- Pan/Zoom ---------- */
-function attach(){
-  const stage=document.getElementById("stage");
-  let scale=0.82,tx=0,ty=0,drag=false,sx=0,sy=0,ox=0,oy=0;
-  function apply(){svg.style.transform=`translate(${tx}px,${ty}px) scale(${scale})`;svg.style.transformOrigin="0 0";}
-  tx=(stage.clientWidth-W*scale)/2; ty=(stage.clientHeight-H*scale)/2; apply();
-  stage.addEventListener("wheel",e=>{e.preventDefault();const f=e.deltaY<0?1.12:1/1.12;const ns=Math.min(3,Math.max(0.2,scale*f));
-    const r=stage.getBoundingClientRect();const mx=e.clientX-r.left,my=e.clientY-r.top;const wx=(mx-tx)/scale,wy=(my-ty)/scale;
-    tx=mx-wx*ns;ty=my-wy*ns;scale=ns;apply();},{passive:false});
-  stage.addEventListener("mousedown",e=>{drag=true;sx=e.clientX;sy=e.clientY;ox=tx;oy=ty;stage.classList.add("panning");});
-  window.addEventListener("mousemove",e=>{if(!drag)return;tx=ox+(e.clientX-sx);ty=oy+(e.clientY-sy);apply();});
-  window.addEventListener("mouseup",()=>{drag=false;stage.classList.remove("panning");});
-  stage.addEventListener("dblclick",()=>{scale=0.82;tx=(stage.clientWidth-W*scale)/2;ty=(stage.clientHeight-H*scale)/2;apply();});
-}
+/* Legende */
+const lb=document.getElementById("btnLegend");
+lb.onclick=()=>{const o=document.getElementById("legend").classList.toggle("open");lb.setAttribute("aria-pressed",o)};
 
-/* ---------- Build ---------- */
-function build(){
-  svg=document.createElementNS(SVGNS,"svg");
-  svg.setAttribute("viewBox",`0 0 ${W} ${H}`);
-  svg.setAttribute("width","100%");svg.setAttribute("height","100%");
-  document.getElementById("stage").appendChild(svg);
-  gMain=svg;
-  const defs=el("defs",{});
-  el("pattern",{id:"grid",width:40,height:40,patternUnits:"userSpaceOnUse"},defs).innerHTML=`<path d="M 40 0 L 0 0 0 40" fill="none" stroke="#12213a" stroke-width="0.5"/>`;
-  el("marker",{id:"arr",markerWidth:10,markerHeight:7,refX:8,refY:3.5,orient:"auto"},defs).innerHTML=`<polygon points="0 0, 10 3.5, 0 7" fill="#64748b"/>`;
-  el("rect",{x:0,y:0,width:W,height:H,fill:"url(#grid)"});
-  gEdges=el("g",{});gNodes=el("g",{});
-  layout();drawEdges();drawNodes();attach();
-  showUpTo(0);updateControls();
+/* Tastatur */
+addEventListener("keydown",e=>{
+  if(e.key==="Escape"){closePanel();return}
+  if(e.target.closest&&e.target.closest("button")&&(e.key===" "||e.key==="Enter"))return;
+  if(e.key==="ArrowRight"||e.key===" "||e.key==="PageDown"){e.preventDefault();goto(current+1)}
+  if(e.key==="ArrowLeft"||e.key==="PageUp"){e.preventDefault();stopAuto();goto(current-1)}
+});
+
+show(0,0);updateControls();focusCurrent(false);
 }
-build();
 </script>
 </body>
 </html>
