@@ -165,7 +165,7 @@ const GOV=[
   {id:"kipersonal",t:"KI-Personalreferent",ki:"KI-001",sec:"Leitung & Governance",c:"#D4A72C",
    d:"Auditiert alle Agenten: Personalbestand, Probezeit, Einstellung/Ausscheiden. Hat personalleiter + onboarding übernommen."},
 ];
-const A=[
+const B=[
   {id:"email",t:"E-Mail-Assistent",ki:"KI-015",sec:"Dokumente & Backoffice",c:"#2A9D8F",
    d:"Arbeitet den Posteingang ab: erkennt die Voltus-Rechnung, zieht das PDF, übergibt an n8n."},
   {id:"n8n",t:"n8n-Workflow-Entwickler",ki:"KI-003",sec:"Software & Automation",c:"#5865D8",
@@ -177,7 +177,7 @@ const A=[
   {id:"banker",t:"Bankkaufmann",ki:"KI-007",sec:"Finanzen & Controlling",c:"#29945D",
    d:"Prüft gegen Bankumsätze, ob die Rechnung schon bezahlt ist → Zahlungsstatus zurück an den Beleg."},
 ];
-const B=[
+const A=[
   {id:"knx",t:"KNX-Techniker",ki:"KI-022",sec:"Infrastruktur & Smart Home",c:"#3b82f6",
    d:"Holt die Gerätebezeichnung aus Paperless (→ MDT SCN-LSEN1.01), legt in ETS an: phys. 1.1.56, GA 10/4/8, DPT 1.005, Name nach Konvention."},
   {id:"strom",t:"Stromlaufplaner",ki:"KI-025",sec:"Infrastruktur & Smart Home",c:"#3b82f6",
@@ -222,11 +222,11 @@ function layout(){
   const bx=1700, bw=380, bh=56, by=540;
   B.forEach((b,i)=>box(b.id,bx,by+i*gap,bw,bh));
   // Zuarbeiter
-  box("netz",560,660,220,44);
-  box("dba",560,712,220,44);
-  box("steuer",560,892,220,44);
-  box("vers",560,944,220,44);
-  box("haadmin",1440,772,220,44);
+  box("netz",1300,660,220,44);
+  box("dba",1300,712,220,44);
+  box("steuer",1300,892,220,44);
+  box("vers",1300,944,220,44);
+  box("haadmin",560,772,220,44);
   // Externe Systeme
   const sy=1280, sw=250, sh=64, sg=26;
   const sxx=(W-(SYS.length*sw+(SYS.length-1)*sg))/2;
@@ -250,9 +250,17 @@ function drawEdges(){
   S(7);
   GOV.forEach(g=>{const p=POS[g.id];edge(p.cx,p.y+p.h,p.cx,320,"#D4A72C",{op:0.55,dash:"3,3",w:1.4});});
 
-  // Schritt 3: Strang A Kette
+  // Schritt 3: Strang A Kette (KNX)
   S(3);
-  for(let i=0;i<A.length-1;i++){const p=POS[A[i].id],q=POS[A[i+1].id];edge(p.cx,p.y+p.h,q.cx,q.y,"#2A9D8F",{op:0.8});}
+  for(let i=0;i<A.length-1;i++){const p=POS[A[i].id],q=POS[A[i+1].id];edge(p.cx,p.y+p.h,q.cx,q.y,"#3b82f6",{op:0.8});}
+  edge(POS.strom.cx,POS.strom.y+POS.strom.h,POS["s-strom"].cx,POS["s-strom"].y,"#fbbf24",{op:0.5,dash:"4,4"});
+  edge(POS.smarthome.cx,POS.smarthome.y+POS.smarthome.h,POS["s-ha"].cx,POS["s-ha"].y,"#fbbf24",{op:0.5,dash:"4,4"});
+  edge(POS.doku.cx,POS.doku.y+POS.doku.h,POS["s-obsidian"].cx,POS["s-obsidian"].y,"#fbbf24",{op:0.5,dash:"4,4"});
+  edge(POS.haadmin.cx,POS.haadmin.y,POS.smarthome.cx,POS.smarthome.y+POS.smarthome.h/2,"#64748b",{op:0.4,dash:"4,3"});
+
+  // Schritt 4: Strang B Kette (Rechnung)
+  S(4);
+  for(let i=0;i<B.length-1;i++){const p=POS[B[i].id],q=POS[B[i+1].id];edge(p.cx,p.y+p.h,q.cx,q.y,"#2A9D8F",{op:0.8});}
   edge(POS.n8n.cx,POS.n8n.y+POS.n8n.h,POS["s-n8n"].cx,POS["s-n8n"].y,"#fbbf24",{op:0.5,dash:"4,4"});
   edge(POS.pa.cx,POS.pa.y+POS.pa.h,POS["s-paperless"].cx,POS["s-paperless"].y,"#fbbf24",{op:0.5,dash:"4,4"});
   edge(POS.banker.cx,POS.banker.y+POS.banker.h,POS["s-bank"].cx,POS["s-bank"].y,"#fbbf24",{op:0.5,dash:"4,4"});
@@ -260,14 +268,6 @@ function drawEdges(){
   edge(POS.dba.cx,POS.dba.y,POS.n8n.cx,POS.n8n.y+POS.n8n.h/2,"#64748b",{op:0.4,dash:"4,3"});
   edge(POS.beleg.cx+POS.beleg.w,POS.beleg.cy,POS.steuer.cx,POS.steuer.cy,"#64748b",{op:0.4,dash:"4,3"});
   edge(POS.beleg.cx+POS.beleg.w,POS.beleg.cy,POS.vers.cx,POS.vers.cy,"#64748b",{op:0.4,dash:"4,3"});
-
-  // Schritt 4: Strang B Kette
-  S(4);
-  for(let i=0;i<B.length-1;i++){const p=POS[B[i].id],q=POS[B[i+1].id];edge(p.cx,p.y+p.h,q.cx,q.y,"#3b82f6",{op:0.8});}
-  edge(POS.strom.cx,POS.strom.y+POS.strom.h,POS["s-strom"].cx,POS["s-strom"].y,"#fbbf24",{op:0.5,dash:"4,4"});
-  edge(POS.smarthome.cx,POS.smarthome.y+POS.smarthome.h,POS["s-ha"].cx,POS["s-ha"].y,"#fbbf24",{op:0.5,dash:"4,4"});
-  edge(POS.doku.cx,POS.doku.y+POS.doku.h,POS["s-obsidian"].cx,POS["s-obsidian"].y,"#fbbf24",{op:0.5,dash:"4,4"});
-  edge(POS.haadmin.cx,POS.haadmin.y,POS.smarthome.cx,POS.smarthome.y+POS.smarthome.h/2,"#64748b",{op:0.4,dash:"4,3"});
 
   // Schritt 5: Abzweig KNX → Paperless + ETS + Lern-Effekt
   S(5);
@@ -334,19 +334,19 @@ function drawNodes(){
   S(2);
   node("projektleiter","Projektleiter","KI-002 · Orchestrator","#f8fafc","#0b1220",{fs:11});
 
-  // Schritt 3: Strang A
+  // Schritt 3: Strang A (KNX)
   S(3);
-  label(350,500,"⏱️ STRANG A · Rechnung — vor Tagen (12.11.2026)","#2A9D8F",13);
+  label(350,500,"⚡ STRANG A · KNX-Einrichtung — jetzt","#3b82f6",13);
   A.forEach(a=>node(a.id,a.t,a.ki,a.c));
-  SYS.filter(s=>["s-n8n","s-paperless","s-bank"].includes(s.id)).forEach(s=>node(s.id,s.t,s.sub,"#fbbf24","#0b1220",{fs:11}));
-  ZU.filter(z=>["netz","dba","steuer","vers"].includes(z.id)).forEach(z=>node(z.id,z.t,z.ki,"#64748b","#0b1220",{fs:9.5}));
-
-  // Schritt 4: Strang B
-  S(4);
-  label(1890,500,"⚡ STRANG B · KNX-Einrichtung — jetzt","#3b82f6",13);
-  B.forEach(b=>node(b.id,b.t,b.ki,b.c));
   SYS.filter(s=>["s-ets","s-ha","s-obsidian","s-strom"].includes(s.id)).forEach(s=>node(s.id,s.t,s.sub,"#fbbf24","#0b1220",{fs:11}));
   ZU.filter(z=>["haadmin"].includes(z.id)).forEach(z=>node(z.id,z.t,z.ki,"#64748b","#0b1220",{fs:9.5}));
+
+  // Schritt 4: Strang B (Rechnung)
+  S(4);
+  label(1890,500,"⏱️ STRANG B · Rechnung — vor Tagen (12.11.2026)","#2A9D8F",13);
+  B.forEach(b=>node(b.id,b.t,b.ki,b.c));
+  SYS.filter(s=>["s-n8n","s-paperless","s-bank"].includes(s.id)).forEach(s=>node(s.id,s.t,s.sub,"#fbbf24","#0b1220",{fs:11}));
+  ZU.filter(z=>["netz","dba","steuer","vers"].includes(z.id)).forEach(z=>node(z.id,z.t,z.ki,"#64748b","#0b1220",{fs:9.5}));
 
   // Schritt 5: Abzweig
   S(5);
@@ -370,8 +370,8 @@ function drawNodes(){
 const STEPS=[
   {label:"Der Prompt",desc:"Thomas steht in der Waschküche — ein einziger Prompt stößt den ganzen Prozess an."},
   {label:"Projektleiter",desc:"Der Orchestrator zerlegt den Auftrag und stößt die KNX-Einrichtung an."},
-  {label:"Strang A · Vergangenheit",desc:"Die Rechnungskette lief schon vor Tagen unbemerkt im Hintergrund."},
-  {label:"Strang B · Jetzt",desc:"Die KNX-Einrichtung des Leckagesensors passiert genau jetzt."},
+  {label:"Strang A · Jetzt",desc:"Die KNX-Einrichtung des Leckagesensors passiert genau jetzt."},
+  {label:"Strang B · Vergangenheit",desc:"Die Rechnungskette lief schon vor Tagen unbemerkt im Hintergrund."},
   {label:"Der Abzweig",desc:"Der KNX-Techniker kennt die Gerätebezeichnung nicht — er holt sie aus Paperless."},
   {label:"Die Frage",desc:"Warum hat er diesen Weg gewählt?"},
   {label:"Governance",desc:"Über allem steht die übergeordnete Governance — sie auditiert jeden Agenten."},
